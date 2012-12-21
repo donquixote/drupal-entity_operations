@@ -1,0 +1,5 @@
+name = Entity Operations API
+description = Provides a framework for adding operations to entities.
+dependencies[] = entity
+core = 7.x
+files[] = includes/entity.operations.inc

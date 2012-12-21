@@ -1,0 +1,81 @@
+<?php
+/**
+ * @file entity_operations.module
+ * Contains core hooks for the Entity Operations module.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function entity_operations_menu() {
+  $items = array();
+  foreach (entity_get_info() as $entity_type => $info) {
+    if (isset($info['operations ui'])) {
+      $class = isset($info['operations ui']['controller class']) ? $info['operations ui']['controller class'] : 'EntityOperationsDefaultUIController';
+      $controller = new $class($entity_type, $info);
+      $items += $controller->hook_menu();
+    }
+  }
+  dsm($items);
+
+  return $items;
+}
+
+/**
+ * Generic page callback. Hands over to the handler's page() method.
+ *
+ * @param $entity_type
+ *  The entity type.
+ * @param $handler_class
+ *  The name of the handler class for the current operation.
+ * @param $entity
+ *  The entity.
+ *
+ * @return
+ *  Either output text or a render array.
+ */
+function entity_operations_operation_page_callback($entity_type, $handler_class, $entity) {
+  $operation_handler = new $handler_class($entity_type);
+
+  return $operation_handler->page($entity_type, $entity);
+}
+
+/**
+ * Operation form callback. Hands over to the handler's form() method.
+ */
+function entity_operations_operation_form($form, &$form_state, $entity_type, $handler_class, $entity) {
+  $operation_handler = new $handler_class($entity_type);
+
+  return $operation_handler->form($form, $form_state, $entity_type, $entity);
+}
+
+/**
+ * Operation form validate callback. Hands over to the handler's formValidate().
+ */
+function entity_operations_operation_form_validate($form, &$form_state) {
+  list($entity_type, $handler_class, $entity) = $form_state['build_info']['args'];
+
+  $operation_handler = new $handler_class($entity_type);
+
+  $operation_handler->formValidate($form, $form_state, $entity_type, $entity);
+}
+
+/**
+ * Operation form submit callback. Hands over to the handler's formSubmit().
+ */
+function entity_operations_operation_form_submit($form, &$form_state) {
+  list($entity_type, $handler_class, $entity) = $form_state['build_info']['args'];
+
+  $operation_handler = new $handler_class($entity_type);
+
+  $operation_handler->formSubmit($form, $form_state, $entity_type, $entity);
+}
+
+/**
+ * Menu access callback. Hands over to the handler's menuAccess().
+ */
+function entity_operations_operation_access_callback($entity_type, $handler_class, $entity) {
+  $operation_handler = new $handler_class($entity_type);
+
+  return $operation_handler->menuAccess($entity_type, $entity);
+}
