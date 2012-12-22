@@ -95,6 +95,13 @@ abstract class EntityOperationsOperationBase {
   protected $controller;
 
   /**
+   * Returns whether or not this handler provides a form.
+   */
+  function is_form() {
+    return FALSE;
+  }
+
+  /**
    * Only needs the controller when used by the controller.
    * TODO!!! URRRGH!!! UGLY PATTERN!
    */
@@ -150,6 +157,13 @@ class EntityOperationsOperationPage extends EntityOperationsOperationBase {
 class EntityOperationsOperationForm extends EntityOperationsOperationBase {
 
   public $access_verb = NULL;
+
+  /**
+   * Returns whether or not this handler provides a form.
+   */
+  function is_form() {
+    return TRUE;
+  }
 
   /**
    * Properties for the menu item specific to this handler.

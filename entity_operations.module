@@ -5,6 +5,36 @@
  */
 
 /**
+ * Get the content for an entity's operation.
+ *
+ * This allows, for instance, a particular operation form to be embedded in
+ * another context.
+ *
+ * @param $entity_type
+ *  The entity type.
+ * @param $entity
+ *  The entity to return the operation for.
+ * @param $operation
+ *  The name of the operation. This should be the key of an item in the entity
+ *  type's operation array.
+ */
+function entity_operations_get_operation($entity_type, $entity, $operation) {
+  $entity_info = entity_get_info($entity_type);
+
+  if (isset($entity_info['operations ui']['operations'][$operation])) {
+    $operation_class = $entity_info['operations ui']['operations'][$operation]['handler'];
+
+    $operation_handler = new $operation_class($entity_type);
+    if ($operation_handler->is_form()) {
+      return drupal_get_form('entity_operations_operation_form', $entity_type, $operation_class, $entity);
+    }
+    else {
+      return $operation_handler->page();
+    }
+  }
+}
+
+/**
  * Implements hook_menu().
  */
 function entity_operations_menu() {
