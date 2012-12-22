@@ -102,10 +102,10 @@ function entity_operations_operation_form_submit($form, &$form_state) {
 }
 
 /**
- * Menu access callback. Hands over to the handler's menuAccess().
+ * Menu access callback. Hands over to the handler's acess().
  */
 function entity_operations_operation_access_callback($entity_type, $handler_class, $entity) {
   $operation_handler = new $handler_class($entity_type);
 
-  return $operation_handler->menuAccess($entity_type, $entity);
+  return $operation_handler->access($entity_type, $entity);
 }

@@ -367,7 +367,7 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationForm {
   /**
    * Menu access callback: deny access if entity is unpublished.
    */
-  function menuAccess($entity_type, $entity) {
+  function access($entity_type, $entity) {
     // Deny access if the entity is already published.
     $published = $entity->status;
     if (!$published) {
