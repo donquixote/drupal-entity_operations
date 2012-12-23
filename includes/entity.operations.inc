@@ -40,12 +40,6 @@ class EntityOperationsDefaultUIController {
         'title' => ucfirst($operation_path),
         'type' => isset($operation_info['default']) ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK,
         'load arguments' => array($this->entityType),
-        'access callback' => 'entity_access',
-        // Note that while entity_access() documents itself as only supporting
-        // basic values of $op, in fact it just passes them to the access
-        // callback, meaning that as long as your entity's access callback
-        // understands it, you can do it here.
-        'access arguments' => array($operation_handler->access_verb, $this->entityType),
         'weight' => $this->weight,
         // Very rarely, handlers may wish to set this (such as 'add'), so we
         // put this in the menu item to let them override it.

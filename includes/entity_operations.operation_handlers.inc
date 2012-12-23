@@ -39,6 +39,13 @@ abstract class EntityOperationsOperationBase {
   }
 
   /**
+   * Properties for the menu item specific to this handler.
+   */
+  function menu_item($operation_path, $operation_info) {
+    return array();
+  }
+
+  /**
    * Determine whether the action may be performed on the given entity.
    *
    * This should take care of determining whether the operation itself makes
@@ -77,7 +84,7 @@ class EntityOperationsOperationPage extends EntityOperationsOperationBase {
    * Returns the menu item for this operation.
    */
   function menu_item($operation_path, $operation_info) {
-    return array(
+    $item = array(
       // This takes care of calling our page() method, and is set here as a
       // convenience.
       // Subclasses however may specify any page callback they wish.
@@ -90,7 +97,13 @@ class EntityOperationsOperationPage extends EntityOperationsOperationBase {
         // TODO!!! UGLY!!
         $this->controller->loader_position,
       ),
+      'access callback' => 'entity_operations_operation_access_callback',
+      'access arguments' => array($this->entityType, get_class($this), $this->controller->loader_position),
     );
+
+    // Add in what the parent class has.
+    $item += parent::menu_item($operation_path, $operation_info);
+    return $item;
   }
 
   /**
@@ -128,6 +141,8 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
         get_class($this),
         $this->controller->loader_position,
       ),
+      'access callback' => 'entity_operations_operation_access_callback',
+      'access arguments' => array($this->entityType, get_class($this), $this->controller->loader_position),
     );
   }
 
@@ -236,7 +251,7 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
    * Properties for the menu item specific to this handler.
    */
   function menu_item($operation_path, $operation_info) {
-    return array(
+    $item = array(
       // Special path which doesn't have an entity loader.
       'path' => $this->controller->path . '/add',
       // We don't want a tab.
@@ -248,6 +263,10 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
         'add',
       ),
     );
+
+    // Add in what the parent class has.
+    $item += parent::menu_item($operation_path, $operation_info);
+    return $item;
   }
 
 }
@@ -284,6 +303,8 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
       $item['file path'] = drupal_get_path('module', $entity_info['module']);
     }
 
+    // Add in what the parent class has.
+    $item += parent::menu_item($operation_path, $operation_info);
     return $item;
   }
 
@@ -302,17 +323,10 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationForm {
 
   /**
    * Properties for the menu item specific to this handler.
-   *
-   * Override the page callback to go straight to entity_ui_get_form().
    */
   function menu_item($operation_path, $operation_info) {
     // TODO: make this a callback rather than a tab??
-    $item = array(
-      'access callback' => 'entity_operations_operation_access_callback',
-      'access arguments' => array($this->entityType, get_class($this), $this->controller->loader_position),
-    );
-
-    return $item;
+    return parent::menu_item($operation_path, $operation_info);
   }
 
   /**
