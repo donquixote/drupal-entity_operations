@@ -35,6 +35,29 @@ function entity_operations_get_operation($entity_type, $entity, $operation) {
 }
 
 /**
+ * Get the operations for all entities.
+ *
+ * @todo: upgrade this to use caching?
+ * @todo: refactor all other code so we always go via here, which would make
+ * changing the hook easier.
+ *
+ * @return
+ *  An array of entity operation info, keyed by entity type. The array values
+ *  are the same as returned by hook_entity_info().
+ *
+ * @see entity_operations_hook_entity_info()
+ */
+function entity_operations_get_operation_info() {
+  $operation_info = array();
+  foreach (entity_get_info() as $entity_type => $entity_info) {
+    if (isset($entity_info['operations ui'])) {
+      $operation_info[$entity_type] = $entity_info['operations ui'];
+    }
+  }
+  return $operation_info;
+}
+
+/**
  * Implements hook_menu().
  */
 function entity_operations_menu() {
@@ -107,4 +130,13 @@ function entity_operations_operation_access_callback($entity_type, $handler_clas
   $operation_handler = new $handler_class($entity_type);
 
   return $operation_handler->access($entity_type, $entity);
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function entity_operations_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'views_bulk_operations') {
+    return 'plugins/' . $plugin_type;
+  }
 }
