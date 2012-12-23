@@ -148,7 +148,6 @@ function entity_operations_operation_access_callback($entity_type, $handler_clas
   $verb = $operation_handler->access_verb;
   $access = entity_access($operation_handler->access_verb, $entity_type);
 
-  dsm("access! $handler_class $verb : $access");
   return $access;
 }
 
