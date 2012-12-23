@@ -127,9 +127,17 @@ function entity_operations_operation_form_submit($form, &$form_state) {
  * Menu access callback. Hands over to the handler's acess().
  */
 function entity_operations_operation_access_callback($entity_type, $handler_class, $entity) {
+  // First see whether the handler has anything to say about access from a
+  // purely logical standpoint.
   $operation_handler = new $handler_class($entity_type);
+  $operation_access = $operation_handler->operationAccess($entity_type, $entity);
+  // If something non-NULL was returned, it has precedence.
+  if (isset($operation_access)) {
+    return $operation_access;
+  }
 
-  return $operation_handler->access($entity_type, $entity);
+  // Otherwise, let entity access take over.
+  return entity_access($operation_handler->access_verb, $entity_type);
 }
 
 /**

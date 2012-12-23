@@ -39,6 +39,23 @@ abstract class EntityOperationsOperationBase {
   }
 
   /**
+   * Determine whether the action may be performed on the given entity.
+   *
+   * This should take care of determining whether the operation itself makes
+   * sense, irrespective of the user performing it.
+   *
+   * For example, a 'publish' operation should deny access here if the entity
+   * is already published.
+   *
+   * @return
+   *  FALSE is the operation should not be allowed, NULL if it should be allowed
+   *  from a logical standpoint and further access control passed on to the
+   *  user permissions.
+   */
+  function operationAccess($entity_type, $entity) {
+  }
+
+  /**
    * Execute the operation.
    */
   function execute($entity_type, $entity) {
@@ -301,15 +318,13 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationForm {
   /**
    * Menu access callback: deny access if entity is unpublished.
    */
-  function access($entity_type, $entity) {
+  function operationAccess($entity_type, $entity) {
     // Deny access if the entity is already published.
     $published = $entity->status;
     if (!$published) {
       return FALSE;
     }
-
-    // Let entity access take over.
-    return entity_access($this->access_verb, $this->entityType);
+    // We only deny access; entity_access() will take over.
   }
 
   /**
