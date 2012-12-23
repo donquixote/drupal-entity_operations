@@ -110,6 +110,12 @@ abstract class EntityOperationsOperationBase {
     $this->controller = $ui_controller;
   }
 
+  /**
+   * Execute the operation.
+   */
+  function execute($entity_type, $entity) {
+  }
+
 }
 
 /**
