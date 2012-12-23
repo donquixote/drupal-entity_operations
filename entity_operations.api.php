@@ -51,5 +51,5 @@
  *
  * @see hook_entity_info()
  */
-function entity_opertations_hook_entity_info() {
+function entity_operations_hook_entity_info() {
 }
