@@ -46,7 +46,6 @@ function entity_operations_menu() {
       $items += $controller->hook_menu();
     }
   }
-  dsm($items);
 
   return $items;
 }
