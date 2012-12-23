@@ -402,7 +402,7 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationForm {
    * Receives the same parameters as the form builder as a convenience.
    */
   function formSubmit($form, &$form_state, $entity_type, $entity) {
-    $this->action($entity_type, $entity);
+    $this->execute($entity_type, $entity);
     $entity_info = entity_get_info($entity_type);
     drupal_set_message(t('%entity-type %label has been published.', array(
       '%entity-type' => $entity_info['label'],
@@ -419,7 +419,7 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationForm {
    *  - UI actions in admin list
    *  - VBO??
    */
-  function action($entity_type, $entity) {
+  function execute($entity_type, $entity) {
     $entity->status = TRUE;
     $entity->save();
   }
