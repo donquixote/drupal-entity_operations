@@ -74,6 +74,21 @@ function entity_operations_menu() {
 }
 
 /**
+ * Generic entity URI callback.
+ *
+ * This can be used for any entity that uses Entity Operations. It will return
+ * the path to the default entity operation, consisting of entity base path
+ * defined in $entity_info['operations ui']['path'] with the entity ID appended.
+ */
+function entity_operations_entity_uri($entity) {
+  // Rely on our entity classes being at least Entity, which means we can
+  // get a type out of them. Haha!
+  $entity_info = $entity->entityInfo();
+  $path = $entity_info['operations ui']['path'] . '/' . $entity->identifier();
+  return array('path' => $path);
+}
+
+/**
  * Generic page callback. Hands over to the handler's page() method.
  *
  * @param $entity_type
