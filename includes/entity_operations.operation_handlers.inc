@@ -253,6 +253,33 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
 }
 
 /**
+ * Operation handler for confirmation forms.
+ *
+ * This should be subclasses with a suitably overridden execute().
+ */
+class EntityOperationsOperationConfirmForm extends EntityOperationsOperationBase {
+
+  /**
+   * Form builder for this operation.
+   *
+   * To get different parameters, override menu_item().
+   */
+  function form($form, &$form_state, $entity_type, $entity) {
+
+  }
+
+  /**
+   * Form submit handler for this operation.
+   *
+   * Receives the same parameters as the form builder as a convenience.
+   */
+  function formSubmit($form, &$form_state, $entity_type, $entity) {
+    $this->execute($entity_type, $entity);
+  }
+
+}
+
+/**
  * Op handler for viewing an entity.
  */
 class EntityOperationsOperationEntityView extends EntityOperationsOperationPage {
@@ -265,6 +292,39 @@ class EntityOperationsOperationEntityView extends EntityOperationsOperationPage 
     // Pass in EntityAPI's defaults for the first two parameters so we can
     // set $page to TRUE.
     return $entity->view('full', NULL, TRUE);
+  }
+
+}
+
+/**
+ * Op handler for viewing devel output for an entity.
+ */
+class EntityOperationsOperationDevel extends EntityOperationsOperationPage {
+
+  public $access_verb = 'view';
+
+  /**
+   * Determine whether the action may be performed on the given entity.
+   */
+  function operationAccess($entity_type, $entity) {
+    // This operation depends on devel module.
+    return module_exists('devel');
+  }
+
+  /**
+   * Determine whether the user has access to this operation.
+   */
+  function userAccess($entity_type, $entity, $account = NULL) {
+    return user_access('access devel information');
+  }
+
+  /**
+   * Page callback.
+   */
+  function page($entity_type, $entity) {
+    drupal_set_title($entity->label());
+    $output = kprint_r($entity, TRUE);
+    return $output;
   }
 
 }
