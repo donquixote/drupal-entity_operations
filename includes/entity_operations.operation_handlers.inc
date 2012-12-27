@@ -253,33 +253,6 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
 }
 
 /**
- * Operation handler for confirmation forms.
- *
- * This should be subclasses with a suitably overridden execute().
- */
-class EntityOperationsOperationConfirmForm extends EntityOperationsOperationBase {
-
-  /**
-   * Form builder for this operation.
-   *
-   * To get different parameters, override menu_item().
-   */
-  function form($form, &$form_state, $entity_type, $entity) {
-
-  }
-
-  /**
-   * Form submit handler for this operation.
-   *
-   * Receives the same parameters as the form builder as a convenience.
-   */
-  function formSubmit($form, &$form_state, $entity_type, $entity) {
-    $this->execute($entity_type, $entity);
-  }
-
-}
-
-/**
  * Op handler for viewing an entity.
  */
 class EntityOperationsOperationEntityView extends EntityOperationsOperationPage {
