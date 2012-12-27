@@ -140,6 +140,12 @@ function entity_operations_operation_access_callback($entity_type, $handler_clas
     return $operation_access;
   }
 
+  // If something non-NULL was returned, it has precedence.
+  $user_access = $operation_handler->userAccess($entity_type, $entity);
+  if (isset($user_access)) {
+    return $user_access;
+  }
+
   // Otherwise, let entity access take over.
   // Note that while entity_access() documents itself as only supporting
   // basic values of $op, in fact it just passes them to the access

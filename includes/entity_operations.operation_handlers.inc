@@ -63,6 +63,24 @@ abstract class EntityOperationsOperationBase {
   }
 
   /**
+   * Determine access to the operation for the user.
+   *
+   * @param $entity_type
+   *  The entity type.
+   * @param $entity
+   *  The current entity.
+   * @param $account
+   *  (Optional) The account to check access for. Defaults to the current user.
+   *
+   * @return
+   *  FALSE is the operation should not be allowed, TRUE if access should be
+   *  granted and NULL if further access control should be passed on to the
+   *  entity access system.
+   */
+  function userAccess($entity_type, $entity, $account = NULL) {
+  }
+
+  /**
    * Execute the operation.
    */
   function execute($entity_type, $entity) {
