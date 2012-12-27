@@ -447,14 +447,11 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationForm {
    * To get different parameters, override menu_item().
    */
   function form($form, &$form_state, $entity_type, $entity) {
-    drupal_set_title(t('Publish %entity', array(
-      '%entity' => $entity->label(),
-    )), PASS_THROUGH);
-
-    $form['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Publish'),
-    );
+    $entity_info = entity_get_info($entity_type);
+    $question = t('Are you sure you want to publish this %type?', array(
+      '%type' => $entity_info['label'],
+    ));
+    $form = $this->confirmForm($form, $entity_type, $entity, $question, '', t('Publish'));
 
     return $form;
   }
