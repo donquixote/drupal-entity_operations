@@ -460,7 +460,9 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationForm {
   function operationAccess($entity_type, $entity) {
     // Deny access if the entity is already published.
     $published = $entity->status;
-    if (!$published) {
+    // Use the constant, which allows module that extend the status property to
+    // also use this, provided 'published' is 1.
+    if ($published == NODE_PUBLISHED) {
       return FALSE;
     }
     // We only deny access; entity_access() will take over.
@@ -508,7 +510,7 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationForm {
    *  - VBO??
    */
   function execute($entity_type, $entity) {
-    $entity->status = TRUE;
+    $entity->status = NODE_PUBLISHED;
     $entity->save();
   }
 
