@@ -1,0 +1,61 @@
+Entity Operations
+=================
+
+This module provides a framework for adding UI tabs to entities when they are viewed. Each tab is called an entity operation.
+
+In fact, the whole of an entity's UI can be created using Entity Operations. For example, a basic entity type's UI might have these operations, which come as part of Entity Operations module:
+  - view: show the rendered entity at its basic URI.
+  - edit: show the entity edit form.
+
+More complex entities can implement further operations specific to its business logic. For example, a library book entity could have a tab that allows making reservations. The operations framework allows modules to output any kind of content or form in an entity tab.
+
+Entity operations are also exposed as Views Bulk Operations (work in progress).
+
+Implementation
+==============
+
+To implement basic entity operations for your entity type, add the following to your hook_entity_info():
+
+  // Entity Operations API
+  'operations ui' => array(
+    // The base path for your entities. This is the same as your entity's URI
+    // but without the ID suffix. (In fact, you can set
+    // entity_operations_entity_uri() as your URI callback, which will use the
+    // value here).
+    'path' => 'node',
+    'operations' => array(
+      // The list of operations. The key defines the path component used after
+      // the entity ID.
+      // Creates the 'node/add' path.
+      'add' => array(
+        'handler' => 'EntityOperationsOperationAdd',
+      ),
+      // Creates the path at 'node/NID/view'. Also shows at 'node/NID' because
+      // of the 'default' property.
+      'view' => array(
+        'handler' => 'EntityOperationsOperationEntityView',
+        'default' => TRUE,
+      ),
+      // Creates the path at 'node/NID/edit'.
+      'edit' => array(
+        'handler' => 'EntityOperationsOperationEdit',
+      ),
+      // If devel module is available, creates the path at 'node/NID/devel'.
+      'devel' => array(
+        'handler' => 'EntityOperationsOperationDevel',
+      ),
+    ),
+  ),
+  // You also need the following Entity API properties:
+  'module' => 'mymodule',
+  'entity class' => 'Entity',
+  'admin ui' => array(
+    // The Add and Edit operations depend on the file path being defined here.
+    'file path' => 'file/path/to/your/entity-form-callback',
+  ),
+
+See the documentation for entity_operations_hook_entity_info() for more details.
+
+
+
+

@@ -1,7 +1,7 @@
 <?php
 /**
  * @file entity_operations.module
- * Contains core hooks for the Entity Operations module.
+ * Contains API functions and core hooks for the Entity Operations module.
  */
 
 /**
