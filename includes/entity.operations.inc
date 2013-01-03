@@ -18,6 +18,9 @@ class EntityOperationsDefaultUIController {
     $this->path = $this->entityInfo['operations ui']['path'];
   }
 
+  /**
+   * Returns items for hook_menu() for an entity's operations.
+   */
   public function hook_menu() {
     $items = array();
 
