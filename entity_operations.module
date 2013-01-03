@@ -125,7 +125,7 @@ function entity_operations_operation_form_validate($form, &$form_state) {
 
   $operation_handler = new $handler_class($entity_type);
 
-  $operation_handler->formValidate($form, $form_state, $entity_type, $entity);
+  $operation_handler->formValidate($form, $form_state, $entity_type, $entity, $operation_path);
 }
 
 /**
@@ -136,7 +136,7 @@ function entity_operations_operation_form_submit($form, &$form_state) {
 
   $operation_handler = new $handler_class($entity_type);
 
-  $operation_handler->formSubmit($form, $form_state, $entity_type, $entity);
+  $operation_handler->formSubmit($form, $form_state, $entity_type, $entity, $operation_path);
 }
 
 /**

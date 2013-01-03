@@ -251,7 +251,7 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    *
    * Receives the same parameters as the form builder as a convenience.
    */
-  function formValidate($form, &$form_state, $entity_type, $entity) {
+  function formValidate($form, &$form_state, $entity_type, $entity, $operation_path) {
   }
 
   /**
@@ -259,7 +259,7 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    *
    * Receives the same parameters as the form builder as a convenience.
    */
-  function formSubmit($form, &$form_state, $entity_type, $entity) {
+  function formSubmit($form, &$form_state, $entity_type, $entity, $operation_path) {
   }
 
   /**
@@ -532,7 +532,7 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationForm {
    *
    * Receives the same parameters as the form builder as a convenience.
    */
-  function formSubmit($form, &$form_state, $entity_type, $entity) {
+  function formSubmit($form, &$form_state, $entity_type, $entity, $operation_path) {
     $this->execute($entity_type, $entity);
     $entity_info = entity_get_info($entity_type);
     drupal_set_message(t('%entity-type %label has been published.', array(
