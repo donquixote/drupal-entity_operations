@@ -53,9 +53,10 @@ class EntityOperationsDefaultUIController {
       // Set our menu item.
       $items[$path] = $menu_item;
 
+      // Increase the weight for the next menu item.
       $this->weight++;
 
-      // The defaut operation also gets to be the parent tab.
+      // The default operation also gets to be the parent tab.
       if (isset($operation_info['default'])) {
         $base_item = $menu_item;
         $base_item['title'] = t('Clients');
