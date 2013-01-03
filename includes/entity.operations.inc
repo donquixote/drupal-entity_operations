@@ -29,16 +29,16 @@ class EntityOperationsDefaultUIController {
 
     $this->weight = 0;
 
-    foreach ($this->entityInfo['operations ui']['operations'] as $operation_path => $operation_info) {
-      $operation_class = $operation_info['handler'];
+    foreach ($this->entityInfo['operations ui']['operations'] as $operation_path => $operation_definition) {
+      $operation_class = $operation_definition['handler'];
       $operation_handler = new $operation_class($this->entityType, $this);
 
       // Allow the handler to provide some properties first.
-      $menu_item = $operation_handler->menu_item($operation_path, $operation_info);
+      $menu_item = $operation_handler->menu_item($operation_path, $operation_definition);
       // Add in our defaults.
       $menu_item += array(
         'title' => ucfirst($operation_path),
-        'type' => isset($operation_info['default']) ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK,
+        'type' => isset($operation_definition['default']) ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK,
         'load arguments' => array($this->entityType),
         'weight' => $this->weight,
         // Very rarely, handlers may wish to set this (such as 'add'), so we
@@ -57,7 +57,7 @@ class EntityOperationsDefaultUIController {
       $this->weight++;
 
       // The default operation also gets to be the parent tab.
-      if (isset($operation_info['default'])) {
+      if (isset($operation_definition['default'])) {
         $base_item = $menu_item;
         $base_item['title'] = t('Clients');
         $base_item['type'] = MENU_NORMAL_ITEM;
