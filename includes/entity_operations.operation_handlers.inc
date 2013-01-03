@@ -175,7 +175,8 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
         'entity_operations_operation_form',
         $this->entityType,
         get_class($this),
-        $this->controller->loader_position,
+        $operation_path,
+        $this->controller->loader_position, // Provides the entity as a parameter.
       ),
       'access callback' => 'entity_operations_operation_access_callback',
       'access arguments' => array($this->entityType, get_class($this), $this->controller->loader_position),
@@ -233,8 +234,16 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    * Form builder for this operation.
    *
    * To get different parameters, override menu_item().
+   *
+   * @param $entity_type
+   *  The entity type.
+   * @param $entity
+   *  The current entity.
+   * @param $operation_path
+   *  The operation path of the current operation. This is the key of the
+   *  definition array in hook_entity_info().
    */
-  function form($form, &$form_state, $entity_type, $entity) {
+  function form($form, &$form_state, $entity_type, $entity, $operation_path) {
   }
 
   /**
@@ -508,7 +517,7 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationForm {
    *
    * To get different parameters, override menu_item().
    */
-  function form($form, &$form_state, $entity_type, $entity) {
+  function form($form, &$form_state, $entity_type, $entity, $operation_path) {
     $entity_info = entity_get_info($entity_type);
     $question = t('Are you sure you want to publish this %type?', array(
       '%type' => $entity_info['label'],

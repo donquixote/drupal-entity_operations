@@ -27,7 +27,7 @@ function entity_operations_get_operation($entity_type, $entity, $operation) {
     $operation_handler = new $operation_class($entity_type);
     $operation_info = $operation_handler->operationInfo();
     if ($operation_info['uses form']) {
-      return drupal_get_form('entity_operations_operation_form', $entity_type, $operation_class, $entity);
+      return drupal_get_form('entity_operations_operation_form', $entity_type, $operation_class, $operation, $entity);
     }
     else {
       return $operation_handler->page();
@@ -111,10 +111,10 @@ function entity_operations_operation_page_callback($entity_type, $handler_class,
 /**
  * Operation form callback. Hands over to the handler's form() method.
  */
-function entity_operations_operation_form($form, &$form_state, $entity_type, $handler_class, $entity) {
+function entity_operations_operation_form($form, &$form_state, $entity_type, $handler_class, $operation_path, $entity) {
   $operation_handler = new $handler_class($entity_type);
 
-  return $operation_handler->form($form, $form_state, $entity_type, $entity);
+  return $operation_handler->form($form, $form_state, $entity_type, $entity, $operation_path);
 }
 
 /**
