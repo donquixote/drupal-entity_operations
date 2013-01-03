@@ -297,6 +297,29 @@ class EntityOperationsOperationEntityView extends EntityOperationsOperationPage 
 }
 
 /**
+ * Extended op handler for viewing an entity with operation buttons shown.
+ *
+ * This adds operation buttons for those with 'entity view' set to TRUE.
+ *
+ * @see entity_operations_get_entity_operations_fieldset().
+ */
+class EntityOperationsOperationEntityViewOperations extends EntityOperationsOperationEntityView {
+
+  public $access_verb = 'view';
+
+  function page($entity_type, $entity) {
+    $build = parent::page($entity_type, $entity);
+
+    // Add the automatic entity view operations to the build array.
+    $build['operations'] = entity_operations_get_entity_operations_fieldset($entity);
+    $build['operations']['#weight'] = 10;
+
+    return $build;
+  }
+
+}
+
+/**
  * Op handler for viewing devel output for an entity.
  */
 class EntityOperationsOperationDevel extends EntityOperationsOperationPage {

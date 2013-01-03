@@ -59,20 +59,36 @@ function entity_operations_get_operation($entity_type, $entity, $operation) {
  * @param $entity
  *  The entity to get operations for. This must be a subclass of Entity.
  * @param $operations
- *  An array of operation names. These are the keys defined in the operations
- *  array in the entity's hook_entity_info().
+ *  (Optional) An array of operation names. These are the keys defined in the
+ *  operations array in the entity's hook_entity_info(). If ommitted, the
+ *  operations used are those with 'entity view' set to TRUE in their
+ *  hook_entity_info() definition.
  *
  * @return
  *  A build array containing all the requested entities.
  */
-function entity_operations_get_entity_operations_fieldset($entity, $operations) {
+function entity_operations_get_entity_operations_fieldset($entity, $operations = array()) {
+  $entity_type = $entity->entityType();
+
+  // Build up operations array if it's empty.
+  if (empty($operations)) {
+    $entity_info = $entity->entityInfo();
+    foreach ($entity_info['operations ui']['operations'] as $operation_path => $operation_definition) {
+      if (isset($operation_definition['entity view'])) {
+        $operations[] = $operation_path;
+      }
+    }
+  }
+
   $build = array(
     '#type' => 'fieldset',
     '#title' => t('Operations'),
   );
+
   foreach ($operations as $operation) {
-    $build['operations'][$operation] = entity_operations_get_operation($entity->entityType(), $entity, $operation);
+    $build['operations'][$operation] = entity_operations_get_operation($entity_type, $entity, $operation);
   }
+  // @TODO: return empty array if there are no operations allowed.
 
   return $build;
 }
