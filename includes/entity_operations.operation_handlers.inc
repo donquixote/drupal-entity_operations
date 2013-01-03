@@ -339,6 +339,9 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
  * Add is a bit of a special case, as it doesn't use an entity loader.
  *
  * @TODO: support bundles. EEEP!
+ *
+ * @TODO: add a common abstract parent class with the Edit op, to avoid
+ * repetition in menu_item().
  */
 class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
 
@@ -360,7 +363,26 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
         NULL,
         'add',
       ),
+      'access callback' => 'entity_operations_operation_access_callback',
+      'access arguments' => array(
+        $this->entityType,
+        get_class($this),
+        $this->controller->loader_position,
+      ),
     );
+
+    // Use the file setting from entity info 'admin ui', as we expect that to be
+    // used for the entity form callback.
+    $entity_info = entity_get_info($this->entityType);
+    if (isset($entity_info['admin ui']['file'])) {
+      $item['file'] = $entity_info['admin ui']['file'];
+    }
+    if (isset($entity_info['admin ui']['file path'])) {
+      $item['file path'] = $entity_info['admin ui']['file path'];
+    }
+    else {
+      $item['file path'] = drupal_get_path('module', $entity_info['module']);
+    }
 
     // Add in what the parent class has.
     $item += parent::menu_item($operation_path, $operation_info);
