@@ -49,6 +49,35 @@ function entity_operations_get_operation($entity_type, $entity, $operation) {
 }
 
 /**
+ * Helper to output operations in an entity's content.
+ *
+ * This can be used in an entity class's buildContent() thus:
+ * @code
+ *  $build['operations'] = entity_operations_get_entity_operations_fieldset($this, array('publish', 'unpublish'));
+ * @code
+ *
+ * @param $entity
+ *  The entity to get operations for. This must be a subclass of Entity.
+ * @param $operations
+ *  An array of operation names. These are the keys defined in the operations
+ *  array in the entity's hook_entity_info().
+ *
+ * @return
+ *  A build array containing all the requested entities.
+ */
+function entity_operations_get_entity_operations_fieldset($entity, $operations) {
+  $build = array(
+    '#type' => 'fieldset',
+    '#title' => t('Operations'),
+  );
+  foreach (array('issue', 'paid') as $operation) {
+    $build['operations'][$operation] = entity_operations_get_operation($entity->entityType(), $entity, $operation);
+  }
+
+  return $build;
+}
+
+/**
  * Get the operations for all entities.
  *
  * @todo: upgrade this to use caching?
