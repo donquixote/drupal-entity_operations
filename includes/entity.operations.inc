@@ -32,6 +32,12 @@ class EntityOperationsDefaultUIController {
     foreach ($this->entityInfo['operations ui']['operations'] as $operation_path => $operation_definition) {
       $operation_class = $operation_definition['handler'];
       $operation_handler = new $operation_class($this->entityType, $this);
+      $operation_info = $operation_handler->operationInfo();
+
+      // Skip operations that don't provide a tab.
+      if (empty($operation_info['provides tab'])) {
+        continue;
+      }
 
       // Allow the handler to provide some properties first.
       $menu_item = $operation_handler->menu_item($operation_path, $operation_definition);
