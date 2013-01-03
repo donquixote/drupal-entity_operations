@@ -70,7 +70,7 @@ function entity_operations_get_entity_operations_fieldset($entity, $operations) 
     '#type' => 'fieldset',
     '#title' => t('Operations'),
   );
-  foreach (array('issue', 'paid') as $operation) {
+  foreach ($operations as $operation) {
     $build['operations'][$operation] = entity_operations_get_operation($entity->entityType(), $entity, $operation);
   }
 
