@@ -23,10 +23,24 @@ abstract class EntityOperationsOperationBase {
   protected $controller;
 
   /**
-   * Returns whether or not this handler provides a form.
+   * Returns basic information about the operation.
+   *
+   * @return
+   *  An array with the following keys:
+   *  - 'provides tab': Whether this operation should provide a tab on the
+   *    entity.
+   *  - 'uses form': If 'provides tab' is TRUE, whether this operation's tab
+   *    is a form rather than a page.
+   *  - 'provides vbo': Whether this operation should be exposed to Views Bulk
+   *    Operations.
    */
-  function is_form() {
-    return FALSE;
+  function operationInfo() {
+    return array(
+      // Default behaviour is to provide a tab.
+      'provides tab' => TRUE,
+      'uses form' => FALSE,
+      'provides vbo' => FALSE,
+    );
   }
 
   /**
@@ -141,10 +155,14 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
   public $access_verb = NULL;
 
   /**
-   * Returns whether or not this handler provides a form.
+   * Returns basic information about the operation.
    */
-  function is_form() {
-    return TRUE;
+  function operationInfo() {
+    return array(
+      'provides tab' => TRUE,
+      'uses form' => TRUE,
+      'provides vbo' => FALSE,
+    );
   }
 
   /**
@@ -349,6 +367,17 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
   // Title: "Edit %entity".
 
   /**
+   * Returns basic information about the operation.
+   */
+  function operationInfo() {
+    return array(
+      'provides tab' => FALSE,
+      'uses form' => TRUE,
+      'provides vbo' => FALSE,
+    );
+  }
+
+  /**
    * Properties for the menu item specific to this handler.
    */
   function menu_item($operation_path, $operation_info) {
@@ -440,6 +469,17 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationForm {
   // TODO: 'publish' usually requires stronger access than 'edit'.
   public $access_verb = 'edit';
   // Title: "Edit %entity".
+
+  /**
+   * Returns basic information about the operation.
+   */
+  function operationInfo() {
+    return array(
+      'provides tab' => FALSE,
+      'uses form' => TRUE,
+      'provides vbo' => TRUE,
+    );
+  }
 
   /**
    * Properties for the menu item specific to this handler.
