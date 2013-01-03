@@ -17,6 +17,10 @@
  * @param $operation
  *  The name of the operation. This should be the key of an item in the entity
  *  type's operation array.
+ *
+ * @return
+ *  The content for the operation (page content or a form), or NULL if access
+ *  to the operation is denied.
  */
 function entity_operations_get_operation($entity_type, $entity, $operation) {
   $entity_info = entity_get_info($entity_type);
@@ -25,6 +29,15 @@ function entity_operations_get_operation($entity_type, $entity, $operation) {
     $operation_class = $entity_info['operations ui']['operations'][$operation]['handler'];
 
     $operation_handler = new $operation_class($entity_type);
+
+    // Check access for the operation.
+    if ($operation_handler->operationAccess($entity_type, $entity) === FALSE) {
+      return;
+    }
+    if ($operation_handler->userAccess($entity_type, $entity) === FALSE) {
+      return;
+    }
+
     $operation_info = $operation_handler->operationInfo();
     if ($operation_info['uses form']) {
       return drupal_get_form('entity_operations_operation_form', $entity_type, $operation_class, $operation, $entity);
