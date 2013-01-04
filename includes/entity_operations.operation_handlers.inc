@@ -2,7 +2,21 @@
 
 /**
  * @file
- * Contains handler classes for basic operations as well as base classes.
+ * Contains handler classes for basic operations as well as base classes:
+ *
+ * - EntityOperationsOperationBase: abstract base class for all operations.
+ *  - EntityOperationsOperationPage: parent class for operations that provide
+ *    a page.
+ *    - EntityOperationsOperationEntityView: displays the entity.
+ *      - EntityOperationsOperationEntityViewOperations: displays the entity,
+ *        with available operations in a fieldset.
+ *    - EntityOperationsOperationDevel: devel output for the entity.
+ *  - EntityOperationsOperationForm: parent class for form operations.
+ *    - EntityOperationsOperationEdit: the edit form for the entity.
+ *    - EntityOperationsOperationAction: parent class for actions on the entity.
+ *      - EntityOperationsOperationPublish: basic publish action.
+ *      - EntityOperationsOperationUnPublish: basic unpublish action.
+ *  - EntityOperationsOperationAdd: the add form for the entity.
  */
 
 /**
