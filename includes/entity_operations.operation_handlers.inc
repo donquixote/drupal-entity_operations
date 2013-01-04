@@ -494,37 +494,12 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
 /**
  * Generic op handler for action-ish operations.
  *
- * This has a form which consists of just a button. Subclasses may override:
- *  - buttonLabel() to customize the button text.
- *  - submitMessage() to customize the message shown on submit.
- *  - operationAccess() to determine when the operation is available.
+ * This has a form which consists of just a button. Subclasses should override:
+ *  - operationStrings() to provide texts specific to their operation
+ *  - operationAccess() to determine when the operation is available
  *  - execute() to customize what happens.
  */
 abstract class EntityOperationsOperationAction extends EntityOperationsOperationForm {
-
-  /**
-   * Return the button text for this form.
-   */
-  function buttonLabel($entity_type, $entity, $operation_path) {
-    $entity_info = entity_get_info($entity_type);
-    // Helpful hack that is bad for translatability. Subclasses should override!
-    $action = ucfirst($operation_path);
-    return t("$action @type", array(
-      // Again, strtolower() is lousy translatability for some languages.
-      '@type' => strtolower($entity_info['label']),
-    ));
-  }
-
-  /**
-   * Return a message to show to the user when used in a UI context.
-   */
-  function submitMessage($entity_type, $entity, $operation_path) {
-    $entity_info = entity_get_info($entity_type);
-    return t('Action completed on %entity-type %label.', array(
-      '%entity-type' => $entity_info['label'],
-      '%label' => $entity->label(),
-    ));
-  }
 
   /**
    * Returns basic information about the operation.
@@ -538,13 +513,43 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
   }
 
   /**
+   * Returns strings for the operations.
+   *
+   * @return
+   *  An array containing the following keys:
+   *  - 'form': An array of strings for the operation form, containing:
+   *    - 'button label'
+   *    - 'confirm question'
+   *    - 'submit message'
+   */
+  function operationStrings($entity_type, $entity, $operation_path) {
+    $entity_info = entity_get_info($entity_type);
+    // Helpful hack that is bad for translatability. Subclasses should override!
+    $action = ucfirst($operation_path);
+    return array(
+      'form' => array(
+        'button label' => t("$action @type", array(
+          // Again, strtolower() is lousy translatability for some languages.
+          '@type' => strtolower($entity_info['label']),
+        )),
+        'confirm question' => t('Are you sure you want to proceed?'),
+        'submit message' => t('Action completed on %entity-type %label.', array(
+          '%entity-type' => $entity_info['label'],
+          '%label' => $entity->label(),
+        )),
+      ),
+    );
+  }
+
+  /**
    * Form builder for this operation.
    */
   function form($form, &$form_state, $entity_type, $entity, $operation_path) {
+    $operation_strings = $this->operationStrings($entity_type, $entity, $operation_path);
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
       '#type' => 'submit',
-      '#value' => $this->buttonLabel($entity_type, $entity, $operation_path),
+      '#value' => $operation_strings['form']['button label'],
     );
 
     return $form;
@@ -555,7 +560,10 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
    */
   function formSubmit($form, &$form_state, $entity_type, $entity, $operation_path) {
     $this->execute($entity_type, $entity);
-    drupal_set_message($this->submitMessage($entity_type, $entity, $operation_path));
+
+    $operation_strings = $this->operationStrings($entity_type, $entity, $operation_path);
+    drupal_set_message($operation_strings['form']['submit message']);
+
     $form_state['redirect'] = $this->redirect_entity_uri($entity_type, $entity);
   }
 
