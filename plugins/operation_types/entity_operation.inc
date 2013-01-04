@@ -34,6 +34,10 @@ function entity_operations_vbo_entity_operations_list($operation_id = NULL) {
       $operation_class = $operation_definition['handler'];
       $operation_handler = new $operation_class($entity_type);
       $operation_info = $operation_handler->operationInfo();
+      // Fill in a default array of VBO options for the operation.
+      $operation_info += array(
+        'vbo' => array(),
+      );
 
       // Skip operations that don't provide a VBO.
       if (empty($operation_info['provides vbo'])) {
@@ -41,7 +45,8 @@ function entity_operations_vbo_entity_operations_list($operation_id = NULL) {
       }
 
       $new_operation_id = 'entity_operation::' . $key;
-      $vbo_operations[$new_operation_id] = array(
+      // Start with what the operation info provides and fill in defaults.
+      $vbo_operations[$new_operation_id] = $operation_info['vbo'] + array(
         'operation_type' => 'entity_operation',
         // Acts on the given entity type. This creates potentially multiple
         // VBO operations per entity operation handler, if it is in use on

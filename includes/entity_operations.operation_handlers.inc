@@ -520,12 +520,18 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
 
   /**
    * Returns basic information about the operation.
+   *
+   * @return
+   *  In addition to the parent method's return, this can also include:
+   *  - 'vbo': An array of options for the VBO operation.
    */
   function operationInfo() {
     return array(
       'provides tab' => FALSE,
       'uses form' => TRUE,
       'provides vbo' => TRUE,
+      // Extra info for VBO.
+      'vbo' => array(),
     );
   }
 
