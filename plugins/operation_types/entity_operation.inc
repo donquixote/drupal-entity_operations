@@ -30,9 +30,15 @@ function entity_operations_vbo_entity_operations_list($operation_id = NULL) {
   // Create operations per-entity.
   $operations_info = entity_operations_get_operation_info();
   foreach ($operations_info as $entity_type => $entity_operations_info) {
-    foreach ($entity_operations_info['operations'] as $key => $entity_operation) {
-      // TODO: we don't necessarily want everything here!
-      // Eg, 'view' and 'edit' don't make all that much sense.
+    foreach ($entity_operations_info['operations'] as $key => $operation_definition) {
+      $operation_class = $operation_definition['handler'];
+      $operation_handler = new $operation_class($entity_type);
+      $operation_info = $operation_handler->operationInfo();
+
+      // Skip operations that don't provide a VBO.
+      if (empty($operation_info['provides vbo'])) {
+        continue;
+      }
 
       $new_operation_id = 'entity_operation::' . $key;
       $vbo_operations[$new_operation_id] = array(
