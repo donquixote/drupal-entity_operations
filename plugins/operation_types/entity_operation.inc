@@ -51,9 +51,9 @@ function entity_operations_vbo_entity_operations_list($operation_id = NULL) {
         'key' => $key,
         // The handler class, so we don't have to go looking up the operations
         // info when executing the VBO op.
-        'handler' => $entity_operation['handler'],
-        // Er... yeah we have nothing here yet really. TODO!
-        'label' => ucfirst($key),
+        'handler' => $operation_definition['handler'],
+        // Use the button label for the VBO label.
+        'label' => $operation_handler->getOperationString('button label', $entity_type, NULL, $key),
         'parameters' => array(),
         'configurable' => FALSE,
         'aggregate' => FALSE,
