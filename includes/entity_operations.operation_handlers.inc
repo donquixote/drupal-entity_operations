@@ -595,17 +595,6 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationAction {
   // Title: "Edit %entity".
 
   /**
-   * Returns basic information about the operation.
-   */
-  function operationInfo() {
-    return array(
-      'provides tab' => FALSE,
-      'uses form' => TRUE,
-      'provides vbo' => TRUE,
-    );
-  }
-
-  /**
    * Returns strings for the operations.
    *
    * @return
