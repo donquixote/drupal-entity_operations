@@ -65,7 +65,8 @@ function entity_operations_get_operation($entity_type, $entity, $operation) {
  *  hook_entity_info() definition.
  *
  * @return
- *  A build array containing all the requested entities.
+ *  A build array containing all the requested entities, or an empty array
+ *  if no operations are available.
  */
 function entity_operations_get_entity_operations_fieldset($entity, $operations = array()) {
   $entity_type = $entity->entityType();
@@ -85,17 +86,26 @@ function entity_operations_get_entity_operations_fieldset($entity, $operations =
     '#title' => t('Operations'),
   );
 
+  $build_operations = array();
   foreach ($operations as $operation) {
     $operation_form = entity_operations_get_operation($entity_type, $entity, $operation);
+    // This may be NULL if access is not allowed.
+    if (!isset($operation_form)) {
+      continue;
+    }
 
     // Remove the confirmation question.
     unset($operation_form['question']);
 
-    $build['operations'][$operation] = $operation_form;
+    $build_operations[$operation] = $operation_form;
   }
-  // @TODO: return empty array if there are no operations allowed.
 
-  return $build;
+  if (!empty($build_operations)) {
+    $build['operations'] = $build_operations;
+    return $build;
+  }
+  // Return an empty array if there are no operations allowed.
+  return array();
 }
 
 /**
