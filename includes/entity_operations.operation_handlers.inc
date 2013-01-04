@@ -515,6 +515,9 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
  *  - operationStrings() to provide texts specific to their operation
  *  - operationAccess() to determine when the operation is available
  *  - execute() to customize what happens.
+ * If the action requires configuration, then subclasses should override:
+ *  - formBody() to provide the form without the submit button
+ *  - formSubmitGetContext() to process the form values into a context array.
  */
 abstract class EntityOperationsOperationAction extends EntityOperationsOperationForm {
 
@@ -590,9 +593,23 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
   }
 
   /**
+   * Return the form body, that is, the form without the submit button.
+   *
+   * This allows this form to work either as standalone, or as a configuration
+   * form in VBO.
+   */
+  function formBody($form, &$form_state, $entity_type, $entity, $operation_path) {
+    return $form;
+  }
+
+  /**
    * Form builder for this operation.
+   *
+   * Subclasses should not override this, but formBody() instead.
    */
   function form($form, &$form_state, $entity_type, $entity, $operation_path) {
+    $form += $this->formBody($form, &$form_state, $entity_type, $entity, $operation_path);
+
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
       '#type' => 'submit',
@@ -604,14 +621,42 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
 
   /**
    * Form submit handler for this operation.
+   *
+   * Subclasses should not override this, but formSubmitGetContext() instead.
    */
   function formSubmit($form, &$form_state, $entity_type, $entity, $operation_path) {
-    $this->execute($entity_type, $entity);
+    $context = $this->formSubmitGetContext($form, &$form_state, $entity_type, $entity, $operation_path);
+
+    $this->execute($entity_type, $entity, $context);
 
     $message = $this->getOperationString('submit message', $entity_type, $entity, $operation_path);
     drupal_set_message($message);
 
     $form_state['redirect'] = $this->redirect_entity_uri($entity_type, $entity);
+  }
+
+  /**
+   * Build a context array from the form values.
+   *
+   * @return
+   *  A context array. This is passed to the execute() method.
+   */
+  function formSubmitGetContext($form, &$form_state, $entity_type, $entity, $operation_path) {
+    $context = array(
+      // This is just an example.
+      //  'param' => TRUE,
+    );
+
+    return $context;
+  }
+
+  /**
+   * Action callback.
+   *
+   * This receives an extra parameter consisting of extra data from the form
+   * submission. This allows operations to be used in a generic way with VBO.
+   */
+  function execute($entity_type, $entity, $context = array()) {
   }
 
 }
@@ -661,13 +706,8 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationAction {
 
   /**
    * The publish action.
-   *
-   * TODO: figure out a way of exposing this to:
-   *  - hook_action_info
-   *  - UI actions in admin list
-   *  - VBO??
    */
-  function execute($entity_type, $entity) {
+  function execute($entity_type, $entity, $context = array()) {
     $entity->status = NODE_PUBLISHED;
     $entity->save();
   }
@@ -721,7 +761,7 @@ class EntityOperationsOperationUnPublish extends EntityOperationsOperationPublis
    *  - UI actions in admin list
    *  - VBO??
    */
-  function execute($entity_type, $entity) {
+  function execute($entity_type, $entity, $context = array()) {
     $entity->status = NODE_NOT_PUBLISHED;
     $entity->save();
   }

@@ -10,6 +10,15 @@ class EntityOperationsVBOOperations extends ViewsBulkOperationsBaseOperation {
 // TODO: most of this is copied over from VBO: needs work!
 
   /**
+   * Constructs an operation object.
+   */
+  public function __construct($operationId, $entityType, array $operationInfo, array $adminOptions) {
+    parent::__construct($operationId, $entityType, $operationInfo, $adminOptions);
+
+    list(, $this->entityOperationKey) = explode('::', $operationId);
+  }
+
+  /**
    * Contains the options provided by the user in the configuration form.
    *
    * @var array
@@ -88,6 +97,14 @@ class EntityOperationsVBOOperations extends ViewsBulkOperationsBaseOperation {
    *   An array of related data provided by the caller.
    */
   public function form($form, &$form_state, array $context) {
+    $handler_class = $this->operationInfo['handler'];
+    $operation_handler = new $handler_class($this->entityType);
+
+    // There is no entity to send to the form. Operations that want to use this
+    // had better not be relying on it!
+    // Get just the form body, without the submit button as VBO adds this.
+    $form = $operation_handler->formBody($form, &$form_state, $this->entityType, NULL, $this->entityOperationKey);
+
     return $form;
   }
 
@@ -101,6 +118,7 @@ class EntityOperationsVBOOperations extends ViewsBulkOperationsBaseOperation {
    *   An array containing the current state of the form.
    */
   public function formValidate($form, &$form_state) {
+    // TODO.
   }
 
   /**
@@ -114,6 +132,11 @@ class EntityOperationsVBOOperations extends ViewsBulkOperationsBaseOperation {
    *   An array containing the current state of the form.
    */
   public function formSubmit($form, &$form_state) {
+    $handler_class = $this->operationInfo['handler'];
+    $operation_handler = new $handler_class($this->entityType);
+
+    // Hand over to the operation handler.
+    $this->formOptions = $operation_handler->formSubmitGetContext($form, &$form_state, $this->entityType, NULL, $this->entityOperationKey);
   }
 
   /**
@@ -131,7 +154,7 @@ class EntityOperationsVBOOperations extends ViewsBulkOperationsBaseOperation {
     $data = is_array($data) ? $data : array($data);
     foreach ($data as $entity) {
       // We always call execute, even if it doesn't do anything.
-      $operation_handler->execute($this->entityType, $entity);
+      $operation_handler->execute($this->entityType, $entity, $context);
     }
   }
 
