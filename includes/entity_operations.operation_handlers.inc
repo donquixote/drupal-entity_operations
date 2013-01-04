@@ -625,9 +625,11 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
    * Subclasses should not override this, but formSubmitGetContext() instead.
    */
   function formSubmit($form, &$form_state, $entity_type, $entity, $operation_path) {
-    $context = $this->formSubmitGetContext($form, &$form_state, $entity_type, $entity, $operation_path);
+    // Set the context on the handler so that subclasses that *do* override
+    // this can get to it.
+    $this->context = $this->formSubmitGetContext($form, &$form_state, $entity_type, $entity, $operation_path);
 
-    $this->execute($entity_type, $entity, $context);
+    $this->execute($entity_type, $entity, $this->context);
 
     $message = $this->getOperationString('submit message', $entity_type, $entity, $operation_path);
     drupal_set_message($message);
