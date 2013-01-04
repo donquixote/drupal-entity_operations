@@ -696,9 +696,11 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationAction {
   function operationAccess($entity_type, $entity) {
     // Deny access if the entity is already published.
     $published = $entity->status;
-    // Use the constant, which allows module that extend the status property to
-    // also use this, provided 'published' is 1.
-    if ($published == NODE_PUBLISHED) {
+    // We check the node is not unpublished rather than whether it is published,
+    // so modules that extend the status property can also use this (assuming
+    // that they don't want entities with a status higher than 1 to revert to
+    // merely being published).
+    if ($published != NODE_NOT_PUBLISHED) {
       return FALSE;
     }
     // We only deny access; entity_access() will take over.
