@@ -552,7 +552,8 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
    *      should not contain the '%label' placeholder.
    *  - 'confirm question': the question to ask the user in the form.
    *  - 'submit message': the message shown to convey to the user that the
-   *      action has succeeded.
+   *      action has succeeded. This may be blank if no submit message is
+   *      required, or if an overridden formSubmit() does something else.
    */
   function operationStrings() {
     return array(
@@ -632,7 +633,9 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
     $this->execute($entity_type, $entity, $this->context);
 
     $message = $this->getOperationString('submit message', $entity_type, $entity, $operation_path);
-    drupal_set_message($message);
+    if (!empty($message)) {
+      drupal_set_message($message);
+    }
 
     $form_state['redirect'] = $this->redirect_entity_uri($entity_type, $entity);
   }
