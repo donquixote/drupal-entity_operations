@@ -508,6 +508,9 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
 /**
  * Generic op handler for action-ish operations.
  *
+ * Operations exposed to Views Bulk Operations should (probably?) use this as
+ * their parent class.
+ *
  * This has a form which consists of just a button. Subclasses should override:
  *  - operationStrings() to provide texts specific to their operation
  *  - operationAccess() to determine when the operation is available
@@ -529,41 +532,65 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
   /**
    * Returns strings for the operations.
    *
+   * These should be translated, and the following placeholders may be used
+   * without values:
+   *  '%entity-type': The human-readable label for the entity type.
+   *  '%label': The entity label.
+   *
    * @return
    *  An array containing the following keys:
-   *  - 'form': An array of strings for the operation form, containing:
-   *    - 'button label'
-   *    - 'confirm question'
-   *    - 'submit message'
+   *  - 'button label': the label for the form button. If used as a VBO, this
+   *      should not contain the '%label' placeholder.
+   *  - 'confirm question': the question to ask the user in the form.
+   *  - 'submit message': the message shown to convey to the user that the
+   *      action has succeeded.
    */
-  function operationStrings($entity_type, $entity, $operation_path) {
-    $entity_info = entity_get_info($entity_type);
-    // Helpful hack that is bad for translatability. Subclasses should override!
-    $action = ucfirst($operation_path);
+  function operationStrings() {
     return array(
-      'form' => array(
-        'button label' => t("$action @type", array(
-          // Again, strtolower() is lousy translatability for some languages.
-          '@type' => strtolower($entity_info['label']),
-        )),
-        'confirm question' => t('Are you sure you want to proceed?'),
-        'submit message' => t('Action completed on %entity-type %label.', array(
-          '%entity-type' => $entity_info['label'],
-          '%label' => $entity->label(),
-        )),
-      ),
+      'button label' => t('Perform action'),
+      'confirm question' => t('Are you sure you want to proceed?'),
+      'submit message' => t('Action completed on %entity-type %label.', array(
+        // This intentionally has no replacements for the placeholders; these
+        // are replaced in getOperationString().
+      )),
     );
+  }
+
+  /**
+   * Get an operations string.
+   *
+   * @param $string_key
+   *  The key in the array in operationStrings() for the string to retrieve.
+   * @param $entity_type
+   *  The entity type.
+   * @param $entity
+   *  The entity. Pass NULL if there is no entity in context.
+   * @param $operation_path
+   *  The key for the operation.
+   *
+   * @return
+   *  A translated string, with replacements made.
+   */
+  function getOperationString($string_key, $entity_type, $entity, $operation_path) {
+    $entity_info = entity_get_info($entity_type);
+    $strings = $this->operationStrings();
+    $substitutions = array(
+      '%entity-type' => $entity_info['label'],
+      '%label' => isset($entity) ? $entity->label() : '',
+    );
+    // Run the string through format_string() to replace the placeholders
+    // which t() will have ignored.
+    return format_string($strings[$string_key], $substitutions);
   }
 
   /**
    * Form builder for this operation.
    */
   function form($form, &$form_state, $entity_type, $entity, $operation_path) {
-    $operation_strings = $this->operationStrings($entity_type, $entity, $operation_path);
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
       '#type' => 'submit',
-      '#value' => $operation_strings['form']['button label'],
+      '#value' => $this->getOperationString('button label', $entity_type, $entity, $operation_path),
     );
 
     return $form;
@@ -575,8 +602,8 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
   function formSubmit($form, &$form_state, $entity_type, $entity, $operation_path) {
     $this->execute($entity_type, $entity);
 
-    $operation_strings = $this->operationStrings($entity_type, $entity, $operation_path);
-    drupal_set_message($operation_strings['form']['submit message']);
+    $message = $this->getOperationString('submit message', $entity_type, $entity, $operation_path);
+    drupal_set_message($message);
 
     $form_state['redirect'] = $this->redirect_entity_uri($entity_type, $entity);
   }
@@ -604,23 +631,11 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationAction {
    *    - 'confirm question'
    *    - 'submit message'
    */
-  function operationStrings($entity_type, $entity, $operation_path) {
-    $entity_info = entity_get_info($entity_type);
-    // Helpful hack that is bad for translatability. Subclasses should override!
-    $action = ucfirst($operation_path);
-    $substitutions = array(
-      '%entity-type' => $entity_info['label'],
-      '%label' => $entity->label(),
-    );
+  function operationStrings() {
     return array(
-      'form' => array(
-        'button label' => t('Publish'),
-        // TODO: this is not actually used currently.
-        // TODO: figure out a way to let form() know when to show this and
-        // when not.
-        'confirm question' => t('Are you sure you want to publish this %entity-type?', $substitutions),
-        'submit message' => t('%entity-type %label has been published.', $substitutions),
-      ),
+      'button label' => t('Publish'),
+      'confirm question' => t('Are you sure you want to publish this %entity-type?'),
+      'submit message' => t('%entity-type %label has been published.'),
     );
   }
 
@@ -670,20 +685,11 @@ class EntityOperationsOperationUnPublish extends EntityOperationsOperationPublis
    *    - 'confirm question'
    *    - 'submit message'
    */
-  function operationStrings($entity_type, $entity, $operation_path) {
-    $entity_info = entity_get_info($entity_type);
-    // Helpful hack that is bad for translatability. Subclasses should override!
-    $action = ucfirst($operation_path);
-    $substitutions = array(
-      '%entity-type' => $entity_info['label'],
-      '%label' => $entity->label(),
-    );
+  function operationStrings() {
     return array(
-      'form' => array(
-        'button label' => t('Unpublish'),
-        'confirm question' => t('Are you sure you want to unpublish this %entity-type?', $substitutions),
-        'submit message' => t('%entity-type %label has been unpublished.', $substitutions),
-      ),
+      'button label' => t('Unpublish'),
+      'confirm question' => t('Are you sure you want to unpublish this %entity-type?'),
+      'submit message' => t('%entity-type %label has been unpublished.'),
     );
   }
 
