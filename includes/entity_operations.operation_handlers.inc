@@ -648,19 +648,54 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationAction {
     $entity->save();
   }
 
+}
+
+/**
+ * Op handler for publishing an entity.
+ *
+ * Requires the entity to have a 'status' property.
+ */
+class EntityOperationsOperationUnPublish extends EntityOperationsOperationPublish {
+
   /**
-   * Form submit handler for this operation.
+   * Returns strings for the operations.
    *
-   * Receives the same parameters as the form builder as a convenience.
+   * @return
+   *  An array containing the following keys:
+   *  - 'form': An array of strings for the operation form, containing:
+   *    - 'button label'
+   *    - 'confirm question'
+   *    - 'submit message'
    */
-  function formSubmit($form, &$form_state, $entity_type, $entity, $operation_path) {
-    $this->execute($entity_type, $entity);
+  function operationStrings($entity_type, $entity, $operation_path) {
     $entity_info = entity_get_info($entity_type);
-    drupal_set_message(t('%entity-type %label has been published.', array(
+    // Helpful hack that is bad for translatability. Subclasses should override!
+    $action = ucfirst($operation_path);
+    $substitutions = array(
       '%entity-type' => $entity_info['label'],
       '%label' => $entity->label(),
-    )));
-    $form_state['redirect'] = $this->redirect_entity_uri($entity_type, $entity);
+    );
+    return array(
+      'form' => array(
+        'button label' => t('Unpublish'),
+        'confirm question' => t('Are you sure you want to unpublish this %entity-type?', $substitutions),
+        'submit message' => t('%entity-type %label has been unpublished.', $substitutions),
+      ),
+    );
+  }
+
+  /**
+   * Access callback: deny access if entity is unpublished.
+   */
+  function operationAccess($entity_type, $entity) {
+    // Deny access if the entity is already published.
+    $published = $entity->status;
+    // Use the constant, which allows module that extend the status property to
+    // also use this, provided 'published' is 1.
+    if ($published == NODE_NOT_PUBLISHED) {
+      return FALSE;
+    }
+    // We only deny access; entity_access() will take over.
   }
 
   /**
@@ -672,7 +707,7 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationAction {
    *  - VBO??
    */
   function execute($entity_type, $entity) {
-    $entity->status = NODE_PUBLISHED;
+    $entity->status = NODE_NOT_PUBLISHED;
     $entity->save();
   }
 
