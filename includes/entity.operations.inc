@@ -68,7 +68,7 @@ class EntityOperationsDefaultUIController {
       // The default operation also gets to be the parent tab.
       if (isset($operation_definition['default'])) {
         $base_item = $menu_item;
-        $base_item['title'] = 'View';
+        $base_item['title'] = 'View'; // Won't get used.
         $base_item['type'] = MENU_NORMAL_ITEM;
 
         $items[$this->base_path] = $base_item;
