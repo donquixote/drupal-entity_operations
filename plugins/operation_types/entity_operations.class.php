@@ -153,6 +153,14 @@ class EntityOperationsVBOOperations extends ViewsBulkOperationsBaseOperation {
 
     $data = is_array($data) ? $data : array($data);
     foreach ($data as $entity) {
+      // In a bulk context we haven't yet checked access to the operation makes
+      // sense.
+      $operation_access = $operation_handler->operationAccess($this->entityType, $entity);
+      // Skip entities whose operation access denies access.
+      if ($operation_access === FALSE) {
+        continue;
+      }
+
       // We always call execute, even if it doesn't do anything.
       $operation_handler->execute($this->entityType, $entity, $context);
     }
