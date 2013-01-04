@@ -604,12 +604,28 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
   }
 
   /**
-   * Form builder for this operation.
+   * Form builder for this operation, shown when used standalone.
    *
    * Subclasses should not override this, but formBody() instead.
+   *
+   * If formBody() returns an empty array, then we show a confirmation message
+   * using the 'confirm question' string, if that string is set. We don't do
+   * this in formBody() as that is used for VBO and we only want this on tabs.
    */
   function form($form, &$form_state, $entity_type, $entity, $operation_path) {
-    $form += $this->formBody($form, &$form_state, $entity_type, $entity, $operation_path);
+    $form_body = $this->formBody($form, &$form_state, $entity_type, $entity, $operation_path);
+
+    if (empty($form_body)) {
+      $message = $this->getOperationString('confirm question', $entity_type, $entity, $operation_path);
+      if (!empty($message)) {
+        $form['#attributes']['class'][] = 'confirmation';
+        $form['question'] = array(
+          '#prefix' => '<p>',
+          '#markup' => $message,
+          '#suffix' => '</p>',
+        );
+      }
+    }
 
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
