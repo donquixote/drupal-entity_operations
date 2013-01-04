@@ -574,7 +574,7 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
  *
  * Requires the entity to have a 'status' property.
  */
-class EntityOperationsOperationPublish extends EntityOperationsOperationForm {
+class EntityOperationsOperationPublish extends EntityOperationsOperationAction {
 
   // TODO: 'publish' usually requires stronger access than 'edit'.
   public $access_verb = 'edit';
@@ -592,15 +592,37 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationForm {
   }
 
   /**
-   * Properties for the menu item specific to this handler.
+   * Returns strings for the operations.
+   *
+   * @return
+   *  An array containing the following keys:
+   *  - 'form': An array of strings for the operation form, containing:
+   *    - 'button label'
+   *    - 'confirm question'
+   *    - 'submit message'
    */
-  function menu_item($operation_path, $operation_definition) {
-    // TODO: make this a callback rather than a tab??
-    return parent::menu_item($operation_path, $operation_definition);
+  function operationStrings($entity_type, $entity, $operation_path) {
+    $entity_info = entity_get_info($entity_type);
+    // Helpful hack that is bad for translatability. Subclasses should override!
+    $action = ucfirst($operation_path);
+    $substitutions = array(
+      '%entity-type' => $entity_info['label'],
+      '%label' => $entity->label(),
+    );
+    return array(
+      'form' => array(
+        'button label' => t('Publish'),
+        // TODO: this is not actually used currently.
+        // TODO: figure out a way to let form() know when to show this and
+        // when not.
+        'confirm question' => t('Are you sure you want to publish this %entity-type?', $substitutions),
+        'submit message' => t('%entity-type %label has been published.', $substitutions),
+      ),
+    );
   }
 
   /**
-   * Menu access callback: deny access if entity is unpublished.
+   * Access callback: deny access if entity is unpublished.
    */
   function operationAccess($entity_type, $entity) {
     // Deny access if the entity is already published.
@@ -614,18 +636,16 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationForm {
   }
 
   /**
-   * Form builder for this operation.
+   * The publish action.
    *
-   * To get different parameters, override menu_item().
+   * TODO: figure out a way of exposing this to:
+   *  - hook_action_info
+   *  - UI actions in admin list
+   *  - VBO??
    */
-  function form($form, &$form_state, $entity_type, $entity, $operation_path) {
-    $entity_info = entity_get_info($entity_type);
-    $question = t('Are you sure you want to publish this %type?', array(
-      '%type' => $entity_info['label'],
-    ));
-    $form = $this->confirmForm($form, $entity_type, $entity, $question, '', t('Publish'));
-
-    return $form;
+  function execute($entity_type, $entity) {
+    $entity->status = NODE_PUBLISHED;
+    $entity->save();
   }
 
   /**
