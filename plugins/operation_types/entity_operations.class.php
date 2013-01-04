@@ -77,6 +77,46 @@ class EntityOperationsVBOOperations extends ViewsBulkOperationsBaseOperation {
   }
 
   /**
+   * Returns the configuration form for the operation.
+   * Only called if the operation is declared as configurable.
+   *
+   * @param $form
+   *   The views form.
+   * @param $form_state
+   *   An array containing the current state of the form.
+   * @param $context
+   *   An array of related data provided by the caller.
+   */
+  public function form($form, &$form_state, array $context) {
+    return $form;
+  }
+
+  /**
+   * Validates the configuration form.
+   * Only called if the operation is declared as configurable.
+   *
+   * @param $form
+   *   The views form.
+   * @param $form_state
+   *   An array containing the current state of the form.
+   */
+  public function formValidate($form, &$form_state) {
+  }
+
+  /**
+   * Handles the submitted configuration form.
+   * This is where the operation can transform and store the submitted data.
+   * Only called if the operation is declared as configurable.
+   *
+   * @param $form
+   *   The views form.
+   * @param $form_state
+   *   An array containing the current state of the form.
+   */
+  public function formSubmit($form, &$form_state) {
+  }
+
+  /**
    * Executes the selected operation on the provided data.
    *
    * @param $data
