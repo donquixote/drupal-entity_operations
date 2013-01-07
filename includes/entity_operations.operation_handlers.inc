@@ -180,6 +180,35 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
   }
 
   /**
+   * Returns strings for the operations.
+   *
+   * These should be translated, and the following placeholders may be used
+   * without values:
+   *  '%entity-type': The human-readable label for the entity type.
+   *  '%label': The entity label.
+   *
+   * @return
+   *  An array containing the following keys:
+   *  - 'button label': the label for the form button. If used as a VBO, this
+   *      should not contain the '%label' placeholder. TODO: not in this class!?
+   *  - 'confirm question': the question to ask the user in the form. This may
+   *      be blank if no confirmation question is ever required for the form.
+   *  - 'submit message': the message shown to convey to the user that the
+   *      action has succeeded. This may be blank if no submit message is
+   *      required, or if an overridden formSubmit() does something else.
+   */
+  function operationStrings() {
+    return array(
+      'button label' => t('Perform action'),
+      'confirm question' => t('Are you sure you want to proceed?'),
+      'submit message' => t('Action completed on %entity-type %label.', array(
+        // This intentionally has no replacements for the placeholders; these
+        // are replaced in getOperationString().
+      )),
+    );
+  }
+
+  /**
    * Properties for the menu item specific to this handler.
    */
   function menu_item($operation_path, $operation_definition) {
@@ -241,6 +270,101 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
     if (!isset($form['#theme'])) {
       $form['#theme'] = 'confirm_form';
     }
+    return $form;
+  }
+
+  /**
+   * Get an operations string.
+   *
+   * @param $string_key
+   *  The key in the array in operationStrings() for the string to retrieve.
+   * @param $entity_type
+   *  The entity type.
+   * @param $entity
+   *  The entity. Pass NULL if there is no entity in context.
+   * @param $operation_path
+   *  The key for the operation.
+   *
+   * @return
+   *  A translated string, with replacements made.
+   */
+  function getOperationString($string_key, $entity_type, $entity, $operation_path) {
+    $entity_info = entity_get_info($entity_type);
+    $strings = $this->operationStrings();
+    $substitutions = array(
+      '%entity-type' => $entity_info['label'],
+      '%label' => isset($entity) ? $entity->label() : '',
+    );
+    // Run the string through format_string() to replace the placeholders
+    // which t() will have ignored.
+    return format_string($strings[$string_key], $substitutions);
+  }
+
+  /**
+   * Helper to get the form for this operation.
+   *
+   * This wraps around form(), but allows various permutations of the form to
+   * be returned. Additional elements can be requested by the caller by setting
+   * the following array keys to TRUE in an array in
+   * $form_state['entity_operation_form_elements']:
+   *  - 'confirmation message': The confirmation question.
+   *  - 'form elements': The body of the form as returned by form().
+   *  - 'action button': The submit button.
+   *  - 'cancel link': A link to return to the entity.
+   */
+  function getForm($form, &$form_state, $entity_type, $entity, $operation_path) {
+    // Case 1: tab: always show everything.
+    // Case 2: node view: show body and button (but not cancel link).
+    // Case 3: VBO: show only body, if configurable.
+
+    // Always show form elements.
+    $form_state['entity_operation_form_elements'] += array(
+      'form elements' => TRUE,
+    );
+
+    // Add confirmation message on tab.
+    // TODO: ONLY if the form array is empty?
+    // (though presumably if you don't want it, just don't set the message)
+    if (!empty($form_state['entity_operation_form_elements']['confirmation message'])) {
+      $message = $this->getOperationString('confirm question', $entity_type, $entity, $operation_path);
+      if (!empty($message)) {
+        $form['#attributes']['class'][] = 'confirmation';
+        $form['question'] = array(
+          '#prefix' => '<p>',
+          '#markup' => $message,
+          '#suffix' => '</p>',
+        );
+      }
+    }
+
+    if (!empty($form_state['entity_operation_form_elements']['form elements'])) {
+      $form = $this->form($form, &$form_state, $entity_type, $entity, $operation_path);
+    }
+
+    if (!empty($form_state['entity_operation_form_elements']['action button'])) {
+      $form['actions']['submit'] = array(
+        '#type' => 'submit',
+        '#value' => $this->getOperationString('button label', $entity_type, $entity, $operation_path),
+      );
+    }
+    if (!empty($form_state['entity_operation_form_elements']['cancel link'])) {
+      $uri = entity_uri($entity_type, $entity);
+      $form['actions']['cancel'] = array(
+        '#type' => 'link',
+        '#title' => t('Cancel'),
+        '#href' => $uri['path'],
+        '#options' => $uri['options'],
+      );
+    }
+
+    // Add the actions element properties if it's needed.
+    if (isset($form['actions'])) {
+      $form['actions'] += array(
+        '#type' => 'actions',
+        '#weight' => 10,
+      );
+    }
+
     return $form;
   }
 
@@ -516,7 +640,7 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
  *  - operationAccess() to determine when the operation is available
  *  - execute() to customize what happens.
  * If the action requires configuration, then subclasses should override:
- *  - formBody() to provide the form without the submit button
+ *  - form() to provide the form without the submit button
  *  - formSubmitGetContext() to process the form values into a context array.
  */
 abstract class EntityOperationsOperationAction extends EntityOperationsOperationForm {
@@ -539,100 +663,15 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
   }
 
   /**
-   * Returns strings for the operations.
+   * Form builder for this operation.
    *
-   * These should be translated, and the following placeholders may be used
-   * without values:
-   *  '%entity-type': The human-readable label for the entity type.
-   *  '%label': The entity label.
-   *
-   * @return
-   *  An array containing the following keys:
-   *  - 'button label': the label for the form button. If used as a VBO, this
-   *      should not contain the '%label' placeholder.
-   *  - 'confirm question': the question to ask the user in the form.
-   *  - 'submit message': the message shown to convey to the user that the
-   *      action has succeeded. This may be blank if no submit message is
-   *      required, or if an overridden formSubmit() does something else.
-   */
-  function operationStrings() {
-    return array(
-      'button label' => t('Perform action'),
-      'confirm question' => t('Are you sure you want to proceed?'),
-      'submit message' => t('Action completed on %entity-type %label.', array(
-        // This intentionally has no replacements for the placeholders; these
-        // are replaced in getOperationString().
-      )),
-    );
-  }
-
-  /**
-   * Get an operations string.
-   *
-   * @param $string_key
-   *  The key in the array in operationStrings() for the string to retrieve.
-   * @param $entity_type
-   *  The entity type.
-   * @param $entity
-   *  The entity. Pass NULL if there is no entity in context.
-   * @param $operation_path
-   *  The key for the operation.
-   *
-   * @return
-   *  A translated string, with replacements made.
-   */
-  function getOperationString($string_key, $entity_type, $entity, $operation_path) {
-    $entity_info = entity_get_info($entity_type);
-    $strings = $this->operationStrings();
-    $substitutions = array(
-      '%entity-type' => $entity_info['label'],
-      '%label' => isset($entity) ? $entity->label() : '',
-    );
-    // Run the string through format_string() to replace the placeholders
-    // which t() will have ignored.
-    return format_string($strings[$string_key], $substitutions);
-  }
-
-  /**
-   * Return the form body, that is, the form without the submit button.
-   *
-   * This allows this form to work either as standalone, or as a configuration
-   * form in VBO.
-   */
-  function formBody($form, &$form_state, $entity_type, $entity, $operation_path) {
-    return $form;
-  }
-
-  /**
-   * Form builder for this operation, shown when used standalone.
-   *
-   * Subclasses should not override this, but formBody() instead.
-   *
-   * If formBody() returns an empty array, then we show a confirmation message
-   * using the 'confirm question' string, if that string is set. We don't do
-   * this in formBody() as that is used for VBO and we only want this on tabs.
+   * This should return the main part of the form, but without any of:
+   *  - a confirmation question (if one is required)
+   *  - a submit button
+   *  - a cancel link
+   * These are added as appropriate by getForm().
    */
   function form($form, &$form_state, $entity_type, $entity, $operation_path) {
-    $form_body = $this->formBody($form, &$form_state, $entity_type, $entity, $operation_path);
-
-    if (empty($form_body)) {
-      $message = $this->getOperationString('confirm question', $entity_type, $entity, $operation_path);
-      if (!empty($message)) {
-        $form['#attributes']['class'][] = 'confirmation';
-        $form['question'] = array(
-          '#prefix' => '<p>',
-          '#markup' => $message,
-          '#suffix' => '</p>',
-        );
-      }
-    }
-
-    $form['actions'] = array('#type' => 'actions');
-    $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => $this->getOperationString('button label', $entity_type, $entity, $operation_path),
-    );
-
     return $form;
   }
 

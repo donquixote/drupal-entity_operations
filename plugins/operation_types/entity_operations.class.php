@@ -102,8 +102,12 @@ class EntityOperationsVBOOperations extends ViewsBulkOperationsBaseOperation {
 
     // There is no entity to send to the form. Operations that want to use this
     // had better not be relying on it!
-    // Get just the form body, without the submit button as VBO adds this.
-    $form = $operation_handler->formBody($form, &$form_state, $this->entityType, NULL, $this->entityOperationKey);
+    // Get just the form body, with only the bare form elements, as VBO adds the
+    // submit button.
+    $form_state['entity_operation_form_elements'] = array(
+      'form elements' => TRUE,
+    );
+    $form = $operation_handler->getForm($form, &$form_state, $this->entityType, NULL, $this->entityOperationKey);
 
     return $form;
   }

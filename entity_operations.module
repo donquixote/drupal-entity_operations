@@ -193,7 +193,14 @@ function entity_operations_operation_form($form, &$form_state, $entity_type, $ha
 
   $operation_handler = new $handler_class($entity_type);
 
-  return $operation_handler->form($form, $form_state, $entity_type, $entity, $operation_path);
+  // Specify the elements we want.
+  $form_state['entity_operation_form_elements'] = array(
+    'confirmation message' => TRUE,
+    'form elements' => TRUE,
+    'action button' => TRUE,
+    'cancel link' => TRUE,
+  );
+  return $operation_handler->getForm($form, $form_state, $entity_type, $entity, $operation_path);
 }
 
 /**
