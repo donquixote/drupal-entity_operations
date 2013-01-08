@@ -186,6 +186,8 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    * without values:
    *  '%entity-type': The human-readable label for the entity type.
    *  '%label': The entity label.
+   * If further substitutions are required, they can be provided by overriding
+   * getOperationStringSubstitutions().
    *
    * @return
    *  An array containing the following keys:
@@ -284,20 +286,52 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    *  The entity. Pass NULL if there is no entity in context.
    * @param $operation_path
    *  The key for the operation.
+   * @param $context
+   *  (Optional) The context array from the form submission values.
    *
    * @return
    *  A translated string, with replacements made.
    */
-  function getOperationString($string_key, $entity_type, $entity, $operation_path) {
-    $entity_info = entity_get_info($entity_type);
+  function getOperationString($string_key, $entity_type, $entity, $operation_path, $context = array()) {
     $strings = $this->operationStrings();
+
+    $substitutions = $this->getOperationStringSubstitutions($entity_type, $entity, $operation_path, $context);
+
+    // Run the string through format_string() to replace the placeholders
+    // which t() will have ignored.
+    return format_string($strings[$string_key], $substitutions);
+  }
+
+  /**
+   * Return an array of string substitutions for t().
+   *
+   * This may be overridden to add further substitutions, in particular using
+   * the context array for the submit confirmation message.
+   *
+   * @param $entity_type
+   *  The entity type.
+   * @param $entity
+   *  The entity. Pass NULL if there is no entity in context.
+   * @param $operation_path
+   *  The key for the operation.
+   * @param $context
+   *  The context array from the form submission values. When this is not
+   *  available, for example when retrieving the button label, this will be an
+   * empty array.
+   *
+   * @return
+   *  An array of string substitutions as used by t(). These should match those
+   *  used in operationStrings(), and should include at least:
+   *  - '%entity-type': The human-readable label for the entity type.
+   *  - '%label': The label of the entity.
+   */
+  function getOperationStringSubstitutions($entity_type, $entity, $operation_path, $context) {
+    $entity_info = entity_get_info($entity_type);
     $substitutions = array(
       '%entity-type' => $entity_info['label'],
       '%label' => isset($entity) ? $entity->label() : '',
     );
-    // Run the string through format_string() to replace the placeholders
-    // which t() will have ignored.
-    return format_string($strings[$string_key], $substitutions);
+    return $substitutions;
   }
 
   /**
@@ -687,7 +721,7 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
 
     $this->execute($entity_type, $entity, $this->context);
 
-    $message = $this->getOperationString('submit message', $entity_type, $entity, $operation_path);
+    $message = $this->getOperationString('submit message', $entity_type, $entity, $operation_path, $this->context);
     if (!empty($message)) {
       drupal_set_message($message);
     }
