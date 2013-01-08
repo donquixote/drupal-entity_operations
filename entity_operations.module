@@ -70,10 +70,10 @@ function entity_operations_get_operation($entity_type, $entity, $operation) {
  */
 function entity_operations_get_entity_operations_fieldset($entity, $operations = array()) {
   $entity_type = $entity->entityType();
+  $entity_info = $entity->entityInfo();
 
   // Build up operations array if it's empty.
   if (empty($operations)) {
-    $entity_info = $entity->entityInfo();
     foreach ($entity_info['operations ui']['operations'] as $operation_path => $operation_definition) {
       if (isset($operation_definition['entity view'])) {
         $operations[] = $operation_path;
@@ -88,14 +88,27 @@ function entity_operations_get_entity_operations_fieldset($entity, $operations =
 
   $build_operations = array();
   foreach ($operations as $operation) {
-    $operation_form = entity_operations_get_operation($entity_type, $entity, $operation);
-    // This may be NULL if access is not allowed.
-    if (!isset($operation_form)) {
+    $operation_class = $entity_info['operations ui']['operations'][$operation]['handler'];
+    $operation_handler = new $operation_class($entity_type);
+
+    // Check access for the operation.
+    if ($operation_handler->operationAccess($entity_type, $entity) === FALSE) {
+      continue;
+    }
+    if ($operation_handler->userAccess($entity_type, $entity) === FALSE) {
       continue;
     }
 
-    // Remove the confirmation question.
-    unset($operation_form['question']);
+    $form_state = array();
+    $form_state['build_info']['args'] = array(
+      $entity_type, $operation_class, $operation, $entity,
+    );
+    $form_state['entity_operation_form_elements'] = array(
+      'form elements' => TRUE,
+      'action button' => TRUE,
+    );
+
+    $operation_form = drupal_build_form('entity_operations_operation_form', $form_state);
 
     $build_operations[$operation] = $operation_form;
   }
@@ -193,13 +206,15 @@ function entity_operations_operation_form($form, &$form_state, $entity_type, $ha
 
   $operation_handler = new $handler_class($entity_type);
 
-  // Specify the elements we want.
-  $form_state['entity_operation_form_elements'] = array(
-    'confirmation message' => TRUE,
-    'form elements' => TRUE,
-    'action button' => TRUE,
-    'cancel link' => TRUE,
-  );
+  // Specify the elements we want, unless our caller already requested some.
+  if (!isset($form_state['entity_operation_form_elements'])) {
+    $form_state['entity_operation_form_elements'] = array(
+      'confirmation message' => TRUE,
+      'form elements' => TRUE,
+      'action button' => TRUE,
+      'cancel link' => TRUE,
+    );
+  }
   return $operation_handler->getForm($form, $form_state, $entity_type, $entity, $operation_path);
 }
 
