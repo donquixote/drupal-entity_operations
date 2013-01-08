@@ -269,7 +269,7 @@ function entity_operations_operation_access_callback($entity_type, $handler_clas
   // callback, meaning that as long as your entity's access callback
   // understands it, you can do it here.
   $verb = $operation_handler->access_verb;
-  $access = entity_access($operation_handler->access_verb, $entity_type);
+  $access = entity_access($operation_handler->access_verb, $entity_type, $entity);
 
   return $access;
 }
