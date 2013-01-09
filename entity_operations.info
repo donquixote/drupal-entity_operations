@@ -4,3 +4,4 @@ dependencies[] = entity
 core = 7.x
 files[] = includes/entity.operations.inc
 files[] = includes/entity_operations.operation_handlers.inc
+files[] = includes/views/entity_operations_plugin_display_operation_tab.inc

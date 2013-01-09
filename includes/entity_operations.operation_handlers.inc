@@ -162,6 +162,77 @@ class EntityOperationsOperationPage extends EntityOperationsOperationBase {
 }
 
 /**
+ * Handler for showing a Views display as a tab.
+ *
+ * @see entity_operations_plugin_display_operation_tab
+ */
+class EntityOperationsOperationPageViews extends EntityOperationsOperationPage {
+
+  /**
+   * The operation for entity_access().
+   *
+   * TODO: allow the views display plugin to expose this as a user option?
+   */
+  public $access_verb = 'view';
+
+  /**
+   * Returns the menu item for this operation.
+   *
+   * We process the info from entity_operations_get_views() here so it can
+   * be overridden easily.
+   */
+  function menu_item($operation_path, $operation_definition) {
+    $item = array(
+      'title' => $operation_definition['views info']['title'],
+      'page callback' => 'entity_operations_operation_page_callback', // ?
+      'page arguments' => array(
+        $this->entityType,
+        // We need to pass $this to get_class() because we want the class of
+        // the current object, not the class we are sitting in.
+        get_class($this),
+        // TODO!!! UGLY!!
+        $this->controller->loader_position,
+        // Extra params.
+        $operation_definition['views info']['name'],
+        $operation_definition['views info']['display'],
+      ),
+      'access callback' => 'entity_operations_operation_access_callback',
+      'access arguments' => array($this->entityType, get_class($this), $this->controller->loader_position),
+    );
+
+    // Add in what the parent class has.
+    $item += parent::menu_item($operation_path, $operation_definition);
+    return $item;
+  }
+
+  /**
+   * Page callback. Receives extra params set up in hook_menu().
+   */
+  function page($entity_type, $entity, $view_name, $view_display_name) {
+    if ($view = views_get_view($view_name)) {
+      $view->set_display($view_display_name);
+      if ($view->access($view_display_name)) {
+        $view->current_entity = $entity;
+
+        $result = $view->execute_display($view_display_name);
+      }
+    }
+
+    if (!empty($result)) {
+      return $result;
+    }
+    else {
+      // We have to return at least an empty string for the page to display.
+      // Ideally, a view used with this should provide 'no results' text so we
+      // never come here.
+      // @todo: add validation to the views display handler to insist on this.
+      return '';
+    }
+  }
+
+}
+
+/**
  * Base operation for forms.
  */
 class EntityOperationsOperationForm extends EntityOperationsOperationBase {

@@ -184,6 +184,8 @@ function entity_operations_entity_uri($entity) {
  *  The name of the handler class for the current operation.
  * @param $entity
  *  The entity.
+ * @param ...
+ *  Further parameters are passed to the operation handler's page() method.
  *
  * @return
  *  Either output text or a render array.
@@ -193,6 +195,19 @@ function entity_operations_operation_page_callback($entity_type, $handler_class,
   drupal_set_title($entity->label());
 
   $operation_handler = new $handler_class($entity_type);
+
+  // Pass further parameters to the page() method. This saves us adding custom
+  // page callbacks that just pass on different parameters... though is slower,
+  // so we only do this if there are extras.
+  $args = func_get_args();
+  if (count($args) > 3) {
+    // Remove the $handler_class parameter.
+    $params = $args;
+    unset($params[1]);
+
+    // Call the page() method with our parameters array.
+    return call_user_func_array(array($operation_handler, 'page'), $params);
+  }
 
   return $operation_handler->page($entity_type, $entity);
 }
@@ -280,5 +295,98 @@ function entity_operations_operation_access_callback($entity_type, $handler_clas
 function entity_operations_ctools_plugin_directory($owner, $plugin_type) {
   if ($owner == 'views_bulk_operations') {
     return 'plugins/' . $plugin_type;
+  }
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function entity_operations_views_api() {
+  return array(
+    'api' => '3',
+    'path' => drupal_get_path('module', 'entity_operations') . '/includes/views',
+  );
+}
+
+/**
+ * Implements hook_entity_operations_menu_operations_alter() for views module.
+ */
+function views_entity_operations_menu_operations_alter(&$entity_operations, $entity_type) {
+  // Get the views with tabs for this entity
+  $views_info = entity_operations_get_views($entity_type);
+  foreach ($views_info as $operation_name => $view_info) {
+    // Views clobber existing operations. Desirable or not? TODO.
+    $entity_operations[$operation_name] = array(
+      'handler' => 'EntityOperationsOperationPageViews',
+      'views info' => $view_info,
+    );
+  }
+}
+
+/**
+ * Get a list of views and displays attached to specific entities.
+ *
+ * This function will cache its results into the views cache, so it gets
+ * cleared by Views appropriately.
+ *
+ * Cribbed from eva_get_views().
+ *
+ * @todo: could this be moved to the views.inc file?
+ *
+ * @param $type
+ *   The entity type we want to retrieve views for. If NULL is
+ *   specified, views for all entity types will be returned.
+ * @param $reset
+ *   Force a rebuild of the data.
+ * @return
+ *   An array of view name/display name values, or an empty array().
+ */
+function entity_operations_get_views($type = NULL, $reset = FALSE) {
+  $used_views = &drupal_static(__FUNCTION__);
+
+  if (!isset($used_views) || $reset) {
+    views_include('cache');
+
+    // If we're not resetting, check the Views cache.
+    if (!$reset) {
+      $cache = views_cache_get("entity_operations");
+      if (isset($cache->data)) {
+        $used_views = $cache->data;
+      }
+    }
+
+    // If it's still empty rebuild it.
+    if (!isset($used_views)) {
+      // Trigger a rebuild of the views object cache, which may not be fully loaded.
+      ctools_include('export');
+      ctools_export_load_object_reset('views_view');
+
+      // Build and cache the data, both in the DB and statically.
+      $views = views_get_applicable_views('provides entity operation');
+      foreach ($views as $data) {
+        list($view, $display_id) = $data;
+        $entity_type = $view->display_handler->get_option('entity_type');
+        $operation_name = $view->display_handler->get_option('path');
+        // Initialize handlers, to determine if the view uses exposed filters.
+        $view->init_handlers();
+        $used_views[$entity_type][$operation_name] = array(
+          'name' => $view->name,
+          'title' => $view->get_human_name() . ' - ' . $view->display[$display_id]->display_title,
+          'display' => $display_id,
+          'operation_name' => $operation_name,
+          'title' => $view->display_handler->get_option('title'),
+        );
+        $view->destroy();
+      }
+      views_cache_set("entity_operations", $used_views);
+    }
+  }
+
+  // Now spit back the data.
+  if (isset($type) & isset($used_views)) {
+    return isset($used_views[$type]) ? $used_views[$type] : array();
+  }
+  else {
+    return isset($used_views) ? $used_views : array();
   }
 }
