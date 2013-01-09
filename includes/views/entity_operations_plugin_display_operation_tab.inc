@@ -211,9 +211,9 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
           }
           $this->set_option('bundles', $new_bundles);
         }
-
+        break;
+      case 'operation_name':
         $this->set_option('path', $form_state['values']['path']);
-
         break;
       case 'arguments':
         $this->set_option('argument_mode', $form_state['values']['argument_mode']);
