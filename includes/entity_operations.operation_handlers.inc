@@ -11,6 +11,8 @@
  *      - EntityOperationsOperationEntityViewOperations: displays the entity,
  *        with available operations in a fieldset.
  *    - EntityOperationsOperationDevel: devel output for the entity.
+ *    - EntityOperationsOperationPageViews: output the result of a Views
+ *      entity tab display.
  *  - EntityOperationsOperationForm: parent class for form operations.
  *    - EntityOperationsOperationEdit: the edit form for the entity.
  *    - EntityOperationsOperationAction: parent class for actions on the entity.
