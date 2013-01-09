@@ -6,8 +6,6 @@
  * Large portions of this are cribbed from EVA.
  *
  * @todo:
- *  - add validation to enforce 'no results' behaviour, so the user never gets
- *    an empty tab.
  *  - add validation to ensure that the op name set by the user doesn't clobber
  *    an existing one. Unless this is desirable behaviour?
  */
@@ -230,6 +228,22 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
         $this->set_option('show_title', $form_state['values']['show_title']);
         break;
     }
+  }
+
+  /**
+   * Enforce at least one 'empty' handler so the user never sees an empty tab.
+   */
+  function validate() {
+    $errors = parent::validate();
+
+    $empty_handlers = $this->get_handlers('empty');
+    if (empty($empty_handlers)) {
+      $errors[] = t('Display "@display" must have at least one "No results" behavior.', array(
+        '@display' => $this->display->display_title,
+      ));
+    }
+
+    return $errors;
   }
 
   /**
