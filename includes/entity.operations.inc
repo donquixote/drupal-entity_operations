@@ -4,6 +4,11 @@
  * Controller class for the entity operations UI.
  *
  * Registers paths with hook_menu(), based on entity info properties.
+ *
+ * The menu item returned for an operation is built up from, in order:
+ *  - the operation array's 'menu item' property (if it exists),
+ *  - the operation handler's menu_item() method,
+ *  - default properties set in this controller's hook_menu().
  */
 class EntityOperationsDefaultUIController {
 
@@ -32,7 +37,14 @@ class EntityOperationsDefaultUIController {
 
     $this->weight = 0;
 
-    foreach ($this->entityInfo['operations ui']['operations'] as $operation_path => $operation_definition) {
+    // Invoke hook_entity_operations_menu_operations_alter().
+    // This allows altering of operations and adding of extra settings, without
+    // either stashing excessive data in hook_entity_info(), or needing to
+    // subclass this controller.
+    $entity_operations = $this->entityInfo['operations ui']['operations'];
+    drupal_alter('entity_operations_menu_operations', $entity_operations, $this->entityType);
+
+    foreach ($entity_operations as $operation_path => $operation_definition) {
       $operation_class = $operation_definition['handler'];
       $operation_handler = new $operation_class($this->entityType, $this);
       $operation_info = $operation_handler->operationInfo();
@@ -42,9 +54,19 @@ class EntityOperationsDefaultUIController {
         continue;
       }
 
-      // Allow the handler to provide some properties first.
-      $menu_item = $operation_handler->menu_item($operation_path, $operation_definition);
-      // Add in our defaults.
+      // Several things get to contribute properties to the menu item.
+      $menu_item = array();
+      // Allow the operation to go first. These should probably be set using
+      // hook_entity_operations_operations_alter() rather than in
+      // hook_entity_info(), as data from the latter is always loaded.
+      if (isset($operation_definition['menu_item'])) {
+        $menu_item = $operation_definition['menu_item'];
+      }
+
+      // Next, allow the handler to provide properties.
+      $menu_item += $operation_handler->menu_item($operation_path, $operation_definition);
+
+      // Finally, add in our defaults.
       $menu_item += array(
         'title' => ucfirst($operation_path),
         'type' => isset($operation_definition['default']) ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK,
