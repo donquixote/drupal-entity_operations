@@ -169,14 +169,23 @@ function entity_operations_menu() {
  * entity type's defined operations. It is intended as a helper to be used by
  * a custom entity type module's hook_permission() (and hook_og_permission()).
  *
+ * @TODO: Add support for per-bundle permissions.
+ *
  * @param $entity_type
  *  The entity type to get permissions for.
+ * @param $own
+ *  An array of access verbs which require both an 'op any entity' and also
+ *  an 'op own entity' permission.
  *
  * @return
  *  An array of permission suitable for hook_permission().
  */
-function entity_operations_get_entity_permissions($entity_type) {
+function entity_operations_get_entity_permissions($entity_type, $own = array()) {
   $entity_info = entity_get_info($entity_type);
+
+  if (isset($own)) {
+    $own = array_fill_keys($own, TRUE);
+  }
 
   $permissions = array();
   foreach ($entity_info['operations ui']['operations'] as $operation_name => $operation_definition) {
@@ -199,6 +208,18 @@ function entity_operations_get_entity_permissions($entity_type) {
     $permissions[$permission_string] = array(
       'title' => $permission_label,
     );
+
+    if (isset($own[$verb])) {
+      $permission_string = "{$verb} own {$entity_type}s";
+      $permission_label = t('!action own !type entities', array(
+        '!action' => ucfirst($verb),
+        '!type' => $entity_info['label'],
+      ));
+
+      $permissions[$permission_string] = array(
+        'title' => $permission_label,
+      );
+    }
   }
 
   return $permissions;
