@@ -265,8 +265,20 @@ function entity_operations_operation_form_submit($form, &$form_state) {
  * This first checks the handler's operationAccess() for a basic sanity check
  * and then passes on to entity_access() using the operation's verb as the $op
  * to check access for.
+ *
+ * @param $entity_type
+ *  The entity type.
+ * @param $handler_class
+ *  The name of the class for the operation handler.
+ * @param $operation_path
+ *  The path the operation is on, i.e. the key in the hook_entity_info() array.
+ * @param $entity
+ *  The entity.
+ *
+ * @return
+ *  A boolean indicating whether access should be granted.
  */
-function entity_operations_operation_access_callback($entity_type, $handler_class, $entity) {
+function entity_operations_operation_access_callback($entity_type, $handler_class, $operation_path, $entity) {
   // First see whether the handler has anything to say about access from a
   // purely logical standpoint.
   $operation_handler = new $handler_class($entity_type);
@@ -287,8 +299,9 @@ function entity_operations_operation_access_callback($entity_type, $handler_clas
   // basic values of $op, in fact it just passes them to the access
   // callback, meaning that as long as your entity's access callback
   // understands it, you can do it here.
-  $verb = $operation_handler->access_verb;
-  $access = entity_access($operation_handler->access_verb, $entity_type, $entity);
+  // @see entity_operations_get_entity_permissions().
+  $verb = $operation_handler->getAccessVerb($operation_path);
+  $access = entity_access($verb, $entity_type, $entity);
 
   return $access;
 }

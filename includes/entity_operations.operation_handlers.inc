@@ -26,6 +26,13 @@
  */
 abstract class EntityOperationsOperationBase {
 
+  /**
+   * The operation for entity_access().
+   *
+   * @see getAccessVerb()
+   */
+  protected $access_verb = 'view';
+
   protected $entityType;
 
   /**
@@ -66,6 +73,26 @@ abstract class EntityOperationsOperationBase {
   public function __construct($entity_type, $ui_controller = NULL) {
     $this->entityType = $entity_type;
     $this->controller = $ui_controller;
+  }
+
+  /**
+   * Get the access verb for this operation.
+   *
+   * This is taken either from the property $access_verb, or if that is NULL,
+   * the operation name.
+   *
+   * TODO: revisit this logic and see if anything better can be devised.
+   *
+   * @param $operation_name
+   *  The path component this operation is on. (Yes, this is ugly to have to
+   *  pass this in here. TODO: clean this up.)
+   *
+   * @return
+   *  The access verb for the operation, e.g. 'view', 'edit', and so on.
+   */
+  public function getAccessVerb($operation_name) {
+    $verb = isset($this->access_verb) ? $this->access_verb : $operation_name;
+    return $verb;
   }
 
   /**
@@ -146,7 +173,12 @@ class EntityOperationsOperationPage extends EntityOperationsOperationBase {
         $this->controller->loader_position,
       ),
       'access callback' => 'entity_operations_operation_access_callback',
-      'access arguments' => array($this->entityType, get_class($this), $this->controller->loader_position),
+      'access arguments' => array(
+        $this->entityType,
+        get_class($this),
+        $operation_path,
+        $this->controller->loader_position,
+      ),
     );
 
     // Add in what the parent class has.
@@ -199,7 +231,12 @@ class EntityOperationsOperationPageViews extends EntityOperationsOperationPage {
         $operation_definition['views info']['display'],
       ),
       'access callback' => 'entity_operations_operation_access_callback',
-      'access arguments' => array($this->entityType, get_class($this), $this->controller->loader_position),
+      'access arguments' => array(
+        $this->entityType,
+        get_class($this),
+        $operation_path,
+        $this->controller->loader_position,
+      ),
     );
 
     // Add in what the parent class has.
@@ -297,7 +334,12 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
         $this->controller->loader_position, // Provides the entity as a parameter.
       ),
       'access callback' => 'entity_operations_operation_access_callback',
-      'access arguments' => array($this->entityType, get_class($this), $this->controller->loader_position),
+      'access arguments' => array(
+        $this->entityType,
+        get_class($this),
+        $operation_path,
+        $this->controller->loader_position,
+      ),
     );
   }
 
@@ -673,6 +715,7 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
       'access arguments' => array(
         $this->entityType,
         get_class($this),
+        $operation_path,
         $this->controller->loader_position,
       ),
     );
