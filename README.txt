@@ -9,7 +9,9 @@ In fact, the whole of an entity's UI can be created using Entity Operations. For
 
 More complex entities can implement further operations specific to its business logic. For example, a library book entity could have a tab that allows making reservations. The operations framework allows modules to output any kind of content or form in an entity tab.
 
-Entity operations are also exposed as Views Bulk Operations (work in progress).
+Entity operations are also exposed as Views Bulk Operations.
+
+Access to an operation is defined by either the handler class, or the path component. entity_operations_get_entity_permissions() can be used to get all the permissions this invents for an entity type.  
 
 Implementation
 ==============
