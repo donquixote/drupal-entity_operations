@@ -163,6 +163,48 @@ function entity_operations_menu() {
 // ========================================== Helpers for custom entities.
 
 /**
+ * Helper to generate permissions from entity operations.
+ *
+ * This produces an array suitable for hook_permission() based on the given
+ * entity type's defined operations. It is intended as a helper to be used by
+ * a custom entity type module's hook_permission() (and hook_og_permission()).
+ *
+ * @param $entity_type
+ *  The entity type to get permissions for.
+ *
+ * @return
+ *  An array of permission suitable for hook_permission().
+ */
+function entity_operations_get_entity_permissions($entity_type) {
+  $entity_info = entity_get_info($entity_type);
+
+  $permissions = array();
+  foreach ($entity_info['operations ui']['operations'] as $operation_name => $operation_definition) {
+    $operation_class = $operation_definition['handler'];
+    $operation_handler = new $operation_class($entity_type);
+
+    // Take the access verb from the handler class if it defines it. Otherwise,
+    // use the operation name.
+    $verb = $operation_handler->getAccessVerb($operation_name);
+
+    $permission_string = "{$verb} {$entity_type}s";
+    // Urgh this is going to be a bit grim for translation. You'd probably want
+    // to turn it into something like:
+    //   'Operer l'action !action sur les entités de type !type'.
+    $permission_label = t('!action !type entities', array(
+      '!action' => ucfirst($verb),
+      '!type' => $entity_info['label'],
+    ));
+
+    $permissions[$permission_string] = array(
+      'title' => $permission_label,
+    );
+  }
+
+  return $permissions;
+}
+
+/**
  * Generic entity URI callback.
  *
  * This can be used for any entity that uses Entity Operations. It will return
