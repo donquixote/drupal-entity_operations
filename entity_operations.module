@@ -160,6 +160,8 @@ function entity_operations_menu() {
   return $items;
 }
 
+// ========================================== Helpers for custom entities.
+
 /**
  * Generic entity URI callback.
  *
@@ -174,6 +176,8 @@ function entity_operations_entity_uri($entity) {
   $path = $entity_info['operations ui']['path'] . '/' . $entity->identifier();
   return array('path' => $path);
 }
+
+// ========================================== Page callbacks and form builders.
 
 /**
  * Generic page callback. Hands over to the handler's page() method.
@@ -288,6 +292,8 @@ function entity_operations_operation_access_callback($entity_type, $handler_clas
 
   return $access;
 }
+
+// ========================================== Other contrib integration.
 
 /**
  * Implements hook_ctools_plugin_directory().
