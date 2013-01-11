@@ -487,7 +487,7 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
     }
 
     if (!empty($form_state['entity_operation_form_elements']['form elements'])) {
-      $form = $this->form($form, &$form_state, $entity_type, $entity, $operation_path);
+      $form = $this->form($form, $form_state, $entity_type, $entity, $operation_path);
     }
 
     if (!empty($form_state['entity_operation_form_elements']['action button'])) {
@@ -833,7 +833,7 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
   function formSubmit($form, &$form_state, $entity_type, $entity, $operation_path) {
     // Set the context on the handler so that subclasses that *do* override
     // this can get to it.
-    $this->context = $this->formSubmitGetContext($form, &$form_state, $entity_type, $entity, $operation_path);
+    $this->context = $this->formSubmitGetContext($form, $form_state, $entity_type, $entity, $operation_path);
 
     $this->execute($entity_type, $entity, $this->context);
 
