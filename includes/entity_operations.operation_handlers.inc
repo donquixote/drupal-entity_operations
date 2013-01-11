@@ -228,6 +228,8 @@ class EntityOperationsOperationPageViews extends EntityOperationsOperationPage {
    */
   function menu_item($operation_path, $operation_definition) {
     $item = array(
+      // TODO: Either take the op name as tab title when the view has none, or
+      // enforce a title in the Views display plugin.
       'title' => $operation_definition['views info']['title'],
       'page callback' => 'entity_operations_operation_page_callback', // ?
       'page arguments' => array(
