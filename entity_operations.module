@@ -251,32 +251,20 @@ function entity_operations_entity_uri($entity) {
  *  The name of the handler class for the current operation.
  * @param $entity
  *  The entity.
- * @param ...
- *  Further parameters are passed to the operation handler's page() method.
+ * @param $params
+ *  (optional) An array of further parameters which is passed to the operation
+ *  handler's page() method.
  *
  * @return
  *  Either output text or a render array.
  */
-function entity_operations_operation_page_callback($entity_type, $handler_class, $entity) {
+function entity_operations_operation_page_callback($entity_type, $handler_class, $entity, $params = array()) {
   // Set the title to the entity so operation handlers don't have to.
   drupal_set_title($entity->label());
 
   $operation_handler = new $handler_class($entity_type);
 
-  // Pass further parameters to the page() method. This saves us adding custom
-  // page callbacks that just pass on different parameters... though is slower,
-  // so we only do this if there are extras.
-  $args = func_get_args();
-  if (count($args) > 3) {
-    // Remove the $handler_class parameter.
-    $params = $args;
-    unset($params[1]);
-
-    // Call the page() method with our parameters array.
-    return call_user_func_array(array($operation_handler, 'page'), $params);
-  }
-
-  return $operation_handler->page($entity_type, $entity);
+  return $operation_handler->page($entity_type, $entity, $params);
 }
 
 /**

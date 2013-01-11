@@ -188,8 +188,19 @@ class EntityOperationsOperationPage extends EntityOperationsOperationBase {
 
   /**
    * Page callback.
+   *
+   * @param $entity_type
+   *  The entity type.
+   * @param $entity
+   *  The entity. Pass NULL if there is no entity in context.
+   * @param $params
+   *  (optional) An array of additional parameters. It is up to subclasses that
+   *  require this to document what they expect.
+   *
+   * @return
+   *  Output suitable for a page callback.
    */
-  function page($entity_type, $entity) {
+  function page($entity_type, $entity, $params = array()) {
     return 'This is my operation page.';
   }
 
@@ -227,8 +238,10 @@ class EntityOperationsOperationPageViews extends EntityOperationsOperationPage {
         // TODO!!! UGLY!!
         $this->controller->loader_position,
         // Extra params.
-        $operation_definition['views info']['name'],
-        $operation_definition['views info']['display'],
+        array(
+          'view_name' => $operation_definition['views info']['name'],
+          'view_display_name' => $operation_definition['views info']['display'],
+        ),
       ),
       'access callback' => 'entity_operations_operation_access_callback',
       'access arguments' => array(
@@ -245,9 +258,16 @@ class EntityOperationsOperationPageViews extends EntityOperationsOperationPage {
   }
 
   /**
-   * Page callback. Receives extra params set up in hook_menu().
+   * Page callback for outputting a View.
+   *
+   * Requires extra params in $params:
+   *  - 'view_name': The name of the view to output.
+   *  - 'view_display_name': The name of the view display to use.
    */
-  function page($entity_type, $entity, $view_name, $view_display_name) {
+  function page($entity_type, $entity, $params = array()) {
+    $view_name = $params['view_name'];
+    $view_display_name = $params['view_display_name'];
+
     if ($view = views_get_view($view_name)) {
       $view->set_display($view_display_name);
       if ($view->access($view_display_name)) {
@@ -573,7 +593,7 @@ class EntityOperationsOperationEntityView extends EntityOperationsOperationPage 
 
   public $access_verb = 'view';
 
-  function page($entity_type, $entity) {
+  function page($entity_type, $entity, $params = array()) {
     //dsm($entity, 'handler page');
     drupal_set_title($entity->label());
     // Pass in EntityAPI's defaults for the first two parameters so we can
@@ -594,7 +614,7 @@ class EntityOperationsOperationEntityViewOperations extends EntityOperationsOper
 
   public $access_verb = 'view';
 
-  function page($entity_type, $entity) {
+  function page($entity_type, $entity, $params = array()) {
     $build = parent::page($entity_type, $entity);
 
     // Add the automatic entity view operations to the build array.
@@ -631,7 +651,7 @@ class EntityOperationsOperationDevel extends EntityOperationsOperationPage {
   /**
    * Page callback.
    */
-  function page($entity_type, $entity) {
+  function page($entity_type, $entity, $params = array()) {
     drupal_set_title($entity->label());
     $output = kprint_r($entity, TRUE);
     return $output;
