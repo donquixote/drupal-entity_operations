@@ -738,7 +738,7 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
         $this->entityType,
         get_class($this),
         $operation_path,
-        $this->controller->loader_position,
+        NULL,
       ),
     );
 
