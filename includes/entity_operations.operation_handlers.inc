@@ -712,7 +712,7 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
    */
   function operationInfo() {
     return array(
-      'provides menu' => FALSE,
+      'provides menu' => TRUE,
       'uses form' => TRUE,
       'provides vbo' => FALSE,
     );
