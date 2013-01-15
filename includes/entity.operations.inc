@@ -49,8 +49,8 @@ class EntityOperationsDefaultUIController {
       $operation_handler = new $operation_class($this->entityType, $this);
       $operation_info = $operation_handler->operationInfo();
 
-      // Skip operations that don't provide a tab.
-      if (empty($operation_info['provides tab'])) {
+      // Skip operations that don't provide a menu item.
+      if (empty($operation_info['provides menu'])) {
         continue;
       }
 

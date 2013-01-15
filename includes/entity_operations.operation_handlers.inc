@@ -50,17 +50,17 @@ abstract class EntityOperationsOperationBase {
    *
    * @return
    *  An array with the following keys:
-   *  - 'provides tab': Whether this operation should provide a tab on the
-   *    entity.
-   *  - 'uses form': If 'provides tab' is TRUE, whether this operation's tab
+   *  - 'provides menu': Whether this operation should provide a menu item on
+   *    the entity base path.
+   *  - 'uses form': If 'provides menu' is TRUE, whether this operation's tab
    *    is a form rather than a page.
    *  - 'provides vbo': Whether this operation should be exposed to Views Bulk
    *    Operations.
    */
   function operationInfo() {
     return array(
-      // Default behaviour is to provide a tab.
-      'provides tab' => TRUE,
+      // Default behaviour is to provide a menu item.
+      'provides menu' => TRUE,
       'uses form' => FALSE,
       'provides vbo' => FALSE,
     );
@@ -305,7 +305,7 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    */
   function operationInfo() {
     return array(
-      'provides tab' => TRUE,
+      'provides menu' => TRUE,
       'uses form' => TRUE,
       'provides vbo' => FALSE,
     );
@@ -712,7 +712,7 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
    */
   function operationInfo() {
     return array(
-      'provides tab' => FALSE,
+      'provides menu' => FALSE,
       'uses form' => TRUE,
       'provides vbo' => FALSE,
     );
@@ -826,7 +826,7 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
    */
   function operationInfo() {
     return array(
-      'provides tab' => FALSE,
+      'provides menu' => FALSE,
       'uses form' => TRUE,
       'provides vbo' => TRUE,
       // Extra info for VBO.
