@@ -54,6 +54,8 @@ abstract class EntityOperationsOperationBase {
    *    the entity base path.
    *  - 'uses form': If 'provides menu' is TRUE, whether this operation's tab
    *    is a form rather than a page.
+   *  - 'provides views field': Whether this operation should be exposed as a
+   *    Views field.
    *  - 'provides vbo': Whether this operation should be exposed to Views Bulk
    *    Operations.
    */
@@ -63,6 +65,7 @@ abstract class EntityOperationsOperationBase {
       'provides menu' => TRUE,
       'uses form' => FALSE,
       'provides vbo' => FALSE,
+      'provides views field' => TRUE,
     );
   }
 
@@ -308,6 +311,7 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
       'provides menu' => TRUE,
       'uses form' => TRUE,
       'provides vbo' => FALSE,
+      'provides views field' => TRUE,
     );
   }
 
@@ -715,6 +719,7 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
       'provides menu' => TRUE,
       'uses form' => TRUE,
       'provides vbo' => FALSE,
+      'provides views field' => FALSE,
     );
   }
 
@@ -831,6 +836,7 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
       'provides vbo' => TRUE,
       // Extra info for VBO.
       'vbo' => array(),
+      'provides views field' => FALSE,
     );
   }
 

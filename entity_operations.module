@@ -49,6 +49,25 @@ function entity_operations_get_operation($entity_type, $entity, $operation) {
 }
 
 /**
+ * Get the operation handler for a given entity type and operation name.
+ *
+ * @param $entity_type
+ *  The entity type.
+ * @param $operation_name
+ *  The path component for the operation.
+ *
+ * @return
+ *  An operation handler class.
+ */
+function entity_operations_get_entity_operation_handler($entity_type, $operation_name) {
+  $entity_info = entity_get_info($entity_type);
+  $operation_class = $entity_info['operations ui']['operations'][$operation_name]['handler'];
+  $operation_handler = new $operation_class($entity_type);
+
+  return $operation_handler;
+}
+
+/**
  * Helper to output operations in an entity's content.
  *
  * This can be used in an entity class's buildContent() thus:
