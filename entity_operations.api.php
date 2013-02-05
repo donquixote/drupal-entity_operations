@@ -68,11 +68,14 @@ function entity_operations_hook_entity_info() {
  *  The entity type.
  */
 function hook_entity_operations_menu_operations_alter(&$entity_operations, $entity_type) {
-  // Change the title of the main 'view' tab of the entity.
   if ($entity_type == 'my_entity') {
+    // Change the title of the main 'view' tab of the entity.
     $entity_operations['view']['menu_item'] = array(
       'title' => t('Dashboard'),
     );
+    // Override the publish operation so it provides an operation tab.
+    // It suffices to set an empty array.
+    $entity_operations['publish']['menu_item'] = array();
   }
 }
 
