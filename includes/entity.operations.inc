@@ -47,10 +47,13 @@ class EntityOperationsDefaultUIController {
     foreach ($entity_operations as $operation_path => $operation_definition) {
       $operation_class = $operation_definition['handler'];
       $operation_handler = new $operation_class($this->entityType, $this);
-      $operation_info = $operation_handler->operationInfo();
+      $operation_handler_info = $operation_handler->operationInfo();
 
-      // Skip operations that don't provide a menu item.
-      if (empty($operation_info['provides menu'])) {
+      // Skip operations that don't provide a menu item, though if the
+      // definition array contains a 'menu_item' property, we allow that to
+      // override this, and assume the entity type definition knows what it is
+      // doing!
+      if (empty($operation_handler_info['provides menu']) && !isset($operation_definition['menu_item'])) {
         continue;
       }
 
