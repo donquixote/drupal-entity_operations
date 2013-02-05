@@ -911,6 +911,57 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
 }
 
 /**
+ * Op handler for deleting an entity.
+ */
+class EntityOperationsOperationDelete extends EntityOperationsOperationAction {
+
+  public $access_verb = 'delete';
+
+  /**
+   * Returns basic information about the operation.
+   */
+  function operationInfo() {
+    return array(
+      'provides menu' => TRUE,
+    ) + parent::operationInfo();
+  }
+
+  /**
+   * Returns strings for the operations.
+   */
+  function operationStrings() {
+    return array(
+      'button label' => t('Delete @entity-type'),
+      'confirm question' => t('Are you sure you want to delete the @entity-type %label?'),
+      'submit message' => t('The @entity-type %label has been deleted.'),
+      // These intentionally have no replacements for the placeholders; these
+      // are replaced in getOperationString().
+    );
+  }
+
+  /**
+   * Form submit handler for this operation.
+   *
+   * Subclasses should not override this, but formSubmitGetContext() instead.
+   */
+  function formSubmit($form, &$form_state, $entity_type, $entity, $operation_path) {
+    parent::formSubmit($form, $form_state, $entity_type, $entity, $operation_path);
+
+    // Overwrite the redirect, as there is no entity to return to.
+    // Just send to the front page; there is nowhere else sensible to go to.
+    $form_state['redirect'] = '<front>';
+  }
+
+  /**
+   * The delete action.
+   */
+  function execute($entity_type, $entity, $context = array()) {
+    $entity->delete();
+  }
+
+}
+
+/**
  * Op handler for publishing an entity.
  *
  * Requires the entity to have a 'status' property.
