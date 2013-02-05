@@ -464,13 +464,24 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    *  An array of string substitutions as used by t(). These should match those
    *  used in operationStrings(), and should include at least:
    *  - '%entity-type': The human-readable label for the entity type.
+   *  - '@entity-type': The human-readable label for the entity type.
    *  - '%label': The label of the entity.
+   *  - '@label': The label of the entity.
+   * We provide both the escaped and placeholder versions (i.e., @ and %)
+   * because in some circumstances (such as buttons) the HTML included in the
+   * placeholder is uunsuitable.
    */
   function getOperationStringSubstitutions($entity_type, $entity, $operation_path, $context) {
     $entity_info = entity_get_info($entity_type);
+
+    // We provide each of these twice so store them in a variable.
+    $entity_type = $entity_info['label'];
+    $entity_label = isset($entity) ? $entity->label() : '';
     $substitutions = array(
       '%entity-type' => $entity_info['label'],
-      '%label' => isset($entity) ? $entity->label() : '',
+      '@entity-type' => $entity_info['label'],
+      '%label' => $entity_label,
+      '@label' => $entity_label,
     );
     return $substitutions;
   }
