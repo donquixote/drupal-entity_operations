@@ -46,7 +46,12 @@ class EntityOperationsDefaultUIController {
 
     foreach ($entity_operations as $operation_path => $operation_definition) {
       $operation_class = $operation_definition['handler'];
-      $operation_handler = new $operation_class($this->entityType, $this);
+
+      $operation_handler = new $operation_class($this->entityType);
+      // Some handlers need to get some of our properties.
+      // TODO: this is a bit ugly.
+      $operation_handler->controller = $this;
+
       $operation_handler_info = $operation_handler->operationInfo();
 
       // Skip operations that don't provide a menu item, though if the

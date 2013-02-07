@@ -43,7 +43,7 @@ abstract class EntityOperationsOperationBase {
   /**
    * The operations controller. Only set when building hook_menu().
    */
-  protected $controller;
+  public $controller;
 
   /**
    * Returns basic information about the operation.
@@ -70,12 +70,13 @@ abstract class EntityOperationsOperationBase {
   }
 
   /**
-   * Only needs the controller when used by the controller.
-   * TODO!!! URRRGH!!! UGLY PATTERN!
+   * Constructor for operation handler objects.
+   *
+   * @param $entity_type
+   *  The entity type.
    */
-  public function __construct($entity_type, $ui_controller = NULL) {
+  public function __construct($entity_type) {
     $this->entityType = $entity_type;
-    $this->controller = $ui_controller;
   }
 
   /**
