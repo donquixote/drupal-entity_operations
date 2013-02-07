@@ -100,8 +100,20 @@ abstract class EntityOperationsOperationBase {
 
   /**
    * Properties for the menu item specific to this handler.
+   *
+   * @param $operation_path
+   *  The path component for the operation, e.g., 'view', 'edit'.
+   * @param $operation_definition
+   *  The definition array for the operation, from the operations definitions
+   *  in hook_entity_info().
+   * @param $loader_position
+   *  The position of the entity loader in the menu base path.
+   *
+   * @return
+   *  An array of items suitable for hook_menu() for this operation. See
+   *  EntityOperationsDefaultUIController::hook_menu() for default values.
    */
-  function menu_item($operation_path, $operation_definition) {
+  function menu_item($operation_path, $operation_definition, $loader_position) {
     return array();
   }
 
@@ -161,7 +173,7 @@ class EntityOperationsOperationPage extends EntityOperationsOperationBase {
   /**
    * Returns the menu item for this operation.
    */
-  function menu_item($operation_path, $operation_definition) {
+  function menu_item($operation_path, $operation_definition, $loader_position) {
     $item = array(
       // This takes care of calling our page() method, and is set here as a
       // convenience.
@@ -172,20 +184,19 @@ class EntityOperationsOperationPage extends EntityOperationsOperationBase {
         // We need to pass $this to get_class() because we want the class of
         // the current object, not the class we are sitting in.
         get_class($this),
-        // TODO!!! UGLY!!
-        $this->controller->loader_position,
+        $loader_position,
       ),
       'access callback' => 'entity_operations_operation_access_callback',
       'access arguments' => array(
         $this->entityType,
         get_class($this),
         $operation_path,
-        $this->controller->loader_position,
+        $loader_position,
       ),
     );
 
     // Add in what the parent class has.
-    $item += parent::menu_item($operation_path, $operation_definition);
+    $item += parent::menu_item($operation_path, $operation_definition, $loader_position);
     return $item;
   }
 
@@ -229,7 +240,7 @@ class EntityOperationsOperationPageViews extends EntityOperationsOperationPage {
    * We process the info from entity_operations_get_views() here so it can
    * be overridden easily.
    */
-  function menu_item($operation_path, $operation_definition) {
+  function menu_item($operation_path, $operation_definition, $loader_position) {
     $item = array(
       // TODO: Either take the op name as tab title when the view has none, or
       // enforce a title in the Views display plugin.
@@ -240,8 +251,7 @@ class EntityOperationsOperationPageViews extends EntityOperationsOperationPage {
         // We need to pass $this to get_class() because we want the class of
         // the current object, not the class we are sitting in.
         get_class($this),
-        // TODO!!! UGLY!!
-        $this->controller->loader_position,
+        $loader_position,
         // Extra params.
         array(
           'view_name' => $operation_definition['views info']['name'],
@@ -253,12 +263,12 @@ class EntityOperationsOperationPageViews extends EntityOperationsOperationPage {
         $this->entityType,
         get_class($this),
         $operation_path,
-        $this->controller->loader_position,
+        $loader_position,
       ),
     );
 
     // Add in what the parent class has.
-    $item += parent::menu_item($operation_path, $operation_definition);
+    $item += parent::menu_item($operation_path, $operation_definition, $loader_position);
     return $item;
   }
 
@@ -349,7 +359,7 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
   /**
    * Properties for the menu item specific to this handler.
    */
-  function menu_item($operation_path, $operation_definition) {
+  function menu_item($operation_path, $operation_definition, $loader_position) {
     return array(
       'page callback' => 'drupal_get_form',
       'page arguments' => array(
@@ -357,14 +367,14 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
         $this->entityType,
         get_class($this),
         $operation_path,
-        $this->controller->loader_position, // Provides the entity as a parameter.
+        $loader_position, // Provides the entity as a parameter.
       ),
       'access callback' => 'entity_operations_operation_access_callback',
       'access arguments' => array(
         $this->entityType,
         get_class($this),
         $operation_path,
-        $this->controller->loader_position,
+        $loader_position,
       ),
     );
   }
@@ -690,7 +700,7 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
   /**
    * Properties for the menu item specific to this handler.
    */
-  function menu_item($operation_path, $operation_definition) {
+  function menu_item($operation_path, $operation_definition, $loader_position) {
     $item = array(
       // Special path which doesn't have an entity loader.
       'path' => $this->controller->path . '/add',
@@ -725,7 +735,7 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
     }
 
     // Add in what the parent class has.
-    $item += parent::menu_item($operation_path, $operation_definition);
+    $item += parent::menu_item($operation_path, $operation_definition, $loader_position);
     return $item;
   }
 
@@ -744,10 +754,10 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
    *
    * Override the page callback to go straight to entity_ui_get_form().
    */
-  function menu_item($operation_path, $operation_definition) {
+  function menu_item($operation_path, $operation_definition, $loader_position) {
     $item = array(
       'page callback' => 'entity_ui_get_form',
-      'page arguments' => array($this->entityType, $this->controller->loader_position),
+      'page arguments' => array($this->entityType, $loader_position),
     );
 
     // Use the file setting from entity info 'admin ui', as we expect that to be
@@ -764,7 +774,7 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
     }
 
     // Add in what the parent class has.
-    $item += parent::menu_item($operation_path, $operation_definition);
+    $item += parent::menu_item($operation_path, $operation_definition, $loader_position);
     return $item;
   }
 

@@ -67,7 +67,7 @@ class EntityOperationsDefaultUIController {
       }
 
       // Next, allow the handler to provide properties.
-      $menu_item += $operation_handler->menu_item($operation_path, $operation_definition);
+      $menu_item += $operation_handler->menu_item($operation_path, $operation_definition, $this->loader_position);
 
       // Finally, add in our defaults.
       $menu_item += array(
