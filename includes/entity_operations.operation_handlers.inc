@@ -370,53 +370,6 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
   }
 
   /**
-   * Helper for simple confirmation forms.
-   *
-   * Based on confirm_form(), which we can't use because it uses the page
-   * title to show the question, whereas we output in a tab.
-   */
-  function confirmForm($form, $entity_type, $entity, $question, $description = NULL, $yes = NULL, $no = NULL) {
-    $description = isset($description) ? $description : t('This action cannot be undone.');
-
-    // Prepare cancel link.
-    if (isset($_GET['destination'])) {
-      $options = drupal_parse_url(urldecode($_GET['destination']));
-    }
-    else {
-      $options = $entity->uri();
-    }
-
-    $form['#attributes']['class'][] = 'confirmation';
-    $form['question'] = array(
-      '#prefix' => '<p>',
-      '#markup' => $question,
-      '#suffix' => '</p>',
-    );
-    $form['description'] = array(
-      '#prefix' => '<p>',
-      '#markup' => $description,
-      '#suffix' => '</p>',
-    );
-
-    $form['actions'] = array('#type' => 'actions');
-    $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => $yes ? $yes : t('Confirm'),
-    );
-    $form['actions']['cancel'] = array(
-      '#type' => 'link',
-      '#title' => $no ? $no : t('Cancel'),
-      '#href' => $options['path'],
-      '#options' => $options,
-    );
-    // By default, render the form using theme_confirm_form().
-    if (!isset($form['#theme'])) {
-      $form['#theme'] = 'confirm_form';
-    }
-    return $form;
-  }
-
-  /**
    * Get an operations string.
    *
    * @param $string_key
