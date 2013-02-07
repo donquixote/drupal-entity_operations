@@ -1051,3 +1051,51 @@ class EntityOperationsOperationUnPublish extends EntityOperationsOperationPublis
   }
 
 }
+
+/**
+ * Op handler for Organic Groups group overview.
+ */
+class EntityOperationsOperationOGGroup extends EntityOperationsOperationPage {
+
+  /**
+   * Returns the menu item for this operation.
+   */
+  function menu_item($operation_path, $operation_definition, $loader_position) {
+    $item = array(
+      'title' => 'Group',
+      // These won't work: these expect IDs not loaded entities. Hence we have
+      // to define userAccess() and page() as wrappers.
+      //'page callback' => 'og_ui_group_admin_overview',
+      //'page arguments' => array($this->entityType, $loader_position),
+      //'access callback' => 'og_ui_get_group_admin',
+      //'access arguments' => array($this->entityType, $loader_position),
+      'file path' => drupal_get_path('module', 'og_ui'),
+      'file' => 'og_ui.admin.inc',
+      'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    );
+
+    // Add in what the parent class has.
+    $item += parent::menu_item($operation_path, $operation_definition, $loader_position);
+    return $item;
+  }
+
+  /**
+   * Determine access to the operation for the user.
+   */
+  function userAccess($entity_type, $entity, $account = NULL) {
+    // This is just a wrapper.
+    return og_ui_get_group_admin($entity_type, $entity->identifier());
+  }
+
+  /**
+   * Page callback.
+   *
+   * We need this as a wrapper around og_ui_group_admin_overview() because
+   * its parameters aren't compatible with our menu loaders.
+   */
+  function page($entity_type, $entity, $params = array()) {
+    // This is just a wrapper.
+    return og_ui_group_admin_overview($entity_type, $entity->identifier());
+  }
+
+}
