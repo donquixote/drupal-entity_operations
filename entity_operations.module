@@ -57,7 +57,7 @@ function entity_operations_get_operation($entity_type, $entity, $operation) {
  *  The path component for the operation.
  *
  * @return
- *  An operation handler class.
+ *  An operation handler object.
  */
 function entity_operations_get_entity_operation_handler($entity_type, $operation_name) {
   $entity_info = entity_get_info($entity_type);
@@ -168,10 +168,13 @@ function entity_operations_get_operation_info() {
  */
 function entity_operations_menu() {
   $items = array();
+  // Get menu items from each entity type that declares operations.
   foreach (entity_get_info() as $entity_type => $info) {
     if (isset($info['operations ui'])) {
+      // Instantiate the operations UI controller.
       $class = isset($info['operations ui']['controller class']) ? $info['operations ui']['controller class'] : 'EntityOperationsDefaultUIController';
       $controller = new $class($entity_type, $info);
+      // Get menu items from the controller.
       $items += $controller->hook_menu();
     }
   }
@@ -185,16 +188,17 @@ function entity_operations_menu() {
  * Helper to generate permissions from entity operations.
  *
  * This produces an array suitable for hook_permission() based on the given
- * entity type's defined operations. It is intended as a helper to be used by
- * a custom entity type module's hook_permission() (and hook_og_permission()).
+ * entity type's defined operations, producing a permission 'op entity type'
+ * for each operation. It is intended as a helper to be used by a custom entity
+ * type module's hook_permission() (and hook_og_permission()).
  *
  * @TODO: Add support for per-bundle permissions.
  *
  * @param $entity_type
  *  The entity type to get permissions for.
  * @param $own
- *  An array of access verbs which require both an 'op any entity' and also
- *  an 'op own entity' permission.
+ *  (optional) An array of access verbs which require both an 'op any entity'
+ *  and also an 'op own entity' permission.
  *
  * @return
  *  An array of permission suitable for hook_permission().
@@ -392,7 +396,7 @@ function entity_operations_views_api() {
  * Implements hook_entity_operations_menu_operations_alter() for views module.
  */
 function views_entity_operations_menu_operations_alter(&$entity_operations, $entity_type) {
-  // Get the views with tabs for this entity
+  // Get the views with tabs for this entity.
   $views_info = entity_operations_get_views($entity_type);
   foreach ($views_info as $operation_name => $view_info) {
     // Views clobber existing operations. Desirable or not? TODO.
@@ -418,6 +422,7 @@ function views_entity_operations_menu_operations_alter(&$entity_operations, $ent
  *   specified, views for all entity types will be returned.
  * @param $reset
  *   Force a rebuild of the data.
+ *
  * @return
  *   An array of view name/display name values, or an empty array().
  */

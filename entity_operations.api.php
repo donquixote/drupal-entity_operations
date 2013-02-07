@@ -62,6 +62,10 @@ function entity_operations_hook_entity_info() {
 /**
  * Alter entity operations prior to building hook_menu() items.
  *
+ * It is preferable to add overrides to operations here rather than
+ * hook_entity_info(), because that is loaded from cache on every page request
+ * whereas this hook is only invoked when rebuilding the menu.
+ *
  * @param $entity_operations
  *  The array of entity operations, taken from hook_entity_info().
  * @param $entity_type
