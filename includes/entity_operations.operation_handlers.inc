@@ -29,6 +29,9 @@ abstract class EntityOperationsOperationBase {
   /**
    * The operation for entity_access().
    *
+   * Subclasses can set this to NULL to allow the path component to determine
+   * the access verb.
+   *
    * @see getAccessVerb()
    */
   protected $access_verb = 'view';
@@ -91,19 +94,15 @@ abstract class EntityOperationsOperationBase {
    * Get the access verb for this operation.
    *
    * This is taken either from the property $access_verb, or if that is NULL,
-   * the operation name.
+   * the operation path component.
    *
    * TODO: revisit this logic and see if anything better can be devised.
-   *
-   * @param $operation_name
-   *  The path component this operation is on. (Yes, this is ugly to have to
-   *  pass this in here. TODO: clean this up.)
    *
    * @return
    *  The access verb for the operation, e.g. 'view', 'edit', and so on.
    */
-  public function getAccessVerb($operation_name) {
-    $verb = isset($this->access_verb) ? $this->access_verb : $operation_name;
+  public function getAccessVerb() {
+    $verb = isset($this->access_verb) ? $this->access_verb : $this->path;
     return $verb;
   }
 
@@ -155,10 +154,19 @@ abstract class EntityOperationsOperationBase {
    *
    * @return
    *  FALSE is the operation should not be allowed, TRUE if access should be
-   *  granted and NULL if further access control should be passed on to the
-   *  entity access system.
+   *  granted.
    */
   function userAccess($entity_type, $entity, $account = NULL) {
+    // We use entity_access() by default.
+    // Note that while entity_access() documents itself as only supporting
+    // basic values of $op, in fact it just passes them to the access
+    // callback, meaning that as long as your entity's access callback
+    // understands it, you can do it here.
+    // @see entity_operations_get_entity_permissions().
+    $verb = $this->getAccessVerb();
+    $access = entity_access($verb, $entity_type, $entity, $account);
+
+    return $access;
   }
 
   /**
