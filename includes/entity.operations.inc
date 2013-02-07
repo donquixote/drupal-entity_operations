@@ -45,9 +45,9 @@ class EntityOperationsDefaultUIController {
     drupal_alter('entity_operations_menu_operations', $entity_operations, $this->entityType);
 
     foreach ($entity_operations as $operation_path => $operation_definition) {
-      $operation_class = $operation_definition['handler'];
+      $handler_class = $operation_definition['handler'];
 
-      $operation_handler = new $operation_class($this->entityType);
+      $operation_handler = new $handler_class($this->entityType);
       // Some handlers need to get some of our properties.
       // TODO: this is a bit ugly.
       $operation_handler->controller = $this;
