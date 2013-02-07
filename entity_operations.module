@@ -28,7 +28,7 @@ function entity_operations_get_operation($entity_type, $entity, $operation) {
   if (isset($entity_info['operations ui']['operations'][$operation])) {
     $handler_class = $entity_info['operations ui']['operations'][$operation]['handler'];
 
-    $operation_handler = new $handler_class($entity_type);
+    $operation_handler = new $handler_class($entity_type, $operation);
 
     // Check access for the operation.
     if ($operation_handler->operationAccess($entity_type, $entity) === FALSE) {
@@ -62,7 +62,7 @@ function entity_operations_get_operation($entity_type, $entity, $operation) {
 function entity_operations_get_entity_operation_handler($entity_type, $operation_name) {
   $entity_info = entity_get_info($entity_type);
   $handler_class = $entity_info['operations ui']['operations'][$operation_name]['handler'];
-  $operation_handler = new $handler_class($entity_type);
+  $operation_handler = new $handler_class($entity_type, $operation_name);
 
   return $operation_handler;
 }
@@ -108,7 +108,7 @@ function entity_operations_get_entity_operations_fieldset($entity, $operations =
   $build_operations = array();
   foreach ($operations as $operation) {
     $handler_class = $entity_info['operations ui']['operations'][$operation]['handler'];
-    $operation_handler = new $handler_class($entity_type);
+    $operation_handler = new $handler_class($entity_type, $operation);
 
     // Check access for the operation.
     if ($operation_handler->operationAccess($entity_type, $entity) === FALSE) {
@@ -209,7 +209,7 @@ function entity_operations_get_entity_permissions($entity_type, $own = array()) 
   $permissions = array();
   foreach ($entity_info['operations ui']['operations'] as $operation_name => $operation_definition) {
     $handler_class = $operation_definition['handler'];
-    $operation_handler = new $handler_class($entity_type);
+    $operation_handler = new $handler_class($entity_type, $operation_name);
 
     // Take the access verb from the handler class if it defines it. Otherwise,
     // use the operation name.
@@ -270,6 +270,8 @@ function entity_operations_entity_uri($entity) {
  *  The name of the handler class for the current operation.
  * @param $entity
  *  The entity.
+ * @param $operation_path
+ *  The path component of the operation.
  * @param $params
  *  (optional) An array of further parameters which is passed to the operation
  *  handler's page() method.
@@ -277,11 +279,11 @@ function entity_operations_entity_uri($entity) {
  * @return
  *  Either output text or a render array.
  */
-function entity_operations_operation_page_callback($entity_type, $handler_class, $entity, $params = array()) {
+function entity_operations_operation_page_callback($entity_type, $handler_class, $operation_path, $entity, $params = array()) {
   // Set the title to the entity so operation handlers don't have to.
   drupal_set_title($entity->label());
 
-  $operation_handler = new $handler_class($entity_type);
+  $operation_handler = new $handler_class($entity_type, $operation_path);
 
   return $operation_handler->page($entity_type, $entity, $params);
 }
@@ -293,7 +295,7 @@ function entity_operations_operation_form($form, &$form_state, $entity_type, $ha
   // Set the title to the entity so operation handlers don't have to.
   drupal_set_title($entity->label());
 
-  $operation_handler = new $handler_class($entity_type);
+  $operation_handler = new $handler_class($entity_type, $operation_path);
 
   // Specify the elements we want, unless our caller already requested some.
   if (!isset($form_state['entity_operation_form_elements'])) {
@@ -313,7 +315,7 @@ function entity_operations_operation_form($form, &$form_state, $entity_type, $ha
 function entity_operations_operation_form_validate($form, &$form_state) {
   list($entity_type, $handler_class, $operation_path, $entity) = $form_state['build_info']['args'];
 
-  $operation_handler = new $handler_class($entity_type);
+  $operation_handler = new $handler_class($entity_type, $operation_path);
 
   $operation_handler->formValidate($form, $form_state, $entity_type, $entity, $operation_path);
 }
@@ -324,7 +326,7 @@ function entity_operations_operation_form_validate($form, &$form_state) {
 function entity_operations_operation_form_submit($form, &$form_state) {
   list($entity_type, $handler_class, $operation_path, $entity) = $form_state['build_info']['args'];
 
-  $operation_handler = new $handler_class($entity_type);
+  $operation_handler = new $handler_class($entity_type, $operation_path);
 
   $operation_handler->formSubmit($form, $form_state, $entity_type, $entity, $operation_path);
 }
@@ -354,7 +356,7 @@ function entity_operations_operation_form_submit($form, &$form_state) {
 function entity_operations_operation_access_callback($entity_type, $handler_class, $operation_path, $entity) {
   // First see whether the handler has anything to say about access from a
   // purely logical standpoint.
-  $operation_handler = new $handler_class($entity_type);
+  $operation_handler = new $handler_class($entity_type, $operation_path);
   $operation_access = $operation_handler->operationAccess($entity_type, $entity);
   // If something non-NULL was returned, it has precedence.
   if (isset($operation_access)) {

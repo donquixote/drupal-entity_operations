@@ -47,7 +47,7 @@ class EntityOperationsDefaultUIController {
     foreach ($entity_operations as $operation_path => $operation_definition) {
       $handler_class = $operation_definition['handler'];
 
-      $operation_handler = new $handler_class($this->entityType);
+      $operation_handler = new $handler_class($this->entityType, $operation_path);
       // Some handlers need to get some of our properties.
       // TODO: this is a bit ugly.
       $operation_handler->controller = $this;

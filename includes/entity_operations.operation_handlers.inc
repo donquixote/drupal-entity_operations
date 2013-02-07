@@ -33,6 +33,11 @@ abstract class EntityOperationsOperationBase {
    */
   protected $access_verb = 'view';
 
+  /**
+   * The path component this operation is on.
+   */
+  protected $path;
+
   protected $entityType;
 
   /**
@@ -74,9 +79,12 @@ abstract class EntityOperationsOperationBase {
    *
    * @param $entity_type
    *  The entity type.
+   * @param $operation_path
+   *  The path component for the operation.
    */
-  public function __construct($entity_type) {
+  public function __construct($entity_type, $operation_path) {
     $this->entityType = $entity_type;
+    $this->path = $operation_path;
   }
 
   /**
@@ -185,6 +193,7 @@ class EntityOperationsOperationPage extends EntityOperationsOperationBase {
         // We need to pass $this to get_class() because we want the class of
         // the current object, not the class we are sitting in.
         get_class($this),
+        $operation_path,
         $loader_position,
       ),
       'access callback' => 'entity_operations_operation_access_callback',
@@ -252,6 +261,7 @@ class EntityOperationsOperationPageViews extends EntityOperationsOperationPage {
         // We need to pass $this to get_class() because we want the class of
         // the current object, not the class we are sitting in.
         get_class($this),
+        $operation_path,
         $loader_position,
         // Extra params.
         array(

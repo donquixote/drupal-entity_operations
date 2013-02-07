@@ -98,7 +98,7 @@ class EntityOperationsVBOOperations extends ViewsBulkOperationsBaseOperation {
    */
   public function form($form, &$form_state, array $context) {
     $handler_class = $this->operationInfo['handler'];
-    $operation_handler = new $handler_class($this->entityType);
+    $operation_handler = new $handler_class($this->entityType, $this->entityOperationKey);
 
     // There is no entity to send to the form. Operations that want to use this
     // had better not be relying on it!
@@ -137,7 +137,7 @@ class EntityOperationsVBOOperations extends ViewsBulkOperationsBaseOperation {
    */
   public function formSubmit($form, &$form_state) {
     $handler_class = $this->operationInfo['handler'];
-    $operation_handler = new $handler_class($this->entityType);
+    $operation_handler = new $handler_class($this->entityType, $this->entityOperationKey);
 
     // Hand over to the operation handler.
     $this->formOptions = $operation_handler->formSubmitGetContext($form, &$form_state, $this->entityType, NULL, $this->entityOperationKey);
@@ -153,7 +153,7 @@ class EntityOperationsVBOOperations extends ViewsBulkOperationsBaseOperation {
    */
   public function execute($data, array $context) {
     $handler_class = $this->operationInfo['handler'];
-    $operation_handler = new $handler_class($this->entityType);
+    $operation_handler = new $handler_class($this->entityType, $this->entityOperationKey);
 
     $data = is_array($data) ? $data : array($data);
     foreach ($data as $entity) {
