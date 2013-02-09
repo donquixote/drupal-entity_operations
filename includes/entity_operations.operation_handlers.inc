@@ -819,7 +819,9 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
  *  - formSubmitGetParameters() to process the form values into a parameters
  *    array which is then passed to execute().
  *
- * See EntityOperationsOperationPublish for an example implementation.
+ * See EntityOperationsOperationPublish for an example implementation using
+ * just the basic form, and EntityOperationsOperationSetOwner for an example
+ * requiring additional parameters.
  */
 abstract class EntityOperationsOperationAction extends EntityOperationsOperationForm {
 
@@ -1064,6 +1066,101 @@ class EntityOperationsOperationUnPublish extends EntityOperationsOperationPublis
    */
   function execute($entity_type, $entity, $parameters = array()) {
     $entity->status = NODE_NOT_PUBLISHED;
+    $entity->save();
+  }
+
+}
+
+/**
+ * Op handler for setting the owner/author of an entity.
+ *
+ * Requires the entity to have a 'uid' property.
+ *
+ * This is mostly provided as an example of a more complex action, and it should
+ * be noted that this will currently fail the access check!
+ */
+class EntityOperationsOperationSetOwner extends EntityOperationsOperationAction {
+
+  /**
+   * Returns basic information about the operation.
+   */
+  function operationInfo() {
+    return array(
+      'provides menu' => TRUE,
+      'vbo' => array(
+        'configurable' => TRUE,
+      ),
+      'parameters' => array(
+        'uid' => 'int',
+      ),
+    ) + parent::operationInfo();
+  }
+
+  /**
+   * Returns strings for the operations.
+   */
+  function operationStrings() {
+    return array(
+      'button label' => t('Set author'),
+      'confirm question' => t('Are you sure you want to set the author of this %entity-type?'),
+      'submit message' => t('Owner of %entity-type %label has been set to !account-name.'),
+    );
+  }
+
+  /**
+   * Return an array of string substitutions for t().
+   *
+   * We add the themed username for the submit message.
+   */
+  function getOperationStringSubstitutions($entity_type, $entity, $operation_path, $parameters) {
+    $substitutions = parent::getOperationStringSubstitutions($entity_type, $entity, $operation_path, $parameters);
+
+    if (isset($parameters['uid'])) {
+      $account = user_load($parameters['uid']);
+      $substitutions['!account-name'] = theme('username', array('account' => $account));
+    }
+
+    return $substitutions;
+  }
+
+  /**
+   * Return the form body, that is, the form without the submit button.
+   */
+  function form($form, &$form_state, $entity_type, $entity, $operation_path) {
+    // TODO: default value.
+
+    $form['owner'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Owner'),
+      '#autocomplete_path' => 'user/autocomplete',
+      '#size' => '24',
+      '#required' => TRUE,
+      '#maxlength' => '60',
+      '#description' => t('Enter the username to assign ownership of this entity to.'),
+    );
+
+    return $form;
+  }
+
+  /**
+   * Build a parameters array from the form values.
+   */
+  function formSubmitGetParameters($form, &$form_state, $entity_type, $entity, $operation_path) {
+    // Get the user out of the form value.
+    $uid = db_query('SELECT uid from {users} WHERE name = :name', array(':name' => $form_state['values']['owner']))->fetchField();
+
+    $parameters = array(
+      'uid' => $uid,
+    );
+
+    return $parameters;
+  }
+
+  /**
+   * Execute the operation.
+   */
+  function execute($entity_type, $entity, $parameters = array()) {
+    $entity->uid = $parameters['uid'];
     $entity->save();
   }
 
