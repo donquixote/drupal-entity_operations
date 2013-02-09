@@ -409,16 +409,16 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    *  The entity. Pass NULL if there is no entity in context.
    * @param $operation_path
    *  The key for the operation.
-   * @param $context
-   *  (Optional) The context array from the form submission values.
+   * @param $parameters
+   *  (Optional) The parameters array from the form submission values.
    *
    * @return
    *  A translated string, with replacements made.
    */
-  function getOperationString($string_key, $entity_type, $entity, $operation_path, $context = array()) {
+  function getOperationString($string_key, $entity_type, $entity, $operation_path, $parameters = array()) {
     $strings = $this->operationStrings();
 
-    $substitutions = $this->getOperationStringSubstitutions($entity_type, $entity, $operation_path, $context);
+    $substitutions = $this->getOperationStringSubstitutions($entity_type, $entity, $operation_path, $parameters);
 
     // Run the string through format_string() to replace the placeholders
     // which t() will have ignored.
@@ -429,16 +429,16 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    * Return an array of string substitutions for t().
    *
    * This may be overridden to add further substitutions, in particular using
-   * the context array for the submit confirmation message.
+   * the parameters array for the submit confirmation message.
    *
    * @param $entity_type
    *  The entity type.
    * @param $entity
-   *  The entity. Pass NULL if there is no entity in context.
+   *  The entity. Pass NULL if there is no entity in parameters.
    * @param $operation_path
    *  The key for the operation.
-   * @param $context
-   *  The context array from the form submission values. When this is not
+   * @param $parameters
+   *  The parameters array from the form submission values. When this is not
    *  available, for example when retrieving the button label, this will be an
    * empty array.
    *
@@ -453,7 +453,7 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    * because in some circumstances (such as buttons) the HTML included in the
    * placeholder is uunsuitable.
    */
-  function getOperationStringSubstitutions($entity_type, $entity, $operation_path, $context) {
+  function getOperationStringSubstitutions($entity_type, $entity, $operation_path, $parameters) {
     $entity_info = entity_get_info($entity_type);
 
     // We provide each of these twice so store them in a variable.
@@ -811,7 +811,7 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
  *  - execute() to customize what happens.
  * If the action requires configuration, then subclasses should override:
  *  - form() to provide the form without the submit button
- *  - formSubmitGetContext() to process the form values into a context array.
+ *  - formSubmitGetContext() to process the form values into a parameters array.
  */
 abstract class EntityOperationsOperationAction extends EntityOperationsOperationForm {
 
@@ -852,13 +852,13 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
    * Subclasses should not override this, but formSubmitGetContext() instead.
    */
   function formSubmit($form, &$form_state, $entity_type, $entity, $operation_path) {
-    // Set the context on the handler so that subclasses that *do* override
-    // this can get to it.
-    $this->context = $this->formSubmitGetContext($form, $form_state, $entity_type, $entity, $operation_path);
+    // Set the operation parameters on the handler so that subclasses that *do*
+    // override this can get to it.
+    $this->parameters = $this->formSubmitGetContext($form, $form_state, $entity_type, $entity, $operation_path);
 
-    $this->execute($entity_type, $entity, $this->context);
+    $this->execute($entity_type, $entity, $this->parameters);
 
-    $message = $this->getOperationString('submit message', $entity_type, $entity, $operation_path, $this->context);
+    $message = $this->getOperationString('submit message', $entity_type, $entity, $operation_path, $this->parameters);
     if (!empty($message)) {
       drupal_set_message($message);
     }
@@ -867,18 +867,18 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
   }
 
   /**
-   * Build a context array from the form values.
+   * Build a parameters array from the form values.
    *
    * @return
-   *  A context array. This is passed to the execute() method.
+   *  An array of additional parameters for the operation's execute() method.
    */
   function formSubmitGetContext($form, &$form_state, $entity_type, $entity, $operation_path) {
-    $context = array(
+    $parameters = array(
       // This is just an example.
       //  'param' => TRUE,
     );
 
-    return $context;
+    return $parameters;
   }
 
   /**
@@ -887,7 +887,7 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
    * This receives an extra parameter consisting of extra data from the form
    * submission. This allows operations to be used in a generic way with VBO.
    */
-  function execute($entity_type, $entity, $context = array()) {
+  function execute($entity_type, $entity, $parameters = array()) {
   }
 
 }
@@ -937,7 +937,7 @@ class EntityOperationsOperationDelete extends EntityOperationsOperationAction {
   /**
    * The delete action.
    */
-  function execute($entity_type, $entity, $context = array()) {
+  function execute($entity_type, $entity, $parameters = array()) {
     $entity->delete();
   }
 
@@ -991,7 +991,7 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationAction {
   /**
    * The publish action.
    */
-  function execute($entity_type, $entity, $context = array()) {
+  function execute($entity_type, $entity, $parameters = array()) {
     $entity->status = NODE_PUBLISHED;
     $entity->save();
   }
@@ -1045,7 +1045,7 @@ class EntityOperationsOperationUnPublish extends EntityOperationsOperationPublis
    *  - UI actions in admin list
    *  - VBO??
    */
-  function execute($entity_type, $entity, $context = array()) {
+  function execute($entity_type, $entity, $parameters = array()) {
     $entity->status = NODE_NOT_PUBLISHED;
     $entity->save();
   }
