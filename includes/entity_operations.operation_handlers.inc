@@ -811,7 +811,8 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
  *  - execute() to customize what happens.
  * If the action requires configuration, then subclasses should override:
  *  - form() to provide the form without the submit button
- *  - formSubmitGetContext() to process the form values into a parameters array.
+ *  - formSubmitGetParameters() to process the form values into a parameters
+ *    array which is then passed to execute().
  */
 abstract class EntityOperationsOperationAction extends EntityOperationsOperationForm {
 
@@ -849,12 +850,12 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
   /**
    * Form submit handler for this operation.
    *
-   * Subclasses should not override this, but formSubmitGetContext() instead.
+   * Subclasses should not override this, but formSubmitGetParameters() instead.
    */
   function formSubmit($form, &$form_state, $entity_type, $entity, $operation_path) {
     // Set the operation parameters on the handler so that subclasses that *do*
     // override this can get to it.
-    $this->parameters = $this->formSubmitGetContext($form, $form_state, $entity_type, $entity, $operation_path);
+    $this->parameters = $this->formSubmitGetParameters($form, $form_state, $entity_type, $entity, $operation_path);
 
     $this->execute($entity_type, $entity, $this->parameters);
 
@@ -872,7 +873,7 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
    * @return
    *  An array of additional parameters for the operation's execute() method.
    */
-  function formSubmitGetContext($form, &$form_state, $entity_type, $entity, $operation_path) {
+  function formSubmitGetParameters($form, &$form_state, $entity_type, $entity, $operation_path) {
     $parameters = array(
       // This is just an example.
       //  'param' => TRUE,
@@ -924,7 +925,7 @@ class EntityOperationsOperationDelete extends EntityOperationsOperationAction {
   /**
    * Form submit handler for this operation.
    *
-   * Subclasses should not override this, but formSubmitGetContext() instead.
+   * Subclasses should not override this, but formSubmitGetParameters() instead.
    */
   function formSubmit($form, &$form_state, $entity_type, $entity, $operation_path) {
     parent::formSubmit($form, $form_state, $entity_type, $entity, $operation_path);
