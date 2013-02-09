@@ -10,9 +10,10 @@ In fact, the whole of an entity's UI can be created using Entity Operations. For
 More complex entities can implement further operations specific to its business logic. For example, a library book entity could have a tab that allows making reservations. The operations framework allows modules to output any kind of content or form in an entity tab.
 
 Entity operations are also exposed in other ways:
-  - Operations that are defined as actions are available to Views Bulk
-    Operations. These should subclass EntityOperationsOperationAction for their
-    handler.
+  - Operations that are treated as actions are available to:
+    - Views Bulk Operations as operations.
+    - Services as targeted actions on entities (requires Services Entity module;
+      currently several patches to it are also required).
   - The link to an operation's tab is available as a Views field on the entity.
   - Operations that are forms can be output in a fieldset that can be shown on
     the entity (or indeed, anywhere).

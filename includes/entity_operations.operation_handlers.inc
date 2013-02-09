@@ -66,6 +66,10 @@ abstract class EntityOperationsOperationBase {
    *    Views field.
    *  - 'provides vbo': Whether this operation should be exposed to Views Bulk
    *    Operations.
+   *  - 'provides services resource': Whether this operation should be exposed
+   *    to Services as a targeted action on the entity resource.
+   * Note that the 'provides vbo' and 'provides services resource' properties
+   * should be used with EntityOperationsOperationAction or a subclass.
    */
   function operationInfo() {
     return array(
@@ -800,10 +804,11 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
 }
 
 /**
- * Generic op handler for action-ish operations.
+ * Generic handler for operations that are treated as actions.
  *
- * Operations exposed to Views Bulk Operations should (probably?) use this as
- * their parent class.
+ * These are made available by default to:
+ *  - Views Bulk Operations
+ *  - Services, as targeted actions on an entity.
  *
  * This has a form which consists of just a button. Subclasses should override:
  *  - operationStrings() to provide texts specific to their operation
@@ -813,6 +818,8 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
  *  - form() to provide the form without the submit button
  *  - formSubmitGetParameters() to process the form values into a parameters
  *    array which is then passed to execute().
+ *
+ * See EntityOperationsOperationPublish for an example implementation.
  */
 abstract class EntityOperationsOperationAction extends EntityOperationsOperationForm {
 
@@ -822,6 +829,10 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
    * @return
    *  In addition to the parent method's return, this can also include:
    *  - 'vbo': An array of options for the VBO operation.
+   *  - 'parameters': An array describing the keys that execute() expects in its
+   *    $parameters argument. The keys should be the key names that execute()
+   *    expects, and the value should describe the type and be one of 'int',
+   *    'string', or 'array'.
    */
   function operationInfo() {
     return array(
@@ -831,6 +842,8 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
       // Extra info for VBO.
       'vbo' => array(),
       'provides views field' => FALSE,
+      'provides services resource' => TRUE,
+      'parameters' => array(),
     );
   }
 
@@ -906,6 +919,9 @@ class EntityOperationsOperationDelete extends EntityOperationsOperationAction {
   function operationInfo() {
     return array(
       'provides menu' => TRUE,
+      // Services module already provides CRUD operations for entities, so we
+      // don't expose this to it.
+      'provides services resource' => FALSE,
     ) + parent::operationInfo();
   }
 
