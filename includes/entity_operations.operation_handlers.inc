@@ -130,7 +130,7 @@ abstract class EntityOperationsOperationBase {
   }
 
   /**
-   * Determine whether the action may be performed on the given entity.
+   * Determine whether the action is valid for the given entity.
    *
    * This should take care of determining whether the operation itself makes
    * sense, irrespective of the user performing it.
@@ -320,9 +320,8 @@ class EntityOperationsOperationPageViews extends EntityOperationsOperationPage {
     }
     else {
       // We have to return at least an empty string for the page to display.
-      // Ideally, a view used with this should provide 'no results' text so we
-      // never come here.
-      // @todo: add validation to the views display handler to insist on this.
+      // The Views plugin used with this enforces at least one 'no results' text
+      // so we shouldn't come here unless that is empty too.
       return '';
     }
   }
@@ -330,7 +329,35 @@ class EntityOperationsOperationPageViews extends EntityOperationsOperationPage {
 }
 
 /**
- * Base operation for forms.
+ * Base handler for operations that show a form.
+ *
+ * The form for this operation can be shown in other ways than as a tab, and
+ * because not everything that consumes this form needs all the same elements,
+ * the building of the form is broken out of the form handlers and split up
+ * between several methods:
+ *   - standard strings such as the button label and confirmation question are
+ *     set in operationStrings().
+ *   - the form builder itself, form(), should only include such elements that
+ *     are needed to capture values from the user. Thus it should not include
+ *     the confirmation question or the submit button. In this base class, the
+ *     returned form is merely an empty array, and when shown as an entity tab,
+ *     the confirmation question, submit button, and cancel link are added by
+ *     the wrapper method getForm(). If your form requires nothing more than
+ *     these, you don't need to override form() at all, only operationStrings().
+ *     Subclasses that need to capture user values should override form() to add
+ *     their form elements, which will be similarly wrapped.
+ *     For details of other contexts the form is used in, see
+ *     EntityOperationsOperationAction.
+ * A downside of this approach is that all forms that go through this class
+ * share the form ID of the generic builder, entity_operations_operation_form(),
+ * and so use of hook_form_alter() on these will be less elegant. It is also
+ * possible to define an operation that provides a form with a subclass of
+ * EntityOperationsOperationPage, and overriding menu_item() to return the form.
+ * However, this will not have the advantages of the form being available in
+ * different contexts.
+ *
+ * See also EntityOperationsOperationAction, which exposes an operation form in
+ * further ways.
  */
 class EntityOperationsOperationForm extends EntityOperationsOperationBase {
 
@@ -354,14 +381,17 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    * These should be translated, and the following placeholders may be used
    * without values:
    *  '%entity-type': The human-readable label for the entity type.
+   *  '@entity-type': The same, but as plain text.
    *  '%label': The entity label.
+   *  '@label': The same, but as plain text.
    * If further substitutions are required, they can be provided by overriding
    * getOperationStringSubstitutions().
    *
    * @return
    *  An array containing the following keys:
    *  - 'button label': the label for the form button. If used as a VBO, this
-   *      should not contain the '%label' placeholder. TODO: not in this class!?
+   *      should not contain the '%label' placeholder, as the button is shown
+   *      prior to any entities being loaded.
    *  - 'confirm question': the question to ask the user in the form. This may
    *      be blank if no confirmation question is ever required for the form.
    *  - 'submit message': the message shown to convey to the user that the
@@ -804,20 +834,29 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
 }
 
 /**
- * Generic handler for operations that are treated as actions.
+ * Generic handler for operations that are exposed as actions to other systems.
  *
  * These are made available by default to:
  *  - Views Bulk Operations
  *  - Services, as targeted actions on an entity.
  *
- * This has a form which consists of just a button. Subclasses should override:
- *  - operationStrings() to provide texts specific to their operation
- *  - operationAccess() to determine when the operation is available
- *  - execute() to customize what happens.
- * If the action requires configuration, then subclasses should override:
- *  - form() to provide the form without the submit button
- *  - formSubmitGetParameters() to process the form values into a parameters
- *    array which is then passed to execute().
+ * Because these don't use the form in the same way (or at all), the execution
+ * of the action is in execute() rather than formSubmit(). If this needs
+ * parameters in addition to the entity, these can be processed from form values
+ * by formSubmitGetContext(). This can then be called by VBO's own submit
+ * handler to process its form values, and also allows Services to call
+ * execute() directly with incoming remote data.
+ *
+ * See EntityOperationsOperationForm for details of how the form builder is
+ * effectively split across different methods.
+ *
+ * Generally, subclasses should override:
+ *  - operationStrings() to provide texts specific to their operation,
+ *  - operationAccess() to determine when the operation is available,
+ *  - execute() to carry out the action.
+ * If the action requires configuration, then also:
+ *  - form() to provide the form elements to collect values,
+ *  - formSubmitGetContext() to process the form values into a context array.
  *
  * See EntityOperationsOperationPublish for an example implementation using
  * just the basic form, and EntityOperationsOperationSetOwner for an example
@@ -1062,7 +1101,6 @@ class EntityOperationsOperationUnPublish extends EntityOperationsOperationPublis
    * TODO: figure out a way of exposing this to:
    *  - hook_action_info
    *  - UI actions in admin list
-   *  - VBO??
    */
   function execute($entity_type, $entity, $parameters = array()) {
     $entity->status = NODE_NOT_PUBLISHED;
