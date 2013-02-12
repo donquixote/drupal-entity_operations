@@ -843,7 +843,7 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
  * Because these don't use the form in the same way (or at all), the execution
  * of the action is in execute() rather than formSubmit(). If this needs
  * parameters in addition to the entity, these can be processed from form values
- * by formSubmitGetContext(). This can then be called by VBO's own submit
+ * by formSubmitGetParameters(). This can then be called by VBO's own submit
  * handler to process its form values, and also allows Services to call
  * execute() directly with incoming remote data.
  *
@@ -856,7 +856,7 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
  *  - execute() to carry out the action.
  * If the action requires configuration, then also:
  *  - form() to provide the form elements to collect values,
- *  - formSubmitGetContext() to process the form values into a context array.
+ *  - formSubmitGetParameters() to process the form values into a context array.
  *
  * See EntityOperationsOperationPublish for an example implementation using
  * just the basic form, and EntityOperationsOperationSetOwner for an example
