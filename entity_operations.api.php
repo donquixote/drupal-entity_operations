@@ -28,9 +28,13 @@
  *    - 'path': The base path for an entity. This should not include the
  *      wildcard or the trailing slash. For example, for nodes this would
  *      be 'node'.
- *    - 'menu wildcard': A menu wildcard for loading the entity. This should
- *        be of the form '%foo' where foo_load() is a menu loader function.
- *        For example, for nodes this would be '%node'.
+ *      Note that to avoid duplication of logic here and in the entity's URI
+ *      callback, the 'entity uri' property may be set to the generic callback
+ *      entity_operations_entity_uri(), which makes use of this base path.
+ *    - 'menu wildcard': (optional) A menu wildcard for loading the entity. This
+ *      defaults to '%entity_object', which should be suitable in most cases.
+ *      If set, should be of the form '%foo' where foo_load() is a menu loader
+ *      function. For example, for nodes this would be '%node'.
  *    - 'operations': An array of operations for the entity type. These are
  *      keyed by the operation machine name, which forms the path component
  *      after the entity. For example, defining operations 'view' and 'edit'
