@@ -2,7 +2,7 @@
 
 /**
  * @file
- * CTools plugin. Provides support for Entity Operations.
+ * CTools plugin. Provides support for Entity Operations to VBO.
  */
 
 $plugin = array(

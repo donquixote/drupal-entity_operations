@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Defines the class for Entity Operation actions.
+ * Defines the class for Entity Operation VBO actions.
  * Belongs to the "action" operation type plugin.
  */
 
