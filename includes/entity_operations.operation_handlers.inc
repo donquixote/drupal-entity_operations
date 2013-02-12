@@ -130,6 +130,28 @@ abstract class EntityOperationsOperationBase {
   }
 
   /**
+   * Determine access to this operation on this entity.
+   *
+   * This calls operationAccess() and userAccess() to check, respectively, the
+   * logical access to the operation, and whether the user may perform it.
+   */
+  function access($entity_type, $entity, $account = NULL) {
+    // First see whether the handler has anything to say about access from a
+    // purely logical standpoint. This covers things such as a 'publish'
+    // operation being denied on a node that is already published, because it
+    // simply doesn't make sense.
+    $operation_access = $this->operationAccess($entity_type, $entity);
+    // If something non-NULL was returned, it has precedence.
+    if (isset($operation_access)) {
+      return $operation_access;
+    }
+
+    // Now hand over to the user access check.
+    $user_access = $this->userAccess($entity_type, $entity, $account);
+    return $user_access;
+  }
+
+  /**
    * Determine whether the action is valid for the given entity.
    *
    * This should take care of determining whether the operation itself makes
