@@ -7,12 +7,18 @@
  */
 class entity_operations_handler_field_operation_link extends views_handler_field_entity {
 
+  /**
+   * Define defaults for options.
+   */
   function option_definition() {
     $options = parent::option_definition();
     $options['text'] = array('default' => '', 'translatable' => TRUE);
     return $options;
   }
 
+  /**
+   * Build the options form.
+   */
   function options_form(&$form, &$form_state) {
     $form['text'] = array(
       '#type' => 'textfield',
@@ -26,6 +32,9 @@ class entity_operations_handler_field_operation_link extends views_handler_field
     $form['alter']['external'] = array('#access' => FALSE);
   }
 
+  /**
+   * Run before any fields are rendered.
+   */
   function pre_render(&$values) {
     parent::pre_render(&$values);
 
@@ -39,6 +48,9 @@ class entity_operations_handler_field_operation_link extends views_handler_field
     }
   }
 
+  /**
+   * Render the field.
+   */
   function render($values) {
     if ($entity = $this->get_value($values)) {
       // Check access for the operation.
@@ -54,6 +66,9 @@ class entity_operations_handler_field_operation_link extends views_handler_field
     }
   }
 
+  /**
+   * Render this field as a link.
+   */
   function render_link($entity, $values) {
     // Get the entity URI and append the operation path component.
     $uri = entity_uri($this->entity_type, $entity);
