@@ -36,10 +36,40 @@ class entity_operations_handler_field_operation_link extends views_handler_field
    * Run before any fields are rendered.
    */
   function pre_render(&$values) {
+    // This gets us the entities that correspond to our rows.
     parent::pre_render(&$values);
 
     // Get the handler for the operation.
     $this->operation_handler = entity_operations_get_entity_operation_handler($this->entity_type, $this->definition['operation path']);
+
+    // We handle access here, because this lets us determine overall access
+    // to all of the rows, and lets us remove ourselves from the view if the
+    // user has access to nothing.
+    // We can't use access(), which is the method we're meant to use to deny
+    // access to a field wholesale, because that is called before we have any
+    // results (and thus any entities) from the view.
+    // @see http://drupal.org/node/1915230
+    $this->row_access = array();
+    foreach ($this->entities as $entity) {
+      // Build up an array of access for each row for render() to use.
+      $id = $entity->identifier();
+      $this->row_access[$id] = $this->operation_handler->access($this->entity_type, $entity);
+    }
+
+    // The overall access to this field is whether the user has access to any
+    // of the rows.
+    $overall_access = count(array_filter($this->row_access));
+
+    // If the user has access to this operation on none of the rows, we assume
+    // they generally lack the right permissions, and remove ourselves wholesale
+    // from this view.
+    // This ensures, for instance, that the user doesn't get an empty (and
+    // likely meaningless!) column in a table view.
+    if (!$overall_access) {
+      unset($this->view->field[$this->field]);
+      // Just bail now, no point.
+      return;
+    }
 
     // Determine whether we should use a destination on the link.
     $operation_info = $this->operation_handler->operationInfo();
@@ -53,14 +83,11 @@ class entity_operations_handler_field_operation_link extends views_handler_field
    */
   function render($values) {
     if ($entity = $this->get_value($values)) {
-      // Check access for the operation.
-      if ($this->operation_handler->operationAccess($this->entity_type, $entity) === FALSE) {
+      $id = $entity->identifier();
+      // Check the access we got in pre_render().
+      if (!$this->row_access[$id]) {
         return;
       }
-      if ($this->operation_handler->userAccess($this->entity_type, $entity) === FALSE) {
-        return;
-      }
-      // TODO: check access verb!
 
       return $this->render_link($entity, $values);
     }
