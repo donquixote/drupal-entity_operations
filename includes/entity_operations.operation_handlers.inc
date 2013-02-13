@@ -727,37 +727,6 @@ class EntityOperationsOperationDevel extends EntityOperationsOperationPage {
 }
 
 /**
- * Op handler for editing an entity: our form.
- THIS IS PROBABLY YAGNI!
- */
-/*
-class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
-
-  public $access_verb = 'edit';
-  // Title: "Edit %entity".
-
-  function form($form, &$form_state, $entity_type, $entity) {
-    drupal_set_title(t('Edit %entity', array(
-      '%entity' => $entity->label(),
-    )), PASS_THROUGH);
-
-    $form['submit'] = array(
-      '#type' => 'submit',
-      '#value' => 'Submit!',
-    );
-
-    return $form;
-  }
-
-  function formSubmit($form, &$form_state, $entity_type, $entity) {
-    dsm($entity);
-    $form_state['redirect'] = $this->redirect_entity_uri($entity_type, $entity);
-  }
-
-}
-*/
-
-/**
  * Op handler for adding an entity: EntityAPI form.
  *
  * Add is a bit of a special case, as it doesn't use an entity loader.
@@ -863,6 +832,181 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
     // Add in what the parent class has.
     $item += parent::menu_item($operation_path, $operation_definition, $loader_position);
     return $item;
+  }
+
+}
+
+/**
+ * Op handler for editing an entity: generic form.
+ *
+ * This can be used as the 'edit' handler for entities that don't require any
+ * form elements other than those provided by FieldAPI.
+ *
+ * One limitation of using this handler rather than
+ * EntityOperationsOperationEdit is that the form produced here will not easily
+ * be alterable with hook_form_alter(), as it will have the form build ID of our
+ * generic operation form builder, 'entity_operations_operation_form'.
+ *
+ * @todo: use Entity Metadata API to automatically add field elements so that
+ * properties such as entity title can be set.
+ * @todo: support entities with more than one bundle.
+ */
+class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm {
+
+  /**
+   * Returns strings for the operations.
+   */
+  function operationStrings() {
+    return array(
+      'page title' => t('Edit %label'),
+      'button label' => t('Save'),
+      // This appears to be sufficient to result in the markup form element
+      // not being created.
+      'confirm question' => NULL,
+      'submit message' => t('The @entity-type %label has been saved.'),
+      // These intentionally have no replacements for the placeholders; these
+      // are replaced in getOperationString().
+    );
+  }
+
+  /**
+   * Form builder for this operation.
+   */
+  function form($form, &$form_state, $entity_type, $entity, $operation_path) {
+    $entity_info = entity_get_info($this->entityType);
+
+    // Ripped from entity_ui_form_defaults().
+    $defaults = array(
+      'entity_type' => $this->entityType,
+    );
+    if (isset($entity)) {
+      $defaults[$this->entityType] = $entity;
+    }
+    if (isset($op)) {
+      $defaults['op'] = $op;
+    }
+    $form_state += $defaults;
+
+    // The bundle needs to be set as a form value for building the pseudo-entity
+    // in entity_form_field_validate().
+    if (!empty($entity_info['entity keys']['bundle'])) {
+      $bundle_key = $entity_info['entity keys']['bundle'];
+      $form[$bundle_key] = array(
+        '#type' => 'value',
+        '#value' => isset($entity->{$bundle_key}) ? $entity->{$bundle_key} : NULL,
+      );
+    }
+
+    if (!empty($entity_info['fieldable'])) {
+      field_attach_form($this->entityType, $entity, $form, $form_state);
+    }
+
+    // Kill the cancel link.
+    unset($form_state['entity_operation_form_elements']['cancel link']);
+
+    return $form;
+  }
+
+  /**
+   * Form validation handler for this operation.
+   *
+   * Receives the same parameters as the form builder as a convenience.
+   */
+  function formValidate($form, &$form_state, $entity_type, $entity, $operation_path) {
+    // Notify field widgets to validate their data.
+    entity_form_field_validate($this->entityType, $form, &$form_state);
+  }
+
+  /**
+   * Form submit handler for this operation.
+   *
+   * Receives the same parameters as the form builder as a convenience.
+   */
+  function formSubmit($form, &$form_state, $entity_type, $entity, $operation_path) {
+    // We should call entity_ui_form_submit_build_entity(), but that requires
+    // a module_load_include(), and this is all it does anyway.
+    $entity = entity_ui_controller($form_state['entity_type'])->entityFormSubmitBuildEntity($form, $form_state);
+
+    // Save the entity.
+    $entity->save();
+
+    $message = $this->getOperationString('submit message', $entity_type, $entity, $operation_path);
+    if (!empty($message)) {
+      drupal_set_message($message);
+    }
+
+    // Redirect to the entity.
+    $form_state['redirect'] = $this->redirect_entity_uri($this->entityType, $entity);
+  }
+
+}
+
+/**
+ * Op handler for adding an entity: generic form.
+ *
+ * This can be used as the 'add' handler for entities that don't require any
+ * form elements other than those provided by FieldAPI.
+ *
+ * See EntityOperationsOperationEditGeneric for limitations of this handler.
+ */
+class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditGeneric {
+
+  public $access_verb = 'create';
+
+  /**
+   * Returns strings for the operations.
+   */
+  function operationStrings() {
+    return array(
+      'page title' => t('Add %entity-type'),
+    ) + parent::operationStrings();
+  }
+
+  /**
+   * Properties for the menu item specific to this handler.
+   */
+  function menu_item($operation_path, $operation_definition, $loader_position) {
+    $item = array(
+      // Special path which doesn't have an entity loader.
+      'path' => $this->controller->path . '/add',
+      // We don't want a tab.
+      'type' => MENU_CALLBACK,
+      // Change the callback arguments to pass NULL for the entity parameter.
+      'page arguments' => array(
+        'entity_operations_operation_form',
+        $this->entityType,
+        get_class($this),
+        $operation_path,
+        NULL,
+      ),
+      'access arguments' => array(
+        $this->entityType,
+        get_class($this),
+        $operation_path,
+        NULL,
+      ),
+    );
+
+    // Add in what the parent class has.
+    $item += parent::menu_item($operation_path, $operation_definition, $loader_position);
+    return $item;
+  }
+
+  /**
+   * Form builder for this operation.
+   */
+  function form($form, &$form_state, $entity_type, $entity, $operation_path) {
+    // We won't have an entity here, so create one for our parent class's form.
+    $values = array();
+    $entity_info = entity_get_info($this->entityType);
+    if (count($entity_info['bundles']) == 1) {
+      $bundle = reset(array_keys($entity_info['bundles']));
+      $bundle_key = $entity_info['entity keys']['bundle'];
+      $values[$bundle_key] = $bundle;
+    }
+    $entity = entity_create($entity_type, $values);
+
+    return parent::form($form, $form_state, $entity_type, $entity, $operation_path);
   }
 
 }
