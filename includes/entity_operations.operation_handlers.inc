@@ -549,6 +549,11 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
       'form elements' => TRUE,
     );
 
+    // Even though we don't want to add the form elements to the $form array
+    // just yet, call form() so that it may alter the list of requested elements
+    // set in $form_state['entity_operation_form_elements'] before we begin.
+    $form_elements = $this->form($form, $form_state, $entity_type, $entity, $operation_path);
+
     // Add confirmation message on tab.
     // TODO: ONLY if the form array is empty?
     // (though presumably if you don't want it, just don't set the message)
@@ -564,8 +569,9 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
       }
     }
 
+    // Now add the form elements.
     if (!empty($form_state['entity_operation_form_elements']['form elements'])) {
-      $form += $this->form($form, $form_state, $entity_type, $entity, $operation_path);
+      $form += $form_elements;
     }
 
     if (!empty($form_state['entity_operation_form_elements']['action button'])) {
