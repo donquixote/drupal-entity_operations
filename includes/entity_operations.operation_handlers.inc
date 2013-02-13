@@ -562,7 +562,7 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
     }
 
     if (!empty($form_state['entity_operation_form_elements']['form elements'])) {
-      $form = $this->form($form, $form_state, $entity_type, $entity, $operation_path);
+      $form += $this->form($form, $form_state, $entity_type, $entity, $operation_path);
     }
 
     if (!empty($form_state['entity_operation_form_elements']['action button'])) {
