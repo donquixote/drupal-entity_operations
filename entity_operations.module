@@ -296,14 +296,12 @@ function entity_operations_operation_page_callback($entity_type, $handler_class,
  * Operation form callback. Hands over to the handler's form() method.
  */
 function entity_operations_operation_form($form, &$form_state, $entity_type, $handler_class, $operation_path, $entity) {
-  // Set the title to the entity so operation handlers don't have to.
-  drupal_set_title($entity->label());
-
   $operation_handler = new $handler_class($entity_type, $operation_path);
 
   // Specify the elements we want, unless our caller already requested some.
   if (!isset($form_state['entity_operation_form_elements'])) {
     $form_state['entity_operation_form_elements'] = array(
+      'page title' => TRUE,
       'confirmation message' => TRUE,
       'form elements' => TRUE,
       'action button' => TRUE,

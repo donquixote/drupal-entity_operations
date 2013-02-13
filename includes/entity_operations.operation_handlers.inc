@@ -411,6 +411,7 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    *
    * @return
    *  An array containing the following keys:
+   *  - 'page title': The page title to show when the form is shown as a tab.
    *  - 'button label': the label for the form button. If used as a VBO, this
    *      should not contain the '%label' placeholder, as the button is shown
    *      prior to any entities being loaded.
@@ -422,6 +423,7 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    */
   function operationStrings() {
     return array(
+      'page title' => '%label',
       'button label' => t('Perform action'),
       'confirm question' => t('Are you sure you want to proceed?'),
       'submit message' => t('Action completed on %entity-type %label.', array(
@@ -531,6 +533,7 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    * be returned. Additional elements can be requested by the caller by setting
    * the following array keys to TRUE in an array in
    * $form_state['entity_operation_form_elements']:
+   *  - 'page title': Set the page title.
    *  - 'confirmation message': The confirmation question.
    *  - 'form elements': The body of the form as returned by form().
    *  - 'action button': The submit button.
@@ -579,6 +582,9 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
         '#href' => $uri['path'],
         '#options' => $uri['options'],
       );
+    }
+    if (!empty($form_state['entity_operation_form_elements']['page title'])) {
+      drupal_set_title($this->getOperationString('page title', $entity_type, $entity, $operation_path), PASS_THROUGH);
     }
 
     // Add the actions element properties if it's needed.
