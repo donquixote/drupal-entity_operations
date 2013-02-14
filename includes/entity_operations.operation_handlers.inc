@@ -925,6 +925,8 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
   function formSubmit($form, &$form_state, $entity_type, $entity, $operation_path) {
     // We should call entity_ui_form_submit_build_entity(), but that requires
     // a module_load_include(), and this is all it does anyway.
+    // TODO: don't depend on the entity UI controller; all it mostly does it
+    // call entity_form_submit_build_entity().
     $entity = entity_ui_controller($form_state['entity_type'])->entityFormSubmitBuildEntity($form, $form_state);
 
     // Save the entity.
