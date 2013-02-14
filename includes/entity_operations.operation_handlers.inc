@@ -516,7 +516,9 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
 
     // We provide each of these twice so store them in a variable.
     $entity_type = $entity_info['label'];
-    $entity_label = isset($entity) ? $entity->label() : '';
+    // Check whether $entity is an object, as the generic 'add' handler bends
+    // the rules and passes us a bundle name string for this.
+    $entity_label = isset($entity) && is_object($entity) ? $entity->label() : '';
     $substitutions = array(
       '%entity-type' => $entity_info['label'],
       '@entity-type' => $entity_info['label'],
@@ -849,7 +851,6 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
  *
  * @todo: use Entity Metadata API to automatically add field elements so that
  * properties such as entity title can be set.
- * @todo: support entities with more than one bundle.
  */
 class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm {
 
@@ -873,6 +874,24 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
    * Form builder for this operation.
    */
   function form($form, &$form_state, $entity_type, $entity, $operation_path) {
+    // Kill the cancel link.
+    unset($form_state['entity_operation_form_elements']['cancel link']);
+
+    return $this->entityForm($form, $form_state, $entity_type, $entity, $operation_path);
+  }
+
+  /**
+   * Helper for form(), building just the entity form.
+   *
+   * Keeps the entity form separate from any wrapping logic and allows clearer
+   * reuse by subclasses.
+   *
+   * Note that overriding this will cause inheritance problems because this is
+   * also used by the EntityOperationsOperationAddGeneric handler. If you want
+   * to customize the form for your entity, you may want to consider using
+   * the EntityOperationsOperationEdit handler instead.
+   */
+  function entityForm($form, &$form_state, $entity_type, $entity, $operation_path) {
     $entity_info = entity_get_info($this->entityType);
 
     // Ripped from entity_ui_form_defaults().
@@ -900,9 +919,6 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
     if (!empty($entity_info['fieldable'])) {
       field_attach_form($this->entityType, $entity, $form, $form_state);
     }
-
-    // Kill the cancel link.
-    unset($form_state['entity_operation_form_elements']['cancel link']);
 
     return $form;
   }
@@ -949,6 +965,14 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
  * This can be used as the 'add' handler for entities that don't require any
  * form elements other than those provided by FieldAPI.
  *
+ * If the entity has multiple bundles, its entity access callback will receive
+ * the bundle name that is being created in the place of the $entity parameter
+ * for the 'add' op. In other words, you will get:
+ * @code
+ * your_entity_access('add', BUNDLE_NAME, $account, $entity_type);
+ * @endcode
+ * (This is the same pattern as node_access().)
+ *
  * See EntityOperationsOperationEditGeneric for limitations of this handler.
  */
 class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditGeneric {
@@ -960,6 +984,7 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
    */
   function operationStrings() {
     return array(
+      // TODO: add the bundle name when appropriate?
       'page title' => t('Add %entity-type'),
     ) + parent::operationStrings();
   }
@@ -979,13 +1004,15 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
         $this->entityType,
         get_class($this),
         $operation_path,
-        NULL,
+        // The path component after 'add', which should be the bundle name.
+        // This is passed into the form and access callbacks as the $entity.
+        $loader_position + 1,
       ),
       'access arguments' => array(
         $this->entityType,
         get_class($this),
         $operation_path,
-        NULL,
+        $loader_position + 1,
       ),
     );
 
@@ -995,20 +1022,144 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
   }
 
   /**
+   * Determine access to the operation for the user.
+   *
+   * We override this to save the entity access callback some legwork: when
+   * there is no entity and we are showing the selection list, determine access
+   * by checking the user has access to create at least one bundle.
+   * This is the same behaviour as _node_add_access().
+   *
+   * @param $entity_type
+   *  The entity type.
+   * @param $entity
+   *  The current entity.
+   * @param $account
+   *  (Optional) The account to check access for. Defaults to the current user.
+   *
+   * @return
+   *  FALSE is the operation should not be allowed, TRUE if access should be
+   *  granted.
+   */
+  function userAccess($entity_type, $entity, $account = NULL) {
+    // Figure out if we're in a situation where we show the bundle selection
+    // list.
+    // TODO: move this logic to the constructor or a helper, as it's repeated
+    // in form().
+    $entity_info = entity_get_info($this->entityType);
+    if (isset($entity_info['bundles'])
+        && count($entity_info['bundles']) > 1
+        && empty($entity)) {
+      foreach (array_keys($entity_info['bundles']) as $bundle_name) {
+        $verb = $this->getAccessVerb();
+        $access = entity_access($verb, $entity_type, $bundle_name, $account);
+        if ($access) {
+          return TRUE;
+        }
+      }
+      // No access: return FALSE.
+      return FALSE;
+    }
+
+    // Otherwise, just return what the parent says.
+    return parent::userAccess($entity_type, $entity, $account);
+  }
+
+  /**
    * Form builder for this operation.
+   *
+   * To get different parameters, override menu_item().
+   *
+   * @param $entity_type
+   *  The entity type.
+   * @param $entity
+   *  The bundle name to add. May be NULL if the entity has no bundles or only
+   *  one bundle.
+   * @param $operation_path
+   *  The operation path of the current operation. This is the key of the
+   *  definition array in hook_entity_info().
    */
   function form($form, &$form_state, $entity_type, $entity, $operation_path) {
+    // TODO: consider instead of abusing $entity, look in form state
+    // build info for an extra bundle parameter?
+
+    // Kill the cancel button.
+    unset($form_state['entity_operation_form_elements']['cancel link']);
+
+    $entity_info = entity_get_info($this->entityType);
+
+    // Multiple cases, depending on what circumstances we're here under and
+    // whether the entity has multiple bundles.
+    // Case 1: we are on /add, and the entity type has either no bundles or
+    // only one bundle. Just show the add form.
+    if (!isset($entity_info['bundles']) || count($entity_info['bundles']) == 1) {
+      // We won't have an entity here, so create one for our parent class's form.
+     $values = array();
+
+      // Set the bundle key, if we need it.
+      if (count($entity_info['bundles']) == 1) {
+        $bundle_name = reset(array_keys($entity_info['bundles']));
+        $bundle_key = $entity_info['entity keys']['bundle'];
+        $values[$bundle_key] = $bundle_name;
+      }
+
+      $entity = entity_create($entity_type, $values);
+
+      return $this->entityForm($form, $form_state, $entity_type, $entity, $operation_path);
+    }
+
+    // Case 2: we are on /add, and we don't know which bundle to use. Show a
+    // list of links.
+    if (empty($entity)) {
+      return $this->bundleSelectionForm($form, $form_state, $entity_type, $entity, $operation_path);
+    }
+
+    // Case 3: we are on /add/BUNDLE. Show the add form.
+    $bundle_name = $entity;
+
     // We won't have an entity here, so create one for our parent class's form.
     $values = array();
-    $entity_info = entity_get_info($this->entityType);
-    if (count($entity_info['bundles']) == 1) {
-      $bundle = reset(array_keys($entity_info['bundles']));
-      $bundle_key = $entity_info['entity keys']['bundle'];
-      $values[$bundle_key] = $bundle;
-    }
+    $bundle_key = $entity_info['entity keys']['bundle'];
+    $values[$bundle_key] = $bundle_name;
+
     $entity = entity_create($entity_type, $values);
 
-    return parent::form($form, $form_state, $entity_type, $entity, $operation_path);
+    return $this->entityForm($form, $form_state, $entity_type, $entity, $operation_path);
+  }
+
+  /**
+   * Helper for form() that returns a list of bundle creation links.
+   *
+   * This is not really a form, just a collection of add links. But we can't
+   * handle this as a page type handler because that would require returning
+   * multiple menu items from a single operation handler; so we fake it.
+   */
+  function bundleSelectionForm($form, &$form_state, $entity_type, $entity, $operation_path) {
+    $entity_info = entity_get_info($this->entityType);
+
+    // Kill the action button.
+    unset($form_state['entity_operation_form_elements']['action button']);
+
+    // Get the base path. We will probably be on ENTITYBASE/add, though of
+    // course the declaration for this operation could have set a different
+    // operation path. We create links with the bundle name appended to that,
+    // which will also be handled by this operation.
+    $base_path = $entity_info['operations ui']['path'] . '/' . $operation_path;
+
+    $items = array();
+    foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
+      // Check access for each item.
+      $verb = $this->getAccessVerb();
+      $access = entity_access($verb, $this->entityType, $bundle_name);
+      if ($access) {
+        $items[] = l(t('Add @bundle', array('@bundle' => $bundle_info['label'])), "$base_path/$bundle_name");
+      }
+    }
+    $form['links'][$bundle_name] = array(
+      '#theme' => 'item_list',
+      '#items' => $items,
+    );
+
+    return $form;
   }
 
 }
