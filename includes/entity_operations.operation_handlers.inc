@@ -1119,8 +1119,11 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
         // Set a variable to avoid a strict warning with reset().
         $bundle_names = array_keys($entity_info['bundles']);
         $bundle_name = reset($bundle_names);
-        $bundle_key = $entity_info['entity keys']['bundle'];
-        $values[$bundle_key] = $bundle_name;
+        // Must use empty(), as entity_get_info() defaults this to ''.
+        if (!empty($entity_info['entity keys']['bundle'])) {
+          $bundle_key = $entity_info['entity keys']['bundle'];
+          $values[$bundle_key] = $bundle_name;
+        }
       }
 
       $entity = entity_create($entity_type, $values);
