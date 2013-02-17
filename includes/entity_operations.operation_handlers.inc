@@ -860,6 +860,13 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
  * be alterable with hook_form_alter(), as it will have the form build ID of our
  * generic operation form builder, 'entity_operations_operation_form'.
  *
+ * Note that if this handler produces a form with no elements other than the
+ * those from FieldAPI, and no hidden bundle element (as a result of the entity
+ * having only one bundle), then a bug in drupal_write_record() will prevent
+ * the entity being saved, because it would have an empty record. A simple
+ * workaround for this is allowing the entity to use the 'label' element which
+ * is automatically provided if the entity info defines the entity key for it.
+ *
  * @todo: use Entity Metadata API to automatically add field elements so that
  * properties such as entity title can be set.
  */
@@ -927,6 +934,18 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
       );
     }
 
+    // Add a form element for the entity label, if we have the necessary
+    // information to make one.
+    if (isset($entity_info['entity keys']['label'])) {
+      $label_key = $entity_info['entity keys']['label'];
+      $form[$label_key] = array(
+        '#type' => 'textfield',
+        '#title' => t('Label'),
+        '#required' => TRUE,
+        '#default_value' => isset($entity->{$label_key}) ? $entity->{$label_key} : '',
+      );
+    }
+
     if (!empty($entity_info['fieldable'])) {
       field_attach_form($this->entityType, $entity, $form, $form_state);
     }
@@ -968,6 +987,10 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
 
     entity_form_submit_build_entity($entity_type, $form_state[$entity_type], $form, $form_state);
     $entity = $form_state[$entity_type];
+
+    // The save operation will fail if the entity has no properties to save to
+    // its base table. This is caused by a bug in drupal_write_record().
+    // @see http://drupal.org/node/970338.
 
     // Save the entity.
     $entity->save();
