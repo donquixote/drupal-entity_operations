@@ -941,7 +941,7 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
    */
   function formValidate($form, &$form_state, $entity_type, $entity, $operation_path) {
     // Notify field widgets to validate their data.
-    entity_form_field_validate($this->entityType, $form, &$form_state);
+    entity_form_field_validate($this->entityType, $form, $form_state);
   }
 
   /**
@@ -1116,7 +1116,9 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
 
       // Set the bundle key, if we need it.
       if (count($entity_info['bundles']) == 1) {
-        $bundle_name = reset(array_keys($entity_info['bundles']));
+        // Set a variable to avoid a strict warning with reset().
+        $bundle_names = array_keys($entity_info['bundles']);
+        $bundle_name = reset($bundle_names);
         $bundle_key = $entity_info['entity keys']['bundle'];
         $values[$bundle_key] = $bundle_name;
       }
