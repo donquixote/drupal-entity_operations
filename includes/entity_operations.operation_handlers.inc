@@ -950,11 +950,24 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
    * Receives the same parameters as the form builder as a convenience.
    */
   function formSubmit($form, &$form_state, $entity_type, $entity, $operation_path) {
-    // We should call entity_ui_form_submit_build_entity(), but that requires
-    // a module_load_include(), and this is all it does anyway.
-    // TODO: don't depend on the entity UI controller; all it mostly does it
-    // call entity_form_submit_build_entity().
-    $entity = entity_ui_controller($form_state['entity_type'])->entityFormSubmitBuildEntity($form, $form_state);
+    $entity_info = entity_get_info($entity_type);
+
+    // Add the bundle property to the entity if the entity type supports bundles
+    // and the form provides a value for the bundle key. Especially new entities
+    // need to have their bundle property pre-populated before we invoke
+    // entity_form_submit_build_entity().
+    // This duplicates what entity_ui_form_submit_build_entity() does, but all
+    // that does is call the entity admin UI controller, and we don't want a
+    // dependency on that for just one of its methods which is pretty basic at
+    // that.
+    // @see EntityDefaultUIController::entityFormSubmitBuildEntity()
+    if (!empty($entity_info['entity keys']['bundle']) && isset($form_state['values'][$entity_info['entity keys']['bundle']])) {
+      $bundle_key = $entity_info['entity keys']['bundle'];
+      $form_state[$entity_type]->{$bundle_key} = $form_state['values'][$bundle_key];
+    }
+
+    entity_form_submit_build_entity($entity_type, $form_state[$entity_type], $form, $form_state);
+    $entity = $form_state[$entity_type];
 
     // Save the entity.
     $entity->save();
