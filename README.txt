@@ -17,6 +17,8 @@ Entity operations are also exposed in other ways:
   - The link to an operation's tab is available as a Views field on the entity.
   - Operations that are forms can be output in a fieldset that can be shown on
     the entity (or indeed, anywhere).
+  - If the Entity API admin UI is being used, the 'add', 'edit', and 'delete'
+    operations can be shown there.
 
 Access to an operation is defined by either the handler class, or the path component. entity_operations_get_entity_permissions() can be used to get all the permissions this invents for an entity type.
 

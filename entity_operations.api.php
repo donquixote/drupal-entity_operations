@@ -55,6 +55,9 @@
  * Other required properties:
  *  - 'admin ui' must be set if using the add or edit operations.
  *    - 'file path' should be set, because it's consumed by another module.
+ *    - 'controller' may be set to 'EntityOperationsDefaultAdminUIController'
+ *      or a subclass, to override the default admin links on entities with
+ *      those for operations.
  *  - 'module' must be set.
  *  - 'entity class' must be Entity or a subclass.
  *

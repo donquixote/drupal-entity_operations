@@ -792,6 +792,14 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
       $item['file path'] = drupal_get_path('module', $entity_info['module']);
     }
 
+    // If the Entity API's admin UI is using our controller class, put this
+    // menu item as a local task on the admin page.
+    // @see EntityOperationsDefaultAdminUIController::menu_item_make_task()
+    $ui_controller = entity_ui_controller($this->entityType);
+    if (is_a($ui_controller, 'EntityOperationsDefaultAdminUIController')) {
+      $ui_controller->menu_item_make_task($item);
+    }
+
     // Add in what the parent class has.
     $item += parent::menu_item($operation_path, $operation_definition, $loader_position);
     return $item;
@@ -1015,6 +1023,14 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
         $loader_position + 1,
       ),
     );
+
+    // If the Entity API's admin UI is using our controller class, put this
+    // menu item as a local task on the admin page.
+    // @see EntityOperationsDefaultAdminUIController::menu_item_make_task()
+    $ui_controller = entity_ui_controller($this->entityType);
+    if (is_a($ui_controller, 'EntityOperationsDefaultAdminUIController')) {
+      $ui_controller->menu_item_make_task($item);
+    }
 
     // Add in what the parent class has.
     $item += parent::menu_item($operation_path, $operation_definition, $loader_position);
