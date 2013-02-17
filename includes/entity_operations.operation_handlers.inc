@@ -1302,6 +1302,7 @@ class EntityOperationsOperationDelete extends EntityOperationsOperationAction {
    */
   function operationStrings() {
     return array(
+      'page title' => 'Delete %label?',
       'button label' => t('Delete @entity-type'),
       'confirm question' => t('Are you sure you want to delete the @entity-type %label?'),
       'submit message' => t('The @entity-type %label has been deleted.'),
