@@ -54,7 +54,7 @@ function entity_operations_views_data_alter(&$data) {
           // TODO: better title.
           'title' => t('Entity operation: @op', array('@op' => $operation_name)),
           // TODO: better description.
-          'description' => t('Entity operation: @op', array('@op' => $operation_name)),
+          'help' => t('Entity operation: @op', array('@op' => $operation_name)),
           'field' => array(
             'real field' => $entity_info['entity keys']['id'],
             'handler' => 'entity_operations_handler_field_operation_link',
