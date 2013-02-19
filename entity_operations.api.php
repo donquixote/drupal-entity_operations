@@ -53,13 +53,14 @@
  *          item data is only needed on cache clear.
  *
  * Other required properties:
+ *  - 'module' must be set.
+ *  - 'entity class' must be Entity or a subclass.
+ *  - 'access callback' must be a callback that works with entity_access().
  *  - 'admin ui' must be set if using the add or edit operations.
  *    - 'file path' should be set, because it's consumed by another module.
  *    - 'controller' may be set to 'EntityOperationsDefaultAdminUIController'
  *      or a subclass, to override the default admin links on entities with
  *      those for operations.
- *  - 'module' must be set.
- *  - 'entity class' must be Entity or a subclass.
  *
  * @see hook_entity_info()
  */

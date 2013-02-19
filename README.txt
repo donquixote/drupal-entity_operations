@@ -60,6 +60,7 @@ To implement basic entity operations for your entity type, add the following to 
   // You also need the following Entity API properties:
   'module' => 'mymodule',
   'entity class' => 'Entity', // or a subclass of Entity
+  'access callback' => 'myentity_access',
   'admin ui' => array(
     // The Add and Edit operations depend on the file path being defined here.
     'file path' => 'file/path/to/your/entity-form-callback',
