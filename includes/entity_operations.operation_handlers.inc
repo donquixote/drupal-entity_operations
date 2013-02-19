@@ -620,6 +620,9 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    *  definition array in hook_entity_info().
    */
   function form($form, &$form_state, $entity_type, $entity, $operation_path) {
+    // Return at least an empty array.
+    $form = array();
+    return $form;
   }
 
   /**
