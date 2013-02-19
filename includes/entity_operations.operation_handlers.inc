@@ -423,7 +423,7 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    */
   function operationStrings() {
     return array(
-      'page title' => '%label',
+      'page title' => '@label',
       'button label' => t('Perform action'),
       'confirm question' => t('Are you sure you want to proceed?'),
       'submit message' => t('Action completed on %entity-type %label.', array(
