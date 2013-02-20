@@ -51,10 +51,15 @@ function entity_operations_views_data_alter(&$data) {
         }
 
         $data[$base_table]['entity_operation_' . $operation_name] = array(
-          // TODO: better title.
-          'title' => t('Entity operation: @op', array('@op' => $operation_name)),
-          // TODO: better description.
-          'help' => t('Entity operation: @op', array('@op' => $operation_name)),
+          'title' => t('Entity operation: !title', array(
+            // This is already translated and sanitized.
+            '!title' => $operation_handler->getOperationAdminString('label'),
+          )),
+          'help' => t('Displays a link to the Entity Operation on the @op subpath: "!op-desc"', array(
+            '@op' => $operation_name,
+            // This is already translated and sanitized.
+            '!op-desc' => $operation_handler->getOperationAdminString('description'),
+          )),
           'field' => array(
             'real field' => $entity_info['entity keys']['id'],
             'handler' => 'entity_operations_handler_field_operation_link',

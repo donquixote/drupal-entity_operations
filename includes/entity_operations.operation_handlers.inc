@@ -58,6 +58,9 @@ abstract class EntityOperationsOperationBase {
    *
    * @return
    *  An array with the following keys:
+   *  - 'label': The localized admin label for this operation.
+   *    See getOperationAdminString().
+   *  - 'description': The localized admin description text for this operation.
    *  - 'provides menu': Whether this operation should provide a menu item on
    *    the entity base path.
    *  - 'uses form': If 'provides menu' is TRUE, whether this operation's tab
@@ -73,6 +76,9 @@ abstract class EntityOperationsOperationBase {
    */
   function operationInfo() {
     return array(
+      // Admin labels.
+      'label' => 'Label',
+      'description' => 'Description',
       // Default behaviour is to provide a menu item.
       'provides menu' => TRUE,
       'uses form' => FALSE,
@@ -92,6 +98,23 @@ abstract class EntityOperationsOperationBase {
   public function __construct($entity_type, $operation_path) {
     $this->entityType = $entity_type;
     $this->path = $operation_path;
+  }
+
+  /**
+   * Get an admin string for this operation, as defined in operationInfo().
+   *
+   * We need this rather than grabbing it directly because some handlers need
+   * to do wacky things rather than just return the string as defined.
+   *
+   * @param $string_key
+   *  The string to get. One of 'label' or 'description'.
+   *
+   * @return
+   *  The translated string.
+   */
+  public function getOperationAdminString($string_key) {
+    $info = $this->operationInfo();
+    return $info[$string_key];
   }
 
   /**
@@ -279,6 +302,32 @@ class EntityOperationsOperationPageViews extends EntityOperationsOperationPage {
   public $access_verb = 'view';
 
   /**
+   * Get an admin string for this operation, as defined in operationInfo().
+   *
+   * We can't return a fixed string from operationInfo; rather we have to
+   * generate this based on the View display this handler is outputting.
+   *
+   * @todo This is not actually relevant until http://drupal.org/node/1922722
+   * is fixed.
+   */
+  public function getOperationAdminString($string_key) {
+    // We need the operation definition, as that has details about which view
+    // this operation outputs, which we need to produce meaningful labels.
+    $entity_info = entity_get_info($this->entityType);
+    $operation_definition = $entity_info['operations ui']['operations'][$this->path];
+
+    switch ($string_key) {
+      case 'label':
+        // TODO!
+        return t('View output of VIEW NAME: DISPLAY', array(
+          // TODO: get data out of $operation_definition.
+        ));
+      case 'description':
+        return t('Shows the output of a View');
+    }
+  }
+
+  /**
    * Returns the menu item for this operation.
    *
    * We process the info from entity_operations_get_views() here so it can
@@ -390,6 +439,8 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    */
   function operationInfo() {
     return array(
+      'label' => 'Label',
+      'description' => 'Description',
       'provides menu' => TRUE,
       'uses form' => TRUE,
       'provides vbo' => FALSE,
@@ -663,6 +714,16 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
  */
 class EntityOperationsOperationEntityView extends EntityOperationsOperationPage {
 
+  /**
+   * Returns basic information about the operation.
+   */
+  function operationInfo() {
+    return array(
+      'label' => 'View entity',
+      'description' => 'View the rendered entity.',
+    ) + parent::operationInfo();
+  }
+
   public $access_verb = 'view';
 
   function page($entity_type, $entity, $params = array()) {
@@ -686,6 +747,16 @@ class EntityOperationsOperationEntityViewOperations extends EntityOperationsOper
 
   public $access_verb = 'view';
 
+  /**
+   * Returns basic information about the operation.
+   */
+  function operationInfo() {
+    return array(
+      'label' => 'View with exposed operations',
+      'description' => 'View the rendered entity with the exposed operations form.',
+    ) + parent::operationInfo();
+  }
+
   function page($entity_type, $entity, $params = array()) {
     $build = parent::page($entity_type, $entity);
 
@@ -704,6 +775,16 @@ class EntityOperationsOperationEntityViewOperations extends EntityOperationsOper
 class EntityOperationsOperationDevel extends EntityOperationsOperationPage {
 
   public $access_verb = 'view';
+
+  /**
+   * Returns basic information about the operation.
+   */
+  function operationInfo() {
+    return array(
+      'label' => 'Devel',
+      'description' => 'View the devel output for the entity.',
+    ) + parent::operationInfo();
+  }
 
   /**
    * Determine whether the action may be performed on the given entity.
@@ -751,6 +832,8 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
    */
   function operationInfo() {
     return array(
+      'label' => 'Add',
+      'description' => 'Create a new entity, with a bundle selection page if required.',
       'provides menu' => TRUE,
       'uses form' => TRUE,
       'provides vbo' => FALSE,
@@ -819,6 +902,16 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
   // Title: "Edit %entity".
 
   /**
+   * Returns basic information about the operation.
+   */
+  function operationInfo() {
+    return array(
+      'label' => 'Edit',
+      'description' => 'Produces a form to edit the entity.',
+    ) + parent::operationInfo();
+  }
+
+  /**
    * Properties for the menu item specific to this handler.
    *
    * Override the page callback to go straight to entity_ui_get_form().
@@ -877,6 +970,8 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
    */
   function operationStrings() {
     return array(
+      'label' => 'Edit',
+      'description' => 'Produces a form to edit the entity.',
       'page title' => t('Edit %label'),
       'button label' => t('Save'),
       // This appears to be sufficient to result in the markup form element
@@ -1031,6 +1126,8 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
    */
   function operationStrings() {
     return array(
+      'label' => 'Add',
+      'description' => 'Create a new entity, with a bundle selection page if required.',
       // TODO: add the bundle name when appropriate?
       'page title' => t('Add %entity-type'),
     ) + parent::operationStrings();
@@ -1350,6 +1447,8 @@ class EntityOperationsOperationDelete extends EntityOperationsOperationAction {
    */
   function operationInfo() {
     return array(
+      'label' => 'Delete',
+      'description' => 'Produces a confirmation form to delete the entity.',
       'provides menu' => TRUE,
       // Services module already provides CRUD operations for entities, so we
       // don't expose this to it.
@@ -1405,6 +1504,16 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationAction {
   // Title: "Edit %entity".
 
   /**
+   * Returns basic information about the operation.
+   */
+  function operationInfo() {
+    return array(
+      'label' => 'Publish',
+      'description' => 'Produces a confirmation form to publish the entity.',
+    ) + parent::operationInfo();
+  }
+
+  /**
    * Returns strings for the operations.
    *
    * @return
@@ -1454,6 +1563,16 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationAction {
  * Requires the entity to have a 'status' property.
  */
 class EntityOperationsOperationUnPublish extends EntityOperationsOperationPublish {
+
+  /**
+   * Returns basic information about the operation.
+   */
+  function operationInfo() {
+    return array(
+      'label' => 'Unpublish',
+      'description' => 'Produces a confirmation form to unpublish the entity.',
+    ) + parent::operationInfo();
+  }
 
   /**
    * Returns strings for the operations.
@@ -1516,6 +1635,8 @@ class EntityOperationsOperationSetOwner extends EntityOperationsOperationAction 
    */
   function operationInfo() {
     return array(
+      'label' => 'Set owner',
+      'description' => 'Produces a form to set the user that owns the entity.',
       'provides menu' => TRUE,
       'vbo' => array(
         'configurable' => TRUE,
@@ -1600,6 +1721,16 @@ class EntityOperationsOperationSetOwner extends EntityOperationsOperationAction 
  * Op handler for Organic Groups group overview.
  */
 class EntityOperationsOperationOGGroup extends EntityOperationsOperationPage {
+
+  /**
+   * Returns basic information about the operation.
+   */
+  function operationInfo() {
+    return array(
+      'label' => 'OG Group',
+      'description' => 'Provides admin tools for working with the entity as an Organic Group.',
+    ) + parent::operationInfo();
+  }
 
   /**
    * Returns the menu item for this operation.
