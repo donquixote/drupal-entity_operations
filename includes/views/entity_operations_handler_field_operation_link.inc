@@ -37,7 +37,7 @@ class entity_operations_handler_field_operation_link extends views_handler_field
    */
   function pre_render(&$values) {
     // This gets us the entities that correspond to our rows.
-    parent::pre_render(&$values);
+    parent::pre_render($values);
 
     // Get the handler for the operation.
     $this->operation_handler = entity_operations_get_entity_operation_handler($this->entity_type, $this->definition['operation path']);
