@@ -11,6 +11,8 @@
  *      - EntityOperationsOperationEntityViewOperations: displays the entity,
  *        with available operations in a fieldset.
  *    - EntityOperationsOperationDevel: devel output for the entity.
+ *      - EntityOperationsOperationMetadata: devel output for the entity's
+ *        metadata properties.
  *    - EntityOperationsOperationPageViews: output the result of a Views
  *      entity tab display.
  *  - EntityOperationsOperationForm: parent class for form operations.
@@ -771,6 +773,9 @@ class EntityOperationsOperationEntityViewOperations extends EntityOperationsOper
 
 /**
  * Op handler for viewing devel output for an entity.
+ *
+ * Requirements:
+ *  - devel module
  */
 class EntityOperationsOperationDevel extends EntityOperationsOperationPage {
 
@@ -808,6 +813,58 @@ class EntityOperationsOperationDevel extends EntityOperationsOperationPage {
     drupal_set_title($entity->label());
     $output = kprint_r($entity, TRUE);
     return $output;
+  }
+
+}
+
+/**
+ * Op handler for viewing devel output for an entity's metadata properties.
+ *
+ * Requirements:
+ *  - entity module
+ *  - devel module
+ */
+class EntityOperationsOperationMetadata extends EntityOperationsOperationDevel {
+
+  /**
+   * Returns basic information about the operation.
+   */
+  function operationInfo() {
+    return array(
+      'label' => 'Devel metadata',
+      'description' => "View the devel output for the entity's metadata.",
+    ) + parent::operationInfo();
+  }
+
+  /**
+   * Page callback.
+   */
+  function page($entity_type, $entity, $params = array()) {
+    drupal_set_title($entity->label());
+
+    $entity_property_info = entity_get_property_info($this->entityType);
+
+    $wrapper = entity_metadata_wrapper($entity_type, $entity);
+
+    $output = array();
+    foreach ($entity_property_info['properties'] as $property => $info) {
+      $output[$property] = array(
+        'raw'   => $wrapper->{$property}->raw(),
+        'value' => $wrapper->{$property}->value(),
+      );
+    }
+
+    if (isset($entity_property_info['bundles'])) {
+      list(, , $bundle) = entity_extract_ids($entity_type, $entity);
+      foreach ($entity_property_info['bundles'][$bundle]['properties'] as $property => $info) {
+        $output[$property] = array(
+          'raw'   => $wrapper->{$property}->raw(),
+          'value' => $wrapper->{$property}->value(),
+        );
+      }
+    }
+
+    return kprint_r($output, TRUE);
   }
 
 }
