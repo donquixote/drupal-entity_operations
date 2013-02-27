@@ -75,8 +75,12 @@ class EntityOperationsDefaultUIController {
       $menu_item += $operation_handler->menu_item($operation_path, $operation_definition, $this->loader_position);
 
       // Finally, add in our defaults.
+
+      // Get the title for the menu item.
+      $title = $operation_handler->getOperationString('tab title', $this->entityType, NULL, $operation_path);
+
       $menu_item += array(
-        'title' => ucfirst($operation_path),
+        'title' => $title,
         'type' => isset($operation_definition['default']) ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK,
         'load arguments' => array($this->entityType),
         'weight' => $this->weight,

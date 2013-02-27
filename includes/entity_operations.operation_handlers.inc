@@ -90,6 +90,34 @@ abstract class EntityOperationsOperationBase {
   }
 
   /**
+   * Returns strings for the operation.
+   *
+   * These should be translated, and the following placeholders may be used
+   * without values:
+   *  '%entity-type': The human-readable label for the entity type.
+   *  '@entity-type': The same, but as plain text.
+   *  '%label': The entity label.
+   *  '@label': The same, but as plain text.
+   * If further substitutions are required, they can be provided by overriding
+   * getOperationStringSubstitutions().
+   *
+   * @return
+   *  An array containing the following keys:
+   *  - 'tab title': The title to show on the menu tab. Note this should not be
+   *    translated, and does not allow substitutions. Also, if a handler
+   *    overrides menu_item(), it may be simpler to set the tab's menu item
+   *    title there, especially if defining the title would be the only purpose
+   *    of overriding operationStrings().
+   *  - 'page title': The page title to show when the form is shown as a tab.
+   */
+  function operationStrings() {
+    return array(
+      'tab title' => '',
+      'page title' => '@label',
+    );
+  }
+
+  /**
    * Constructor for operation handler objects.
    *
    * @param $entity_type
@@ -117,6 +145,87 @@ abstract class EntityOperationsOperationBase {
   public function getOperationAdminString($string_key) {
     $info = $this->operationInfo();
     return $info[$string_key];
+  }
+
+  /**
+   * Get an operation string.
+   *
+   * @param $string_key
+   *  The key in the array in operationStrings() for the string to retrieve.
+   * @param $entity_type
+   *  The entity type.
+   * @param $entity
+   *  The entity. Pass NULL if there is no entity in context.
+   * @param $operation_path
+   *  The key for the operation.
+   * @param $parameters
+   *  (Optional) The parameters array from the form submission values.
+   *
+   * @return
+   *  A translated string, with replacements made. (With the exception of the
+   *  'tab title' string, which is returned untranslated.)
+   */
+  function getOperationString($string_key, $entity_type, $entity, $operation_path, $parameters = array()) {
+    $strings = $this->operationStrings();
+
+    // The 'tab title' string is a special case, as it is passed to hook_menu()
+    // and therefore can't have substitutions. Just return it.
+    // TODO: figure out 'title arguments' in hook_menu() so we can at least
+    // pass the entity type and entity; assuming this is ever a needed feature!
+    if ($string_key == 'tab title') {
+      return $strings['tab title'];
+    }
+
+    $substitutions = $this->getOperationStringSubstitutions($entity_type, $entity, $operation_path, $parameters);
+
+    // Run the string through format_string() to replace the placeholders
+    // which t() will have ignored.
+    return format_string($strings[$string_key], $substitutions);
+  }
+
+  /**
+   * Return an array of string substitutions for t().
+   *
+   * This may be overridden to add further substitutions, in particular using
+   * the parameters array for the submit confirmation message.
+   *
+   * @param $entity_type
+   *  The entity type.
+   * @param $entity
+   *  The entity. Pass NULL if there is no entity in parameters.
+   * @param $operation_path
+   *  The key for the operation.
+   * @param $parameters
+   *  The parameters array from the form submission values. When this is not
+   *  available, for example when retrieving the button label, this will be an
+   * empty array.
+   *
+   * @return
+   *  An array of string substitutions as used by t(). These should match those
+   *  used in operationStrings(), and should include at least:
+   *  - '%entity-type': The human-readable label for the entity type.
+   *  - '@entity-type': The human-readable label for the entity type.
+   *  - '%label': The label of the entity.
+   *  - '@label': The label of the entity.
+   * We provide both the escaped and placeholder versions (i.e., @ and %)
+   * because in some circumstances (such as buttons) the HTML included in the
+   * placeholder is unsuitable.
+   */
+  function getOperationStringSubstitutions($entity_type, $entity, $operation_path, $parameters) {
+    $entity_info = entity_get_info($entity_type);
+
+    // We provide each of these twice so store them in a variable.
+    $entity_type = $entity_info['label'];
+    // Check whether $entity is an object, as the generic 'add' handler bends
+    // the rules and passes us a bundle name string for this.
+    $entity_label = isset($entity) && is_object($entity) ? $entity->label() : '';
+    $substitutions = array(
+      '%entity-type' => $entity_info['label'],
+      '@entity-type' => $entity_info['label'],
+      '%label' => $entity_label,
+      '@label' => $entity_label,
+    );
+    return $substitutions;
   }
 
   /**
@@ -463,8 +572,8 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    * getOperationStringSubstitutions().
    *
    * @return
-   *  An array containing the following keys:
-   *  - 'page title': The page title to show when the form is shown as a tab.
+   *  An array containing the following keys, in addition to the parent
+   *  class's items:
    *  - 'button label': the label for the form button. If used as a VBO, this
    *      should not contain the '%label' placeholder, as the button is shown
    *      prior to any entities being loaded.
@@ -476,6 +585,7 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    */
   function operationStrings() {
     return array(
+      'tab title' => 'Form',
       'page title' => '@label',
       'button label' => t('Perform action'),
       'confirm question' => t('Are you sure you want to proceed?'),
@@ -507,78 +617,6 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
         $loader_position,
       ),
     );
-  }
-
-  /**
-   * Get an operations string.
-   *
-   * @param $string_key
-   *  The key in the array in operationStrings() for the string to retrieve.
-   * @param $entity_type
-   *  The entity type.
-   * @param $entity
-   *  The entity. Pass NULL if there is no entity in context.
-   * @param $operation_path
-   *  The key for the operation.
-   * @param $parameters
-   *  (Optional) The parameters array from the form submission values.
-   *
-   * @return
-   *  A translated string, with replacements made.
-   */
-  function getOperationString($string_key, $entity_type, $entity, $operation_path, $parameters = array()) {
-    $strings = $this->operationStrings();
-
-    $substitutions = $this->getOperationStringSubstitutions($entity_type, $entity, $operation_path, $parameters);
-
-    // Run the string through format_string() to replace the placeholders
-    // which t() will have ignored.
-    return format_string($strings[$string_key], $substitutions);
-  }
-
-  /**
-   * Return an array of string substitutions for t().
-   *
-   * This may be overridden to add further substitutions, in particular using
-   * the parameters array for the submit confirmation message.
-   *
-   * @param $entity_type
-   *  The entity type.
-   * @param $entity
-   *  The entity. Pass NULL if there is no entity in parameters.
-   * @param $operation_path
-   *  The key for the operation.
-   * @param $parameters
-   *  The parameters array from the form submission values. When this is not
-   *  available, for example when retrieving the button label, this will be an
-   * empty array.
-   *
-   * @return
-   *  An array of string substitutions as used by t(). These should match those
-   *  used in operationStrings(), and should include at least:
-   *  - '%entity-type': The human-readable label for the entity type.
-   *  - '@entity-type': The human-readable label for the entity type.
-   *  - '%label': The label of the entity.
-   *  - '@label': The label of the entity.
-   * We provide both the escaped and placeholder versions (i.e., @ and %)
-   * because in some circumstances (such as buttons) the HTML included in the
-   * placeholder is uunsuitable.
-   */
-  function getOperationStringSubstitutions($entity_type, $entity, $operation_path, $parameters) {
-    $entity_info = entity_get_info($entity_type);
-
-    // We provide each of these twice so store them in a variable.
-    $entity_type = $entity_info['label'];
-    // Check whether $entity is an object, as the generic 'add' handler bends
-    // the rules and passes us a bundle name string for this.
-    $entity_label = isset($entity) && is_object($entity) ? $entity->label() : '';
-    $substitutions = array(
-      '%entity-type' => $entity_info['label'],
-      '@entity-type' => $entity_info['label'],
-      '%label' => $entity_label,
-      '@label' => $entity_label,
-    );
-    return $substitutions;
   }
 
   /**
@@ -728,6 +766,15 @@ class EntityOperationsOperationEntityView extends EntityOperationsOperationPage 
 
   public $access_verb = 'view';
 
+  /**
+   * Returns strings for the operations.
+   */
+  function operationStrings() {
+    return array(
+      'tab title' => 'View',
+    ) + parent::operationStrings();
+  }
+
   function page($entity_type, $entity, $params = array()) {
     //dsm($entity, 'handler page');
     drupal_set_title($entity->label());
@@ -792,6 +839,15 @@ class EntityOperationsOperationDevel extends EntityOperationsOperationPage {
   }
 
   /**
+   * Returns strings for the operations.
+   */
+  function operationStrings() {
+    return array(
+      'tab title' => 'Devel',
+    ) + parent::operationStrings();
+  }
+
+  /**
    * Determine whether the action may be performed on the given entity.
    */
   function operationAccess($entity_type, $entity) {
@@ -834,6 +890,15 @@ class EntityOperationsOperationMetadata extends EntityOperationsOperationDevel {
       'label' => 'Devel metadata',
       'description' => "View the devel output for the entity's metadata.",
     ) + parent::operationInfo();
+  }
+
+  /**
+   * Returns strings for the operations.
+   */
+  function operationStrings() {
+    return array(
+      'tab title' => 'Devel metadata',
+    ) + parent::operationStrings();
   }
 
   /**
@@ -903,6 +968,7 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
    */
   function menu_item($operation_path, $operation_definition, $loader_position) {
     $item = array(
+      'title' => 'Add',
       // Special path which doesn't have an entity loader.
       'path' => $this->controller->path . '/add',
       // We don't want a tab.
@@ -975,6 +1041,7 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
    */
   function menu_item($operation_path, $operation_definition, $loader_position) {
     $item = array(
+      'title' => 'Edit',
       'page callback' => 'entity_ui_get_form',
       'page arguments' => array($this->entityType, $loader_position),
     );
@@ -1027,6 +1094,7 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
    */
   function operationStrings() {
     return array(
+      'tab title' => 'Edit',
       'label' => 'Edit',
       'description' => 'Produces a form to edit the entity.',
       'page title' => t('Edit %label'),
@@ -1183,6 +1251,7 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
    */
   function operationStrings() {
     return array(
+      'tab title' => 'Add',
       'label' => 'Add',
       'description' => 'Create a new entity, with a bundle selection page if required.',
       // TODO: add the bundle name when appropriate?
@@ -1518,6 +1587,7 @@ class EntityOperationsOperationDelete extends EntityOperationsOperationAction {
    */
   function operationStrings() {
     return array(
+      'tab title' => 'Delete',
       'page title' => 'Delete %label?',
       'button label' => t('Delete @entity-type'),
       'confirm question' => t('Are you sure you want to delete the @entity-type %label?'),
@@ -1582,6 +1652,7 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationAction {
    */
   function operationStrings() {
     return array(
+      'tab title' => 'Publish',
       'button label' => t('Publish'),
       'confirm question' => t('Are you sure you want to publish this %entity-type?'),
       'submit message' => t('%entity-type %label has been published.'),
@@ -1643,6 +1714,7 @@ class EntityOperationsOperationUnPublish extends EntityOperationsOperationPublis
    */
   function operationStrings() {
     return array(
+      'tab title' => 'Unpublish',
       'button label' => t('Unpublish'),
       'confirm question' => t('Are you sure you want to unpublish this %entity-type?'),
       'submit message' => t('%entity-type %label has been unpublished.'),
@@ -1709,6 +1781,7 @@ class EntityOperationsOperationSetOwner extends EntityOperationsOperationAction 
    */
   function operationStrings() {
     return array(
+      'tab title' => 'Set author',
       'button label' => t('Set author'),
       'confirm question' => t('Are you sure you want to set the author of this %entity-type?'),
       'submit message' => t('Owner of %entity-type %label has been set to !account-name.'),
