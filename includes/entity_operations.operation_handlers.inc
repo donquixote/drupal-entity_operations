@@ -700,6 +700,12 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
   /**
    * Form builder for this operation.
    *
+   * This should return the main part of the form, but without any of:
+   *  - a confirmation question (if one is required)
+   *  - a submit button
+   *  - a cancel link
+   * These are added as appropriate by getForm().
+   *
    * To get different parameters, override menu_item().
    *
    * @param $entity_type
@@ -1512,6 +1518,8 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
    * These are added as appropriate by getForm().
    */
   function form($form, &$form_state, $entity_type, $entity, $operation_path) {
+    // Return at least an empty array.
+    $form = array();
     return $form;
   }
 
