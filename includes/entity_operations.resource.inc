@@ -22,7 +22,8 @@
  *  operation handler's execute() method.
  *
  * @return
- *  The affected entity.
+ *  The result of the operation's execute() method, or if that returns nothing,
+ *  the affected entity.
  */
 function entity_operations_services_resource_callback($entity_type, $handler_class, $operation_path, $entity_id) {
   $operation_handler = entity_operations_get_entity_operation_handler($entity_type, $operation_path);
@@ -38,9 +39,9 @@ function entity_operations_services_resource_callback($entity_type, $handler_cla
     $parameters[$parameter_name] = array_shift($extra_arguments);
   }
 
-  $operation_handler->execute($entity_type, $entity, $parameters);
+  $result = $operation_handler->execute($entity_type, $entity, $parameters);
 
-  return $entity;
+  return isset($result) ? $result : $entity;
 }
 
 /**

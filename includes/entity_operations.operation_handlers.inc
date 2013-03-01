@@ -1559,10 +1559,15 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
   }
 
   /**
-   * Action callback.
+   * Execute the action.
    *
-   * This receives an extra parameter consisting of extra data from the form
-   * submission. This allows operations to be used in a generic way with VBO.
+   * This receives an extra parameter consisting of extra data. When coming from
+   * the tab UI, this is built up by formSubmitGetParameters(); other ways in
+   * such as VBO or Services must construct this themselves.
+   *
+   * @return
+   *  No return is required, but when called by Services, the return value will
+   *  be returned to the resource caller.
    */
   function execute($entity_type, $entity, $parameters = array()) {
   }
