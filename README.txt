@@ -13,7 +13,7 @@ Entity operations are also exposed in other ways:
   - Operations that are treated as actions are available to:
     - Views Bulk Operations as operations.
     - Services as targeted actions on entities (requires Services Entity
-      module).
+      module, and a patch to Services at http://drupal.org/node/1931080).
   - The link to an operation's tab is available as a Views field on the entity.
   - Operations that are forms can be output in a fieldset that can be shown on
     the entity (or indeed, anywhere).

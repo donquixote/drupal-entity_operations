@@ -40,6 +40,8 @@ function entity_operations_services_resources() {
           array(
             // This is a hardcoded parameter to our callback, which requires
             // a bit of hoop-jumping to work with Services.
+            // Currently also requires a patch to Services to prevent a
+            // warning. See http://drupal.org/node/1931080.
             'name' => 'entity_type',
             // We have to set this as optional so the default value gets used.
             // @see RESTServer::getControllerArguments()
