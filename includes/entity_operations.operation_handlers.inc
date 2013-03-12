@@ -275,8 +275,10 @@ abstract class EntityOperationsOperationBase {
     // operation being denied on a node that is already published, because it
     // simply doesn't make sense.
     $operation_access = $this->operationAccess($entity_type, $entity);
-    // If something non-NULL was returned, it has precedence.
-    if (isset($operation_access)) {
+    // If the operation access control denies access, it has precedence. This is
+    // because even if, say, the user has access to publish a node, if the node
+    // in question simply *can't* be published, then it really can't!
+    if ($operation_access === FALSE) {
       return $operation_access;
     }
 
