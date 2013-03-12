@@ -50,10 +50,15 @@ class entity_operations_handler_field_operation_link extends views_handler_field
     // results (and thus any entities) from the view.
     // @see http://drupal.org/node/1915230
     $this->row_access = array();
-    foreach ($this->entities as $entity) {
-      // Build up an array of access for each row for render() to use.
-      $id = $entity->identifier();
-      $this->row_access[$id] = $this->operation_handler->access($this->entity_type, $entity);
+    // We have to check the entities array, as
+    // views_handler_field_entity::pre_render() only sets it if there is a
+    // result for the view.
+    if (!empty($this->entities)) {
+      foreach ($this->entities as $entity) {
+        // Build up an array of access for each row for render() to use.
+        $id = $entity->identifier();
+        $this->row_access[$id] = $this->operation_handler->access($this->entity_type, $entity);
+      }
     }
 
     // The overall access to this field is whether the user has access to any
