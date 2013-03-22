@@ -1033,6 +1033,115 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
 }
 
 /**
+ * Op handler for adding an entity: EntityAPI form, with prepopulation.
+ *
+ * This class is a bit messy, as it's a descendant of the form class, but
+ * provides a page. TODO: clean up: the only thing we inherit is the menu_item()
+ * and that's not really worth this WTF.
+ */
+class EntityOperationsOperationAddPrepopulate extends EntityOperationsOperationAdd {
+
+  /**
+   * Properties for the menu item specific to this handler.
+   */
+  function menu_item($operation_path, $operation_definition, $loader_position) {
+    $item = parent::menu_item($operation_path, $operation_definition, $loader_position);
+
+    // Change the page callback so it goes via our form.
+    $item['page callback'] = 'entity_operations_operation_page_callback';
+    $item['page arguments'] = array(
+      $this->entityType,
+      get_class($this),
+      $operation_path,
+      // There is no entity.
+      NULL,
+    );
+
+    return $item;
+  }
+
+  /**
+   * Helper to set the page title.
+   *
+   * We have to override this as the parent implementation will try to get a
+   * label out of a nonexistent entity.
+   *
+   * @see page() for the parameters.
+   */
+  function setTitle($entity_type, $entity, $params = array()) {
+    // entity_ui_get_form() takes care of setting the title.
+  }
+
+  /**
+   * Determine access to the operation for the user.
+   *
+   * We have to override this, because otherwise, as is called before page(), it
+   * doesn't have the prepopulated entity to work on.
+   *
+   * @param $entity_type
+   *  The entity type.
+   * @param $entity
+   *  The current entity.
+   * @param $account
+   *  (Optional) The account to check access for. Defaults to the current user.
+   *
+   * @return
+   *  FALSE is the operation should not be allowed, TRUE if access should be
+   *  granted.
+   */
+  function userAccess($entity_type, $entity, $account = NULL) {
+    // Build the entity first.
+    $entity = $this->createEntity();
+
+    $verb = $this->getAccessVerb();
+    $access = entity_access($verb, $entity_type, $entity, $account);
+
+    return $access;
+  }
+
+  /**
+   * Page callback.
+   *
+   * This is a wrapper around entity_ui_get_form() which builds up a new entity
+   * prepopulated with data from the query parameters.
+   */
+  function page($entity_type, $entity, $params = array()) {
+    // This is repeating the same work done by userAccess(). Would it be better
+    // to remember the entity in this handler?
+    $entity = $this->createEntity();
+
+    return entity_ui_get_form($this->entityType, $entity, 'add');
+  }
+
+  /**
+   * Helper for userAccess() and page().
+   *
+   * Creates a new entity based on query parameters.
+   *
+   * We have to create the entity from parameters during access control, to
+   * be able to pass it to entity_access(). This in turn is necessary to allow
+   * OG access control for entity creation.
+   *
+   * @return $entity
+   *  An unsaved, newly-created entity.
+   */
+  function createEntity() {
+    // Create an empty entity and get its wrapper.
+    $entity = entity_create($this->entityType, array());
+    $wrapper = entity_metadata_wrapper($this->entityType, $entity);
+
+    // Set properties from the query parameters on the new entity.
+    $query = drupal_get_query_parameters();
+    foreach ($query as $property => $value) {
+      $wrapper->$property->set($value);
+    }
+
+    return $entity;
+  }
+
+}
+
+/**
  * Op handler for editing an entity: EntityAPI form.
  */
 class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
