@@ -381,6 +381,18 @@ class EntityOperationsOperationPage extends EntityOperationsOperationBase {
   }
 
   /**
+   * Helper to set the page title.
+   *
+   * This allows handlers to either override the title, or not have to bother
+   * about it.
+   *
+   * @see page() for the parameters.
+   */
+  function setTitle($entity_type, $entity, $params = array()) {
+    drupal_set_title($entity->label());
+  }
+
+  /**
    * Page callback.
    *
    * @param $entity_type
@@ -785,7 +797,6 @@ class EntityOperationsOperationEntityView extends EntityOperationsOperationPage 
 
   function page($entity_type, $entity, $params = array()) {
     //dsm($entity, 'handler page');
-    drupal_set_title($entity->label());
     // Pass in EntityAPI's defaults for the first two parameters so we can
     // set $page to TRUE.
     return $entity->view('full', NULL, TRUE);
@@ -874,7 +885,6 @@ class EntityOperationsOperationDevel extends EntityOperationsOperationPage {
    * Page callback.
    */
   function page($entity_type, $entity, $params = array()) {
-    drupal_set_title($entity->label());
     $output = kprint_r($entity, TRUE);
     return $output;
   }
@@ -913,8 +923,6 @@ class EntityOperationsOperationMetadata extends EntityOperationsOperationDevel {
    * Page callback.
    */
   function page($entity_type, $entity, $params = array()) {
-    drupal_set_title($entity->label());
-
     $entity_property_info = entity_get_property_info($this->entityType);
 
     $wrapper = entity_metadata_wrapper($entity_type, $entity);

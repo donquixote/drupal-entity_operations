@@ -269,7 +269,10 @@ function entity_operations_entity_uri($entity) {
 // ========================================== Page callbacks and form builders.
 
 /**
- * Generic page callback. Hands over to the handler's page() method.
+ * Generic page callback for an operation handler.
+ *
+ * This hands over to the handler's page() method for the output, and calls the
+ * handler's setTitle() to allow setting of the page title.
  *
  * @param $entity_type
  *  The entity type.
@@ -287,10 +290,9 @@ function entity_operations_entity_uri($entity) {
  *  Either output text or a render array.
  */
 function entity_operations_operation_page_callback($entity_type, $handler_class, $operation_path, $entity, $params = array()) {
-  // Set the title to the entity so operation handlers don't have to.
-  drupal_set_title($entity->label());
-
   $operation_handler = new $handler_class($entity_type, $operation_path);
+
+  $operation_handler->setTitle($entity_type, $entity, $params);
 
   return $operation_handler->page($entity_type, $entity, $params);
 }
