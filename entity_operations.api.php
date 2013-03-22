@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Hooks provided by the Remote Entity API.
+ * Hooks provided by the Entity Operations module.
  */
 
 /**
