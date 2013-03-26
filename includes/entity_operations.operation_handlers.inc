@@ -1379,7 +1379,8 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
       'tab title' => 'Add',
       'label' => 'Add',
       'description' => 'Create a new entity, with a bundle selection page if required.',
-      // TODO: add the bundle name when appropriate?
+      // Note: this is ignored when on the entity form for entities with more
+      // than one bundle type.
       'page title' => t('Add %entity-type'),
     ) + parent::operationStrings();
   }
@@ -1528,6 +1529,12 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
     $values = array();
     $bundle_key = $entity_info['entity keys']['bundle'];
     $values[$bundle_key] = $bundle_name;
+
+    // Kill the setting of the title: we need more complex handling.
+    unset($form_state['entity_operation_form_elements']['page title']);
+    drupal_set_title(t('Add %bundle-type', array(
+      '%bundle-type' => $entity_info['bundles'][$bundle_name]['label'],
+    )), PASS_THROUGH);
 
     $entity = entity_create($entity_type, $values);
 
