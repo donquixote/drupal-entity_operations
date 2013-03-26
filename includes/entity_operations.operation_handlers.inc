@@ -1792,6 +1792,7 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationAction {
   function operationStrings() {
     return array(
       'tab title' => 'Publish',
+      'page title' => 'Publish %label',
       'button label' => t('Publish'),
       'confirm question' => t('Are you sure you want to publish this %entity-type?'),
       'submit message' => t('%entity-type %label has been published.'),
@@ -1854,6 +1855,7 @@ class EntityOperationsOperationUnPublish extends EntityOperationsOperationPublis
   function operationStrings() {
     return array(
       'tab title' => 'Unpublish',
+      'page title' => 'Unpublish %label',
       'button label' => t('Unpublish'),
       'confirm question' => t('Are you sure you want to unpublish this %entity-type?'),
       'submit message' => t('%entity-type %label has been unpublished.'),
@@ -1921,6 +1923,7 @@ class EntityOperationsOperationSetOwner extends EntityOperationsOperationAction 
   function operationStrings() {
     return array(
       'tab title' => 'Set author',
+      'page title' => 'Set author of %label',
       'button label' => t('Set author'),
       'confirm question' => t('Are you sure you want to set the author of this %entity-type?'),
       'submit message' => t('Owner of %entity-type %label has been set to !account-name.'),
