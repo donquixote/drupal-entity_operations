@@ -44,6 +44,22 @@ class EntityOperationsDefaultAdminUIController extends EntityDefaultUIController
   }
 
   /**
+   * Generates the table headers for the overview table.
+   */
+  protected function overviewTableHeaders($conditions, $rows, $additional_header = array()) {
+    // Before we hand over to the parent, create extra columns we might need.
+
+    // Add a type column if this entity has more than one bundle.
+    if (count($this->entityInfo['bundles'] > 1)) {
+      $additional_header['type'] = t('Type');
+    }
+
+    $header = parent::overviewTableHeaders($conditions, $rows, $additional_header);
+
+    return $header;
+  }
+
+  /**
    * Generates the row for the passed entity and may be overridden in order to
    * customize the rows.
    *
@@ -51,6 +67,14 @@ class EntityOperationsDefaultAdminUIController extends EntityDefaultUIController
    *   Additional columns to be added after the entity label column.
    */
   protected function overviewTableRow($conditions, $id, $entity, $additional_cols = array()) {
+    // Before we hand over to the parent, create extra columns we might need.
+
+    // Add a type column if this entity has more than one bundle.
+    if (count($this->entityInfo['bundles'] > 1)) {
+      list(, , $bundle) = entity_extract_ids($this->entityType, $entity);
+      $additional_cols['type'] = $this->entityInfo['bundles'][$bundle]['label'];
+    }
+
     $row = parent::overviewTableRow($conditions, $id, $entity, $additional_cols);
 
     // Figure out which columns have the 'edit' and 'delete' links so we can
