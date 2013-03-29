@@ -42,7 +42,8 @@ function entity_operations_views_data_alter(&$data) {
     if (isset($data[$base_table])) {
       foreach ($entity_operations_info['operations'] as $operation_name => $operation) {
         // Get the handler and the operation info.
-        $operation_handler = entity_operations_get_entity_operation_handler($entity_type, $operation_name);
+        $handler_class = $operation['handler'];
+        $operation_handler = new $handler_class($entity_type, $operation_name);
         $operation_info = $operation_handler->operationInfo();
 
         if (empty($operation_info['provides views field'])) {

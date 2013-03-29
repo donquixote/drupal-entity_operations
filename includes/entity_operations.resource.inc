@@ -26,7 +26,7 @@
  *  the affected entity.
  */
 function entity_operations_services_resource_callback($entity_type, $handler_class, $operation_name, $entity_id) {
-  $operation_handler = entity_operations_get_entity_operation_handler($entity_type, $operation_name);
+  $operation_handler = new $handler_class($entity_type, $operation_name);
   $operation_info = $operation_handler->operationInfo();
 
   $entity = entity_load_single($entity_type, $entity_id);
@@ -52,7 +52,7 @@ function entity_operations_services_resource_callback($entity_type, $handler_cla
  * Parameters are the same as entity_operations_services_resource_callback().
  */
 function entity_operations_services_resource_access_callback($entity_type, $handler_class, $operation_name, $entity_id) {
-  $operation_handler = entity_operations_get_entity_operation_handler($entity_type, $operation_name);
+  $operation_handler = new $handler_class($entity_type, $operation_name);
   $entity = entity_load_single($entity_type, $entity_id);
 
   $operation_access = $operation_handler->operationAccess($entity_type, $entity);
