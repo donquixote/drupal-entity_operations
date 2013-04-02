@@ -13,6 +13,8 @@ class entity_operations_handler_field_operation_link extends views_handler_field
   function option_definition() {
     $options = parent::option_definition();
     $options['text'] = array('default' => '', 'translatable' => TRUE);
+    $options['rewrite_link_text'] = array('default' => FALSE);
+
     return $options;
   }
 
@@ -25,7 +27,21 @@ class entity_operations_handler_field_operation_link extends views_handler_field
       '#title' => t('Text to display'),
       '#default_value' => $this->options['text'],
     );
+    $form['rewrite_link_text'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Rewrite the link text of this field'),
+      '#description' => t('Enable to override the link text with replacement tokens as per the "Replacement patterns" below.'),
+      '#default_value' => $this->options['rewrite_link_text'],
+    );
+
     parent::options_form($form, $form_state);
+
+    // Copy the replacement patterns help (now our parent has made it) so the
+    // user can see it without having to open up the 'Rewrite results' fieldset.
+    $form['help'] = $form['alter']['help'];
+    $form['help']['#dependency'] = array(
+      'edit-options-rewrite-link-text' => array(1),
+    );
 
     // The path is set by render_link function so don't allow to set it.
     $form['alter']['path'] = array('#access' => FALSE);
@@ -111,8 +127,20 @@ class entity_operations_handler_field_operation_link extends views_handler_field
     // The 'query' value is set in pre_render() as it's common to the whole
     // View result.
 
-    $text = !empty($this->options['text']) ? $this->options['text'] : $this->definition['operation path'];
-    return $text;
+    if (!empty($this->options['text'])) {
+      $link_text = $this->options['text'];
+
+      if ($this->options['rewrite_link_text']) {
+        $tokens = $this->get_render_tokens($link_text);
+        $alter = array('text' => $link_text);
+        $link_text = $this->render_altered($alter, $tokens);
+      }
+    }
+    else {
+      $link_text = $this->definition['operation path'];
+    }
+
+    return $link_text;
   }
 
 }
