@@ -17,10 +17,13 @@ class EntityOperationsDefaultUIController {
   // Argh, public because of the op handlers.
   public $path;
 
-  public function __construct($entity_type, $entity_info) {
+  public function __construct($entity_type) {
     $this->entityType = $entity_type;
-    $this->entityInfo = $entity_info;
-    $this->path = $this->entityInfo['operations ui']['path'];
+
+    $this->entityInfo = entity_get_info($this->entityType);
+    $this->entityOperationInfo = entity_operations_get_operation_info($this->entityType);
+
+    $this->path = $this->entityOperationInfo['path'];
   }
 
   /**
@@ -31,7 +34,7 @@ class EntityOperationsDefaultUIController {
 
     // TODO: set these in __construct() so subclasses can override them before
     // we do our work here??
-    $this->wildcard = isset($this->entityInfo['operations ui']['menu wildcard']) ? $this->entityInfo['operations ui']['menu wildcard'] : '%entity_object';
+    $this->wildcard = isset($this->entityOperationInfo['menu wildcard']) ? $this->entityOperationInfo['menu wildcard'] : '%entity_object';
     $this->base_path = $this->path . '/' . $this->wildcard;
     $this->loader_position = count(explode('/', $this->path));
 
@@ -41,7 +44,7 @@ class EntityOperationsDefaultUIController {
     // This allows altering of operations and adding of extra settings, without
     // either stashing excessive data in hook_entity_info(), or needing to
     // subclass this controller.
-    $entity_operations = $this->entityInfo['operations ui']['operations'];
+    $entity_operations = $this->entityOperationInfo['operations'];
     drupal_alter('entity_operations_menu_operations', $entity_operations, $this->entityType);
 
     foreach ($entity_operations as $operation_path => $operation_definition) {
