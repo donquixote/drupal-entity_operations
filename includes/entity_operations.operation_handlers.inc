@@ -753,20 +753,24 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
   }
 
   /**
-   * Helper function to set the form redirect to the entity URI.
+   * Set the path to redirect the user to after form submission.
+   *
+   * This is split off from formSubmit() for easier overriding.
+   *
+   * @param $entity_type
+   *  The entity type.
+   * @param $entity
+   *  The current entity.
+   *
+   * @return
+   *  A Drupal path to redirect the user to.
    */
-  function redirect_entity_uri($entity_type, $entity) {
+  function getFormSubmitRedirect($entity_type, $entity) {
+    // By default, we redirect the user to the entity URI.
     $uri = entity_uri($entity_type, $entity);
     return $uri['path'];
   }
 
-  /**
-   * ARRRGH needs tons of data we don't have here!
-   */
-  function redirect_default_operation($entity_type, $entity) {
-    $entity_info = entity_get_info($entity_type);
-    // ARGHL need to delve way too deep into stuff!
-  }
 }
 
 /**
@@ -1346,7 +1350,7 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
     }
 
     // Redirect to the entity.
-    $form_state['redirect'] = $this->redirect_entity_uri($this->entityType, $entity);
+    $form_state['redirect'] = $this->getFormSubmitRedirect($this->entityType, $entity);
   }
 
 }
@@ -1666,7 +1670,7 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
       drupal_set_message($message);
     }
 
-    $form_state['redirect'] = $this->redirect_entity_uri($entity_type, $entity);
+    $form_state['redirect'] = $this->getFormSubmitRedirect($entity_type, $entity);
   }
 
   /**
@@ -1737,16 +1741,12 @@ class EntityOperationsOperationDelete extends EntityOperationsOperationAction {
   }
 
   /**
-   * Form submit handler for this operation.
-   *
-   * Subclasses should not override this, but formSubmitGetParameters() instead.
+   * Set the path to redirect the user to after form submission.
    */
-  function formSubmit($form, &$form_state, $entity_type, $entity, $operation_path) {
-    parent::formSubmit($form, $form_state, $entity_type, $entity, $operation_path);
-
+  function getFormSubmitRedirect($entity_type, $entity) {
     // Overwrite the redirect, as there is no entity to return to.
     // Just send to the front page; there is nowhere else sensible to go to.
-    $form_state['redirect'] = '<front>';
+    return '<front>';
   }
 
   /**
