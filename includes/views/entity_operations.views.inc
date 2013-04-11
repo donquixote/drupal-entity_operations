@@ -66,6 +66,7 @@ function entity_operations_views_data_alter(&$data) {
             'handler' => 'entity_operations_handler_field_operation_link',
             // Data for our handler to find.
             'operation path' => $operation_name,
+            'operation handler class' => $handler_class,
           ),
         );
       }

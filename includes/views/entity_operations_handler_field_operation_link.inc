@@ -56,7 +56,10 @@ class entity_operations_handler_field_operation_link extends views_handler_field
     parent::pre_render($values);
 
     // Get the handler for the operation.
-    $this->operation_handler = entity_operations_get_entity_operation_handler($this->entity_type, $this->definition['operation path']);
+    $operation_name = $this->definition['operation path'];
+    $handler_class  = $this->definition['operation handler class'];
+
+    $this->operation_handler = new $handler_class($this->entity_type, $operation_name);
 
     // We handle access here, because this lets us determine overall access
     // to all of the rows, and lets us remove ourselves from the view if the
