@@ -17,7 +17,8 @@ class EntityOperationsDefaultAdminUIController extends EntityDefaultUIController
     // Sigh... have to get this all over again.
     $wildcard = isset($this->entityInfo['admin ui']['menu wildcard']) ? $this->entityInfo['admin ui']['menu wildcard'] : '%entity_object';
 
-    $operations = $this->entityInfo['operations ui']['operations'];
+    $operation_info = entity_operations_get_operation_info($this->entityType);
+    $operations = $operation_info['operations'];
 
     // TODO: check for handlers rather than paths, since these can be custom.
     // However, the handler classes could be subclasses! And also we have two
@@ -96,7 +97,9 @@ class EntityOperationsDefaultAdminUIController extends EntityDefaultUIController
       }
     }
 
-    $operations = $this->entityInfo['operations ui']['operations'];
+    $operation_info = entity_operations_get_operation_info($this->entityType);
+    $operations = $operation_info['operations'];
+
     $uri = $entity->uri();
 
     // TODO: check for handlers rather than paths, since these can be custom.
