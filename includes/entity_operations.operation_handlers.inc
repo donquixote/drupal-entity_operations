@@ -452,6 +452,17 @@ class EntityOperationsOperationPageViews extends EntityOperationsOperationPage {
   }
 
   /**
+   * Determine access to the operation for the user.
+   *
+   * Hands over to views_access().
+   */
+  function userAccess($entity_type, $entity, $params = array(), $account = NULL) {
+    // There should be only one array for views_access(), so just pull it out.
+    $views_access_param = $params[0][0];
+    return views_access($views_access_param);
+  }
+
+  /**
    * Returns the menu item for this operation.
    *
    * We process the info from entity_operations_get_views() here so it can
@@ -482,6 +493,9 @@ class EntityOperationsOperationPageViews extends EntityOperationsOperationPage {
         get_class($this),
         $operation_path,
         $loader_position,
+        array(
+          $operation_definition['views info']['access'],
+        ),
       ),
     );
 

@@ -478,12 +478,18 @@ function entity_operations_get_views($type = NULL, $reset = FALSE) {
         $operation_name = $view->display_handler->get_option('path');
         // Initialize handlers, to determine if the view uses exposed filters.
         $view->init_handlers();
+
+        // Get the access parameters out of our plugin.
+        // This is the same pattern as views_menu_alter().
+        $access = $view->display_handler->get_access_parameters();
+
         $used_views[$entity_type][$operation_name] = array(
           'name' => $view->name,
           'title' => $view->get_human_name() . ' - ' . $view->display[$display_id]->display_title,
           'display' => $display_id,
           'operation_name' => $operation_name,
           'title' => $view->display_handler->get_option('title'),
+          'access' => $access,
         );
         $view->destroy();
       }

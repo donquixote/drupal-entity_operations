@@ -61,6 +61,19 @@ class entity_operations_handler_field_operation_link extends views_handler_field
 
     $this->operation_handler = new $handler_class($this->entity_type, $operation_name);
 
+    $operation_info = entity_operations_get_operation_info($this->entity_type);
+    $operation_definition = $operation_info[$operation_name];
+
+    // Spoofily get the menu item, in case the access callback has a $params
+    // array. This is (currently) for the single case of a field that is itself
+    // provided by a Views operations tab, which therefore needs parameters for
+    // views_access().
+    // (Yes, this is messy: we totally fake the loader position as it's
+    // probably (!) not relevant.)
+    // TODO: Would this be better done in hook_views_data() for performance?
+    $menu_item = $this->operation_handler->menu_item($operation_name, $operation_definition, 0);
+    $access_params = isset($menu_item['access arguments'][4]) ? $menu_item['access arguments'][4] : array();
+
     // We handle access here, because this lets us determine overall access
     // to all of the rows, and lets us remove ourselves from the view if the
     // user has access to nothing.
@@ -76,7 +89,7 @@ class entity_operations_handler_field_operation_link extends views_handler_field
       foreach ($this->entities as $entity) {
         // Build up an array of access for each row for render() to use.
         $id = $entity->identifier();
-        $this->row_access[$id] = $this->operation_handler->access($this->entity_type, $entity);
+        $this->row_access[$id] = $this->operation_handler->access($this->entity_type, $entity, $access_params);
       }
     }
 

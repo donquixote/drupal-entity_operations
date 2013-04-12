@@ -28,6 +28,49 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
     return $this->get_option('path');
   }
 
+  /**
+   * Get the arguments for views_access() for this display.
+   *
+   * Cribbed from parts of execute_hook_menu().
+   */
+  function get_access_parameters() {
+    $access_plugin = $this->get_plugin('access');
+    if (!isset($access_plugin)) {
+      $access_plugin = views_get_plugin('access', 'none');
+    }
+
+    // Get access callback might return an array of the callback + the dynamic arguments.
+    $access_plugin_callback = $access_plugin->get_access_callback();
+
+    if (is_array($access_plugin_callback)) {
+      $access_arguments = array();
+
+      // Find the plugin arguments.
+      $access_plugin_method = array_shift($access_plugin_callback);
+      $access_plugin_arguments = array_shift($access_plugin_callback);
+      if (!is_array($access_plugin_arguments)) {
+        $access_plugin_arguments = array();
+      }
+
+      $access_arguments[0] = array($access_plugin_method, &$access_plugin_arguments);
+
+      // Move the plugin arguments to the access arguments array.
+      $i = 1;
+      foreach ($access_plugin_arguments as $key => $value) {
+        if (is_int($value)) {
+          $access_arguments[$i] = $value;
+          $access_plugin_arguments[$key] = $i;
+          $i++;
+        }
+      }
+    }
+    else {
+      $access_arguments = array($access_plugin_callback);
+    }
+
+    return $access_arguments;
+  }
+
   function option_definition() {
     $options = parent::option_definition();
 
