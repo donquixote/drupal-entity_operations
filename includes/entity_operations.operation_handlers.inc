@@ -1219,6 +1219,16 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
 class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm {
 
   /**
+   * Returns basic information about the operation.
+   */
+  function operationInfo() {
+    return array(
+      'label' => 'Edit',
+      'description' => 'Produces a generic form to edit the entity.',
+    ) + parent::operationInfo();
+  }
+
+  /**
    * Returns strings for the operations.
    */
   function operationStrings() {
