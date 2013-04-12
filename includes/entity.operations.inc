@@ -109,10 +109,6 @@ class EntityOperationsDefaultUIController {
       }
     }
 
-    // Invoke hook_entity_operations_operations_menu_alter().
-    //drupal_alter('entity_operations_operations_menu', $items, $this->entityType);
-    //dsm($items);
-
     return $items;
   }
 

@@ -64,16 +64,3 @@
 function entity_operations_hook_entity_info() {
 }
 
-/**
- * Alter menu items for an entity type's operations.
- *
- * This is called just before these are passed to hook_menu().
- *
- * @param $items
- *  The hook_menu() items.
- * @param $entity_type
- *  The entity type.
- */
-function hook_entity_operations_operations_menu_alter(&$items, $entity_type) {
-
-}
