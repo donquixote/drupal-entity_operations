@@ -159,18 +159,26 @@ function entity_operations_get_entity_operations_fieldset($entity, $operations =
  * @see entity_operations_hook_entity_info()
  */
 function entity_operations_get_operation_info($requested_entity_type = NULL) {
-  $operation_info = array();
-  foreach (entity_get_info() as $entity_type => $entity_info) {
-    if (isset($entity_info['operations ui'])) {
-      $operation_info[$entity_type] = $entity_info['operations ui'];
-    }
+  // No need for static caching: we probably won't call this mutiple times per
+  // request. Most calls to this only take place during a cache clear, but we
+  // use our own database caching for the ones that don't.
+  if ($cache = cache_get("entity_operation_info")) {
+    $entity_operation_info = $cache->data;
+  }
+  else {
+    $entity_operation_info = module_invoke_all('entity_operation_info');
+
+    // Let other modules alter the entity operation info.
+    drupal_alter('entity_operation_info', $entity_operation_info);
+
+    cache_set("entity_operation_info", $entity_operation_info);
   }
 
   if (empty($requested_entity_type)) {
-    return $operation_info;
+    return $entity_operation_info;
   }
-  elseif (isset($operation_info[$requested_entity_type])) {
-    return $operation_info[$requested_entity_type];
+  elseif (isset($entity_operation_info[$requested_entity_type])) {
+    return $entity_operation_info[$requested_entity_type];
   }
 }
 
