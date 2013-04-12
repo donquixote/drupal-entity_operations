@@ -23,7 +23,7 @@ class EntityOperationsDefaultUIController {
     $this->entityInfo = entity_get_info($this->entityType);
     $this->entityOperationInfo = entity_operations_get_operation_info($this->entityType);
 
-    $this->path = $this->entityOperationInfo['path'];
+    $this->path = $this->entityInfo['operations ui']['path'];
   }
 
   /**
@@ -34,7 +34,7 @@ class EntityOperationsDefaultUIController {
 
     // TODO: set these in __construct() so subclasses can override them before
     // we do our work here??
-    $this->wildcard = isset($this->entityOperationInfo['menu wildcard']) ? $this->entityOperationInfo['menu wildcard'] : '%entity_object';
+    $this->wildcard = isset($this->entityInfo['operations ui']['menu wildcard']) ? $this->entityInfo['operations ui']['menu wildcard'] : '%entity_object';
     $this->base_path = $this->path . '/' . $this->wildcard;
     $this->loader_position = count(explode('/', $this->path));
 
