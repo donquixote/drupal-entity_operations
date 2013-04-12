@@ -107,7 +107,7 @@ class EntityOperationsVBOOperations extends ViewsBulkOperationsBaseOperation {
     $form_state['entity_operation_form_elements'] = array(
       'form elements' => TRUE,
     );
-    $form = $operation_handler->getForm($form, &$form_state, $this->entityType, NULL, $this->entityOperationKey);
+    $form = $operation_handler->getForm($form, $form_state, $this->entityType, NULL, $this->entityOperationKey);
 
     return $form;
   }
@@ -140,7 +140,7 @@ class EntityOperationsVBOOperations extends ViewsBulkOperationsBaseOperation {
     $operation_handler = new $handler_class($this->entityType, $this->entityOperationKey);
 
     // Hand over to the operation handler.
-    $this->formOptions = $operation_handler->formSubmitGetParameters($form, &$form_state, $this->entityType, NULL, $this->entityOperationKey);
+    $this->formOptions = $operation_handler->formSubmitGetParameters($form, $form_state, $this->entityType, NULL, $this->entityOperationKey);
   }
 
   /**
