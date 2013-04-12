@@ -63,10 +63,8 @@ abstract class EntityOperationsOperationBase {
    *  - 'label': The localized admin label for this operation.
    *    See getOperationAdminString().
    *  - 'description': The localized admin description text for this operation.
-   *  - 'provides menu': Whether this operation should provide a menu item on
-   *    the entity base path.
-   *  - 'uses form': If 'provides menu' is TRUE, whether this operation's tab
-   *    is a form rather than a page.
+   *  - 'uses form': Whether this operation's output is a form. This causes a
+   *    different page callback to be used when output as a menu item.
    *  - 'provides views field': Whether this operation should be exposed as a
    *    Views field.
    *  - 'provides vbo': Whether this operation should be exposed to Views Bulk
@@ -82,7 +80,6 @@ abstract class EntityOperationsOperationBase {
       'label' => 'Label',
       'description' => 'Description',
       // Default behaviour is to provide a menu item.
-      'provides menu' => TRUE,
       'uses form' => FALSE,
       'provides vbo' => FALSE,
       'provides views field' => TRUE,
@@ -566,7 +563,6 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
     return array(
       'label' => 'Label',
       'description' => 'Description',
-      'provides menu' => TRUE,
       'uses form' => TRUE,
       'provides vbo' => FALSE,
       'provides views field' => TRUE,
@@ -976,7 +972,6 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
     return array(
       'label' => 'Add',
       'description' => 'Create a new entity, with a bundle selection page if required.',
-      'provides menu' => TRUE,
       'uses form' => TRUE,
       'provides vbo' => FALSE,
       'provides views field' => FALSE,
@@ -1637,7 +1632,6 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
    */
   function operationInfo() {
     return array(
-      'provides menu' => FALSE,
       'uses form' => TRUE,
       'provides vbo' => TRUE,
       // Extra info for VBO.
@@ -1728,7 +1722,6 @@ class EntityOperationsOperationDelete extends EntityOperationsOperationAction {
     return array(
       'label' => 'Delete',
       'description' => 'Produces a confirmation form to delete the entity.',
-      'provides menu' => TRUE,
       // Services module already provides CRUD operations for entities, so we
       // don't expose this to it.
       'provides services resource' => FALSE,
@@ -1917,7 +1910,6 @@ class EntityOperationsOperationSetOwner extends EntityOperationsOperationAction 
     return array(
       'label' => 'Set owner',
       'description' => 'Produces a form to set the user that owns the entity.',
-      'provides menu' => TRUE,
       'vbo' => array(
         'configurable' => TRUE,
       ),
