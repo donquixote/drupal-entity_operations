@@ -435,17 +435,17 @@ class EntityOperationsOperationPageViews extends EntityOperationsOperationPage {
   public function getOperationAdminString($string_key) {
     // We need the operation definition, as that has details about which view
     // this operation outputs, which we need to produce meaningful labels.
-    $entity_info = entity_get_info($this->entityType);
-    $operation_definition = $entity_info['operations ui']['operations'][$this->path];
-
+    // This is one of the reasons operation info is cached!
+    $operation_info = entity_operations_get_operation_info($this->entityType);
+    $operation_info[$this->path]['views info']['title'];
     switch ($string_key) {
       case 'label':
-        // TODO!
-        return t('View output of VIEW NAME: DISPLAY', array(
-          // TODO: get data out of $operation_definition.
-        ));
+        return $operation_info[$this->path]['views info']['title'];
       case 'description':
-        return t('Shows the output of a View');
+        return t('Shows the output of the View "!view-name" display "!display-name".', array(
+          '!view-name'    => $operation_info[$this->path]['views info']['name'],
+          '!display-name' => $operation_info[$this->path]['views info']['display'],
+        ));
     }
   }
 

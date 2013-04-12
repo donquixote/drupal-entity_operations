@@ -417,6 +417,9 @@ function views_entity_operation_info_alter(&$operation_info) {
         'handler' => 'EntityOperationsOperationPageViews',
         'provision' => array(
           'menu' => TRUE,
+          // By default, we provide a Views field for this... view. Which just
+          // means you can link to it from another view.
+          'views field' => TRUE,
         ),
         // Extend the array with info Views needs.
         'views info' => $view_info,
