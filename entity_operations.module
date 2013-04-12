@@ -232,7 +232,7 @@ function entity_operations_get_entity_permissions($entity_type, $own = array()) 
   }
 
   $permissions = array();
-  foreach ($entity_operation_info['operations'] as $operation_name => $operation_definition) {
+  foreach ($entity_operation_info as $operation_name => $operation_definition) {
     $handler_class = $operation_definition['handler'];
     $operation_handler = new $handler_class($entity_type, $operation_name);
 
