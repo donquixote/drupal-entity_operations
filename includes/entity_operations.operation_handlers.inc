@@ -266,12 +266,12 @@ abstract class EntityOperationsOperationBase {
    * This calls operationAccess() and userAccess() to check, respectively, the
    * logical access to the operation, and whether the user may perform it.
    */
-  function access($entity_type, $entity, $account = NULL) {
+  function access($entity_type, $entity, $params = array(), $account = NULL) {
     // First see whether the handler has anything to say about access from a
     // purely logical standpoint. This covers things such as a 'publish'
     // operation being denied on a node that is already published, because it
     // simply doesn't make sense.
-    $operation_access = $this->operationAccess($entity_type, $entity);
+    $operation_access = $this->operationAccess($entity_type, $entity, $params);
     // If the operation access control denies access, it has precedence. This is
     // because even if, say, the user has access to publish a node, if the node
     // in question simply *can't* be published, then it really can't!
@@ -280,7 +280,7 @@ abstract class EntityOperationsOperationBase {
     }
 
     // Now hand over to the user access check.
-    $user_access = $this->userAccess($entity_type, $entity, $account);
+    $user_access = $this->userAccess($entity_type, $entity, $params, $account);
     return $user_access;
   }
 
@@ -298,7 +298,7 @@ abstract class EntityOperationsOperationBase {
    *  from a logical standpoint and further access control passed on to the
    *  user permissions.
    */
-  function operationAccess($entity_type, $entity) {
+  function operationAccess($entity_type, $entity, $params = array()) {
   }
 
   /**
@@ -308,6 +308,8 @@ abstract class EntityOperationsOperationBase {
    *  The entity type.
    * @param $entity
    *  The current entity.
+   * @param $params
+   *  An array of additional parameters.
    * @param $account
    *  (Optional) The account to check access for. Defaults to the current user.
    *
@@ -315,7 +317,7 @@ abstract class EntityOperationsOperationBase {
    *  FALSE is the operation should not be allowed, TRUE if access should be
    *  granted.
    */
-  function userAccess($entity_type, $entity, $account = NULL) {
+  function userAccess($entity_type, $entity, $params = array(), $account = NULL) {
     // We use entity_access() by default.
     // Note that while entity_access() documents itself as only supporting
     // basic values of $op, in fact it just passes them to the access
@@ -869,7 +871,7 @@ class EntityOperationsOperationDevel extends EntityOperationsOperationPage {
   /**
    * Determine whether the action may be performed on the given entity.
    */
-  function operationAccess($entity_type, $entity) {
+  function operationAccess($entity_type, $entity, $params = array()) {
     // This operation depends on devel module.
     return module_exists('devel');
   }
@@ -877,7 +879,7 @@ class EntityOperationsOperationDevel extends EntityOperationsOperationPage {
   /**
    * Determine whether the user has access to this operation.
    */
-  function userAccess($entity_type, $entity, $account = NULL) {
+  function userAccess($entity_type, $entity, $params = array(), $account = NULL) {
     return user_access('access devel information');
   }
 
@@ -1076,19 +1078,8 @@ class EntityOperationsOperationAddPrepopulate extends EntityOperationsOperationA
    *
    * We have to override this, because otherwise, as is called before page(), it
    * doesn't have the prepopulated entity to work on.
-   *
-   * @param $entity_type
-   *  The entity type.
-   * @param $entity
-   *  The current entity.
-   * @param $account
-   *  (Optional) The account to check access for. Defaults to the current user.
-   *
-   * @return
-   *  FALSE is the operation should not be allowed, TRUE if access should be
-   *  granted.
    */
-  function userAccess($entity_type, $entity, $account = NULL) {
+  function userAccess($entity_type, $entity, $params = array(), $account = NULL) {
     // Build the entity first.
     $entity = $this->createEntity();
 
@@ -1441,19 +1432,8 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
    * there is no entity and we are showing the selection list, determine access
    * by checking the user has access to create at least one bundle.
    * This is the same behaviour as _node_add_access().
-   *
-   * @param $entity_type
-   *  The entity type.
-   * @param $entity
-   *  The current entity.
-   * @param $account
-   *  (Optional) The account to check access for. Defaults to the current user.
-   *
-   * @return
-   *  FALSE is the operation should not be allowed, TRUE if access should be
-   *  granted.
    */
-  function userAccess($entity_type, $entity, $account = NULL) {
+  function userAccess($entity_type, $entity, $params = array(), $account = NULL) {
     // Figure out if we're in a situation where we show the bundle selection
     // list.
     // TODO: move this logic to the constructor or a helper, as it's repeated
@@ -1805,7 +1785,7 @@ class EntityOperationsOperationPublish extends EntityOperationsOperationAction {
   /**
    * Access callback: deny access if entity is unpublished.
    */
-  function operationAccess($entity_type, $entity) {
+  function operationAccess($entity_type, $entity, $params = array()) {
     // Deny access if the entity is already published.
     $published = $entity->status;
     // We check the node is not unpublished rather than whether it is published,
@@ -1868,7 +1848,7 @@ class EntityOperationsOperationUnPublish extends EntityOperationsOperationPublis
   /**
    * Access callback: deny access if entity is unpublished.
    */
-  function operationAccess($entity_type, $entity) {
+  function operationAccess($entity_type, $entity, $params = array()) {
     // Deny access if the entity is already published.
     $published = $entity->status;
     // Use the constant, which allows module that extend the status property to
@@ -2031,7 +2011,7 @@ class EntityOperationsOperationOGGroup extends EntityOperationsOperationPage {
   /**
    * Determine access to the operation for the user.
    */
-  function userAccess($entity_type, $entity, $account = NULL) {
+  function userAccess($entity_type, $entity, $params = array(), $account = NULL) {
     // This is just a wrapper.
     return og_ui_get_group_admin($entity_type, $entity->identifier());
   }

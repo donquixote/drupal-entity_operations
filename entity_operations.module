@@ -372,15 +372,18 @@ function entity_operations_operation_form_submit($form, &$form_state) {
  *  The path the operation is on, i.e. the key in the hook_entity_info() array.
  * @param $entity
  *  The entity.
+ * @param $params
+ *  (optional) An array of further parameters which is passed to the operation
+ *  handler's page() method.
  *
  * @return
  *  A boolean indicating whether access should be granted.
  *
  * @see EntityOperationsOperationBase::access()
  */
-function entity_operations_operation_access_callback($entity_type, $handler_class, $operation_path, $entity) {
+function entity_operations_operation_access_callback($entity_type, $handler_class, $operation_path, $entity, $params = array()) {
   $operation_handler = new $handler_class($entity_type, $operation_path);
-  return $operation_handler->access($entity_type, $entity);
+  return $operation_handler->access($entity_type, $entity, $params);
 }
 
 // ========================================== Other contrib integration.
