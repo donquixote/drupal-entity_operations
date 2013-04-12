@@ -146,3 +146,18 @@ function hook_entity_operation_info_alter(&$operation_info) {
   // Replace the handler for the edit operation.
   $info['myentity']['edit']['handler'] = 'MyEntityCustomHandlerClass';
 }
+
+/*
+ * Alter entity operations prior to building hook_menu() items.
+ *
+ * This allows the addition of operations when menu items are being created. In
+ * particular, it prevents circularity with Views both defining operations and
+ * consuming them.
+ *
+ * @param $entity_operations
+ *  The array of entity operations, taken from hook_entity_info().
+ * @param $entity_type
+ *  The entity type.
+ */
+function hook_entity_operations_menu_operations_alter(&$entity_operations, $entity_type) {
+}

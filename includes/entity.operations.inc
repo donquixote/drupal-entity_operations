@@ -40,7 +40,11 @@ class EntityOperationsDefaultUIController {
 
     $this->weight = 0;
 
+    // Invoke hook_entity_operations_menu_operations_alter().
+    // This allows altering of operations and adding operations which otherwise
+    // would cause circularity.
     $entity_operations = $this->entityOperationInfo;
+    drupal_alter('entity_operations_menu_operations', $entity_operations, $this->entityType);
 
     foreach ($entity_operations as $operation_path => $operation_definition) {
       // Only act on operations that request a menu item.

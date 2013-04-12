@@ -410,6 +410,8 @@ function entity_operations_views_api() {
 /**
  * Implements hook_entity_operation_info_alter() for views module.
  */
+/*
+// Can't do this due to circularity: see http://drupal.org/node/1968748
 function views_entity_operation_info_alter(&$operation_info) {
   // Get the views with tabs for this entity.
   $views_info = entity_operations_get_views();
@@ -428,6 +430,26 @@ function views_entity_operation_info_alter(&$operation_info) {
         'views info' => $view_info,
       );
     }
+  }
+}
+*/
+
+/**
+ * Implements hook_entity_operations_menu_operations_alter() for views module.
+ */
+function views_entity_operations_menu_operations_alter(&$entity_operations, $entity_type) {
+  // Get the views with tabs for this entity.
+  $views_info = entity_operations_get_views($entity_type);
+  foreach ($views_info as $operation_name => $view_info) {
+    // Views clobber existing operations. Desirable or not? TODO.
+    $entity_operations[$operation_name] = array(
+      'handler' => 'EntityOperationsOperationPageViews',
+      'provision' => array(
+        'menu' => TRUE,
+      ),
+      // Extend the array with info Views needs.
+      'views info' => $view_info,
+    );
   }
 }
 
