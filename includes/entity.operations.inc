@@ -44,12 +44,18 @@ class EntityOperationsDefaultUIController {
     // This allows altering of operations and adding of extra settings, without
     // either stashing excessive data in hook_entity_info(), or needing to
     // subclass this controller.
-    $entity_operations = $this->entityOperationInfo['operations'];
-    drupal_alter('entity_operations_menu_operations', $entity_operations, $this->entityType);
+    $entity_operations = $this->entityOperationInfo;
+    //drupal_alter('entity_operations_menu_operations', $entity_operations, $this->entityType);
 
     foreach ($entity_operations as $operation_path => $operation_definition) {
-      $handler_class = $operation_definition['handler'];
+      // Only act on operations that request a menu item.
+      // We use empty() so that the definition can set this to FALSE to
+      // override handler info.
+      if (empty($operation_definition['provision']['menu'])) {
+        continue;
+      }
 
+      $handler_class = $operation_definition['handler'];
       $operation_handler = new $handler_class($this->entityType, $operation_path);
       // Some handlers need to get some of our properties.
       // TODO: this is a bit ugly.
@@ -57,21 +63,17 @@ class EntityOperationsDefaultUIController {
 
       $operation_handler_info = $operation_handler->operationInfo();
 
-      // Skip operations that don't provide a menu item, though if the
-      // definition array contains a 'menu_item' property, we allow that to
-      // override this, and assume the entity type definition knows what it is
-      // doing!
-      if (empty($operation_handler_info['provides menu']) && !isset($operation_definition['menu_item'])) {
+      // Skip operations whose handlers don't declare that they can provide a
+      // menu item.
+      if (empty($operation_handler_info['provides menu'])) {
         continue;
       }
 
       // Several things get to contribute properties to the menu item.
       $menu_item = array();
-      // Allow the operation to go first. These should probably be set using
-      // hook_entity_operations_operations_alter() rather than in
-      // hook_entity_info(), as data from the latter is always loaded.
-      if (isset($operation_definition['menu_item'])) {
-        $menu_item = $operation_definition['menu_item'];
+      // Allow the operation to go first.
+      if (!empty($operation_definition['provision']['menu']['menu item'])) {
+        $menu_item = $operation_definition['provision']['menu']['menu item'];
       }
 
       // Next, allow the handler to provide properties.
@@ -103,7 +105,7 @@ class EntityOperationsDefaultUIController {
       $this->weight++;
 
       // The default operation also gets to be the parent tab.
-      if (isset($operation_definition['default'])) {
+      if (!empty($operation_definition['provision']['menu']['default'])) {
         $base_item = $menu_item;
         $base_item['title'] = 'View'; // Won't get used.
         $base_item['type'] = MENU_NORMAL_ITEM;
@@ -113,7 +115,8 @@ class EntityOperationsDefaultUIController {
     }
 
     // Invoke hook_entity_operations_operations_menu_alter().
-    drupal_alter('entity_operations_operations_menu', $items, $this->entityType);
+    //drupal_alter('entity_operations_operations_menu', $items, $this->entityType);
+    //dsm($items);
 
     return $items;
   }

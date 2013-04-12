@@ -188,13 +188,11 @@ function entity_operations_get_operation_info($requested_entity_type = NULL) {
 function entity_operations_menu() {
   $items = array();
   // Get menu items from each entity type that declares operations.
-  foreach (entity_operations_get_operation_info() as $entity_type => $info) {
-    // Only act for entities that use our API, but also only if there is a base
-    // path defined. This allows entity types that do not require a UI to expose
-    // operations as Services, for instance.
-    if (isset($info['path'])) {
+  foreach (entity_get_info() as $entity_type => $entity_info) {
+    // Only act for entities request the Entity Operations UI.
+    if (isset($entity_info['operations ui'])) {
       // Instantiate the operations UI controller.
-      $class = isset($info['controller class']) ? $info['controller class'] : 'EntityOperationsDefaultUIController';
+      $class = isset($entity_info['operations ui']['controller class']) ? $entity_info['operations ui']['controller class'] : 'EntityOperationsDefaultUIController';
       $controller = new $class($entity_type);
       // Get menu items from the controller.
       $items += $controller->hook_menu();
