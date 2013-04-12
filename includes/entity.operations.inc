@@ -58,12 +58,6 @@ class EntityOperationsDefaultUIController {
 
       $operation_handler_info = $operation_handler->operationInfo();
 
-      // Skip operations whose handlers don't declare that they can provide a
-      // menu item.
-      if (empty($operation_handler_info['provides menu'])) {
-        continue;
-      }
-
       // Several things get to contribute properties to the menu item.
       $menu_item = array();
       // Allow the operation to go first.
