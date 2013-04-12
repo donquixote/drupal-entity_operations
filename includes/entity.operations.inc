@@ -79,7 +79,7 @@ class EntityOperationsDefaultUIController {
 
       $menu_item += array(
         'title' => $title,
-        'type' => isset($operation_definition['default']) ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK,
+        'type' => isset($operation_definition['provision']['menu']['default']) ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK,
         'load arguments' => array($this->entityType),
         'weight' => $this->weight,
         // Very rarely, handlers may wish to set this (such as 'add'), so we
