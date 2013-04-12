@@ -144,7 +144,7 @@ function hook_entity_operation_info() {
  */
 function hook_entity_operation_info_alter(&$operation_info) {
   // Replace the handler for the edit operation.
-  $info['myentity']['edit']['handler'] = 'MyEntityCustomHandlerClass';
+  $operation_info['myentity']['edit']['handler'] = 'MyEntityCustomHandlerClass';
 }
 
 /*
