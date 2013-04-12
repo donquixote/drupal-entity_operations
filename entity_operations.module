@@ -426,21 +426,6 @@ function views_entity_operation_info_alter(&$operation_info) {
 }
 
 /**
- * Implements hook_entity_operations_menu_operations_alter() for views module.
- */
-function views_entity_operations_menu_operations_alter(&$entity_operations, $entity_type) {
-  // Get the views with tabs for this entity.
-  $views_info = entity_operations_get_views($entity_type);
-  foreach ($views_info as $operation_name => $view_info) {
-    // Views clobber existing operations. Desirable or not? TODO.
-    $entity_operations[$operation_name] = array(
-      'handler' => 'EntityOperationsOperationPageViews',
-      'views info' => $view_info,
-    );
-  }
-}
-
-/**
  * Get a list of views and displays attached to specific entities.
  *
  * This function will cache its results into the views cache, so it gets

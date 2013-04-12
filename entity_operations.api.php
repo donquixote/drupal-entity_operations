@@ -47,10 +47,7 @@
  *          base URI of the entity, ie 'base_path/%wildcard'. For nodes, the
  *          'view' operation would be the default.
  *        - 'menu item': (optional) Properties to use for this operation's
- *          menu item. While these can be set here, it is recommended to use
- *          hook_entity_operations_menu_operations_alter() to set them instead,
- *          as data from this hook is loaded every page load whereas the menu
- *          item data is only needed on cache clear.
+ *          menu item.
  *
  * Other required properties:
  *  - 'module' must be set.
@@ -65,30 +62,6 @@
  * @see hook_entity_info()
  */
 function entity_operations_hook_entity_info() {
-}
-
-/**
- * Alter entity operations prior to building hook_menu() items.
- *
- * It is preferable to add overrides to operations here rather than
- * hook_entity_info(), because that is loaded from cache on every page request
- * whereas this hook is only invoked when rebuilding the menu.
- *
- * @param $entity_operations
- *  The array of entity operations, taken from hook_entity_info().
- * @param $entity_type
- *  The entity type.
- */
-function hook_entity_operations_menu_operations_alter(&$entity_operations, $entity_type) {
-  if ($entity_type == 'my_entity') {
-    // Change the title of the main 'view' tab of the entity.
-    $entity_operations['view']['menu_item'] = array(
-      'title' => t('Dashboard'),
-    );
-    // Override the publish operation so it provides an operation tab.
-    // It suffices to set an empty array.
-    $entity_operations['publish']['menu_item'] = array();
-  }
 }
 
 /**
