@@ -405,6 +405,27 @@ function entity_operations_views_api() {
 }
 
 /**
+ * Implements hook_entity_operation_info_alter() for views module.
+ */
+function views_entity_operation_info_alter(&$operation_info) {
+  // Get the views with tabs for this entity.
+  $views_info = entity_operations_get_views();
+  foreach (array_keys($views_info) as $entity_type) {
+    foreach ($views_info[$entity_type] as $operation_name => $view_info) {
+      // Views clobber existing operations. Desirable or not? TODO.
+      $operation_info[$entity_type][$operation_name] = array(
+        'handler' => 'EntityOperationsOperationPageViews',
+        'provision' => array(
+          'menu' => TRUE,
+        ),
+        // Extend the array with info Views needs.
+        'views info' => $view_info,
+      );
+    }
+  }
+}
+
+/**
  * Implements hook_entity_operations_menu_operations_alter() for views module.
  */
 function views_entity_operations_menu_operations_alter(&$entity_operations, $entity_type) {
