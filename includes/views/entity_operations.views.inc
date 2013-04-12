@@ -33,6 +33,13 @@ function entity_operations_views_plugins() {
  * Add Views fields for links to entity operations that support it.
  */
 function entity_operations_views_data_alter(&$data) {
+  // Avoid a DX WTF if Views has its data cache disabled, and force a rebuild of
+  // entity operations. Without this, the parts of Views data we supply would
+  // remain stale.
+  if (variable_get('views_skip_cache', FALSE)) {
+    cache_clear_all('entity_operation_info', 'cache');
+  }
+
   $entities_operations_info = entity_operations_get_operation_info();
   foreach ($entities_operations_info as $entity_type => $entity_operations_info) {
     $entity_info = entity_get_info($entity_type);
@@ -40,9 +47,16 @@ function entity_operations_views_data_alter(&$data) {
     // Only add operations to entities if their base table has Views data.
     $base_table = $entity_info['base table'];
     if (isset($data[$base_table])) {
-      foreach ($entity_operations_info['operations'] as $operation_name => $operation) {
+      foreach ($entity_operations_info as $operation_name => $operation_definition) {
+        // Only act on operations that request a views field.
+        // We use empty() so that the definition can set this to FALSE to
+        // override handler info.
+        if (empty($operation_definition['provision']['views field'])) {
+          continue;
+        }
+
         // Get the handler and the operation info.
-        $handler_class = $operation['handler'];
+        $handler_class = $operation_definition['handler'];
         $operation_handler = new $handler_class($entity_type, $operation_name);
         $operation_info = $operation_handler->operationInfo();
 

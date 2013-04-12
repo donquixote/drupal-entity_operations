@@ -30,7 +30,7 @@ function entity_operations_vbo_entity_operations_list($operation_id = NULL) {
   // Create operations per-entity.
   $operations_info = entity_operations_get_operation_info();
   foreach ($operations_info as $entity_type => $entity_operations_info) {
-    foreach ($entity_operations_info['operations'] as $key => $operation_definition) {
+    foreach ($entity_operations_info as $key => $operation_definition) {
       $handler_class = $operation_definition['handler'];
       $operation_handler = new $handler_class($entity_type, $key);
       $operation_info = $operation_handler->operationInfo();

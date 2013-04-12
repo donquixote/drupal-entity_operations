@@ -159,18 +159,26 @@ function entity_operations_get_entity_operations_fieldset($entity, $operations =
  * @see entity_operations_hook_entity_info()
  */
 function entity_operations_get_operation_info($requested_entity_type = NULL) {
-  $operation_info = array();
-  foreach (entity_get_info() as $entity_type => $entity_info) {
-    if (isset($entity_info['operations ui'])) {
-      $operation_info[$entity_type] = $entity_info['operations ui'];
-    }
+  // No need for static caching: we probably won't call this mutiple times per
+  // request. Most calls to this only take place during a cache clear, but we
+  // use our own database caching for the ones that don't.
+  if ($cache = cache_get("entity_operation_info")) {
+    $entity_operation_info = $cache->data;
+  }
+  else {
+    $entity_operation_info = module_invoke_all('entity_operation_info');
+
+    // Let other modules alter the entity operation info.
+    drupal_alter('entity_operation_info', $entity_operation_info);
+
+    cache_set("entity_operation_info", $entity_operation_info);
   }
 
   if (empty($requested_entity_type)) {
-    return $operation_info;
+    return $entity_operation_info;
   }
-  elseif (isset($operation_info[$requested_entity_type])) {
-    return $operation_info[$requested_entity_type];
+  elseif (isset($entity_operation_info[$requested_entity_type])) {
+    return $entity_operation_info[$requested_entity_type];
   }
 }
 
@@ -180,13 +188,11 @@ function entity_operations_get_operation_info($requested_entity_type = NULL) {
 function entity_operations_menu() {
   $items = array();
   // Get menu items from each entity type that declares operations.
-  foreach (entity_operations_get_operation_info() as $entity_type => $info) {
-    // Only act for entities that use our API, but also only if there is a base
-    // path defined. This allows entity types that do not require a UI to expose
-    // operations as Services, for instance.
-    if (isset($info['path'])) {
+  foreach (entity_get_info() as $entity_type => $entity_info) {
+    // Only act for entities request the Entity Operations UI.
+    if (isset($entity_info['operations ui'])) {
       // Instantiate the operations UI controller.
-      $class = isset($info['controller class']) ? $info['controller class'] : 'EntityOperationsDefaultUIController';
+      $class = isset($entity_info['operations ui']['controller class']) ? $entity_info['operations ui']['controller class'] : 'EntityOperationsDefaultUIController';
       $controller = new $class($entity_type);
       // Get menu items from the controller.
       $items += $controller->hook_menu();
@@ -226,7 +232,7 @@ function entity_operations_get_entity_permissions($entity_type, $own = array()) 
   }
 
   $permissions = array();
-  foreach ($entity_operation_info['operations'] as $operation_name => $operation_definition) {
+  foreach ($entity_operation_info as $operation_name => $operation_definition) {
     $handler_class = $operation_definition['handler'];
     $operation_handler = new $handler_class($entity_type, $operation_name);
 
@@ -399,17 +405,23 @@ function entity_operations_views_api() {
 }
 
 /**
- * Implements hook_entity_operations_menu_operations_alter() for views module.
+ * Implements hook_entity_operation_info_alter() for views module.
  */
-function views_entity_operations_menu_operations_alter(&$entity_operations, $entity_type) {
+function views_entity_operation_info_alter(&$operation_info) {
   // Get the views with tabs for this entity.
-  $views_info = entity_operations_get_views($entity_type);
-  foreach ($views_info as $operation_name => $view_info) {
-    // Views clobber existing operations. Desirable or not? TODO.
-    $entity_operations[$operation_name] = array(
-      'handler' => 'EntityOperationsOperationPageViews',
-      'views info' => $view_info,
-    );
+  $views_info = entity_operations_get_views();
+  foreach (array_keys($views_info) as $entity_type) {
+    foreach ($views_info[$entity_type] as $operation_name => $view_info) {
+      // Views clobber existing operations. Desirable or not? TODO.
+      $operation_info[$entity_type][$operation_name] = array(
+        'handler' => 'EntityOperationsOperationPageViews',
+        'provision' => array(
+          'menu' => TRUE,
+        ),
+        // Extend the array with info Views needs.
+        'views info' => $view_info,
+      );
+    }
   }
 }
 
