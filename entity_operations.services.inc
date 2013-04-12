@@ -16,7 +16,7 @@ function entity_operations_services_resources() {
 
   $entities_operations_info = entity_operations_get_operation_info();
   foreach ($entities_operations_info as $entity_type => $entity_operations_info) {
-    foreach ($entity_operations_info['operations'] as $operation_name => $operation) {
+    foreach ($entity_operations_info as $operation_name => $operation) {
       // Get the handler and the operation info.
       $handler_class = $operation['handler'];
       $operation_handler = new $handler_class($entity_type, $operation_name);
