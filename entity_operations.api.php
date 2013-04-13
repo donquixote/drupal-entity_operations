@@ -80,10 +80,14 @@ function entity_operations_hook_entity_info() {
  *      - 'views field': The operation is available as a Views field on the
  *        entity's base table, which shows a link to the operation tab. (This
  *        also requires 'menu' to be set.)
+ *      - 'entity view': The operation is shown by default in the fieldset of
+ *        operation forms returned by
+ *        entity_operations_get_entity_operations_fieldset(), and shown on the
+ *        entity view if the EntityOperationsOperationEntityViewOperations
+ *        handler is used.
  *      - TODO: vbo
  *      - TODO: services
  *      - TODO: admin UI links
- *      - TODO: entity display
  *      Values of a provision type array can be one of:
  *      - TRUE: If the operation is to be provided in this channel, and no
  *        further settings need to be specified.

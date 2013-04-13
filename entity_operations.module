@@ -78,7 +78,7 @@ function entity_operations_get_entity_operation_handler($entity_type, $operation
  *  (Optional) An array of operation names. These are the keys defined in the
  *  operations array in the entity's hook_entity_info(). If ommitted, the
  *  operations used are those with 'entity view' set to TRUE in their
- *  hook_entity_info() definition.
+ *  hook_entity_operation_info() 'provision' settings.
  *
  * @return
  *  A build array containing all the requested entities, or an empty array
@@ -87,12 +87,13 @@ function entity_operations_get_entity_operation_handler($entity_type, $operation
 function entity_operations_get_entity_operations_fieldset($entity, $operations = array()) {
   $entity_type = $entity->entityType();
   $entity_info = $entity->entityInfo();
+  $operation_info = entity_operations_get_operation_info($entity->entityType());
 
   // Build up operations array if it's empty.
   if (empty($operations)) {
-    foreach ($entity_info['operations ui']['operations'] as $operation_path => $operation_definition) {
-      if (isset($operation_definition['entity view'])) {
-        $operations[] = $operation_path;
+    foreach ($operation_info as $operation_name => $operation_definition) {
+      if (isset($operation_definition['provision']['entity view'])) {
+        $operations[] = $operation_name;
       }
     }
   }
