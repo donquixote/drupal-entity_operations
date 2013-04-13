@@ -55,13 +55,7 @@ function entity_operations_services_resource_access_callback($entity_type, $hand
   $operation_handler = new $handler_class($entity_type, $operation_name);
   $entity = entity_load_single($entity_type, $entity_id);
 
-  $operation_access = $operation_handler->operationAccess($entity_type, $entity);
-  // If something non-NULL was returned, it has precedence.
-  if (isset($operation_access)) {
-    return $operation_access;
-  }
-
-  // Now hand over to the handler's user access check.
-  $user_access = $operation_handler->userAccess($entity_type, $entity);
-  return $user_access;
+  // Get access for the operation.
+  $access = $operation_handler->access($entity_type, $entity);
+  return $access;
 }
