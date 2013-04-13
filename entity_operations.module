@@ -103,9 +103,9 @@ function entity_operations_get_entity_operations_fieldset($entity, $operations =
   );
 
   $build_operations = array();
-  foreach ($operations as $operation) {
-    $handler_class = $entity_info['operations ui']['operations'][$operation]['handler'];
-    $operation_handler = new $handler_class($entity_type, $operation);
+  foreach ($operations as $operation_name) {
+    $handler_class = $operation_info[$operation_name]['handler'];
+    $operation_handler = new $handler_class($entity_type, $operation_name);
 
     // Check access for the operation.
     if ($operation_handler->access($entity_type, $entity) === FALSE) {
@@ -114,7 +114,7 @@ function entity_operations_get_entity_operations_fieldset($entity, $operations =
 
     $form_state = array();
     $form_state['build_info']['args'] = array(
-      $entity_type, $handler_class, $operation, $entity,
+      $entity_type, $handler_class, $operation_name, $entity,
     );
     $form_state['entity_operation_form_elements'] = array(
       'form elements' => TRUE,
@@ -123,7 +123,7 @@ function entity_operations_get_entity_operations_fieldset($entity, $operations =
 
     $operation_form = drupal_build_form('entity_operations_operation_form', $form_state);
 
-    $build_operations[$operation] = $operation_form;
+    $build_operations[$operation_name] = $operation_form;
   }
 
   if (!empty($build_operations)) {
