@@ -924,6 +924,62 @@ class EntityOperationsOperationDevel extends EntityOperationsOperationPage {
 }
 
 /**
+ * Op handler for viewing tokens for an entity.
+ *
+ * Requirements:
+ *  - token
+ *  - devel module
+ * You probably also should have entity_token enabled too!
+ */
+class EntityOperationsOperationToken extends EntityOperationsOperationPage {
+
+  /**
+   * Returns basic information about the operation.
+   */
+  function operationInfo() {
+    return array(
+      'label' => 'Token',
+      'description' => 'View the tokens for the entity.',
+    ) + parent::operationInfo();
+  }
+
+  /**
+   * Returns strings for the operations.
+   */
+  function operationStrings() {
+    return array(
+      'tab title' => 'Tokens',
+    ) + parent::operationStrings();
+  }
+
+  /**
+   * Determine whether the action may be performed on the given entity.
+   */
+  function operationAccess($entity_type, $entity, $params = array()) {
+    // This operation depends on devel module.
+    return (module_exists('devel') && module_exists('token'));
+  }
+
+  /**
+   * Determine whether the user has access to this operation.
+   */
+  function userAccess($entity_type, $entity, $params = array(), $account = NULL) {
+    return user_access('access devel information');
+  }
+
+  /**
+   * Page callback.
+   */
+  function page($entity_type, $entity, $params = array()) {
+    module_load_include('inc', 'token', 'token.pages');
+    $build = token_devel_token_object($entity_type, $entity);
+
+    return $build;
+  }
+
+}
+
+/**
  * Op handler for viewing devel output for an entity's metadata properties.
  *
  * Requirements:
