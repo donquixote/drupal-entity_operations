@@ -113,6 +113,7 @@ function entity_operations_get_entity_operations_fieldset($entity, $operations =
       continue;
     }
 
+    // Dose up $form_state with our requested form elements.
     $form_state = array();
     $form_state['build_info']['args'] = array(
       $entity_type, $handler_class, $operation_name, $entity,
@@ -122,7 +123,11 @@ function entity_operations_get_entity_operations_fieldset($entity, $operations =
       'action button' => TRUE,
     );
 
-    $operation_form = drupal_build_form('entity_operations_operation_form', $form_state);
+    // Get the form id.
+    $form_id = $operation_handler->getFormID($entity_type, $operation_name);
+
+    // We have to use drupal_build_form() so we can pass in a $form_state.
+    $operation_form = drupal_build_form($form_id, $form_state);
 
     $build_operations[$operation_name] = $operation_form;
   }
@@ -308,6 +313,20 @@ function entity_operations_operation_page_callback($entity_type, $handler_class,
   $operation_handler->setTitle($entity_type, $entity, $params);
 
   return $operation_handler->page($entity_type, $entity, $params);
+}
+
+/**
+ * Implements hook_forms().
+ */
+function entity_operations_forms($form_id, $args) {
+  // We only care about the first piece of the form ID here.
+  $length = strlen('entity_operations_operation_form');
+  if (substr($form_id, 0, $length) == 'entity_operations_operation_form') {
+    $forms[$form_id] = array(
+      'callback' => 'entity_operations_operation_form',
+    );
+    return $forms;
+  }
 }
 
 /**

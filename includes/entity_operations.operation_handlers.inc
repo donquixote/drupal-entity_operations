@@ -626,10 +626,11 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    * Properties for the menu item specific to this handler.
    */
   function menu_item($operation_path, $operation_definition, $loader_position) {
+    $form_id = $this->getFormID($this->entityType, $operation_path);
     return array(
       'page callback' => 'drupal_get_form',
       'page arguments' => array(
-        'entity_operations_operation_form',
+        $form_id,
         $this->entityType,
         get_class($this),
         $operation_path,
@@ -643,6 +644,21 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
         $loader_position,
       ),
     );
+  }
+
+  /**
+   * Get the form ID for the operation form.
+   *
+   * @param $entity_type
+   *  The entity type.
+   * @param $operation_path
+   *  The path component for the operation.
+   *
+   * @return
+   *  A form ID that will be recognized by entity_operations_forms().
+   */
+  function getFormID($entity_type, $operation_path) {
+    return implode('_', array('entity_operations_operation_form', $entity_type, $operation_path));
   }
 
   /**
