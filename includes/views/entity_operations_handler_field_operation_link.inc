@@ -72,6 +72,22 @@ class entity_operations_handler_field_operation_link extends views_handler_field
   }
 
   /**
+   * Require the entity operation name to be set.
+   *
+   * This prevents an AJAX error when adding the field, before it's been
+   * configured.
+   */
+  function validate() {
+    $errors = parent::validate();
+
+    if (empty($this->options['operation_name'])) {
+      $errors[] = t('The operation name must be set.');
+    }
+
+    return $errors;
+  }
+
+  /**
    * Run before any fields are rendered.
    */
   function pre_render(&$values) {
