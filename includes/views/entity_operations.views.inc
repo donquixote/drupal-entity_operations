@@ -40,10 +40,7 @@ function entity_operations_views_data_alter(&$data) {
     cache_clear_all('entity_operation_info', 'cache');
   }
 
-  $entities_operations_info = entity_operations_get_operation_info();
-  foreach ($entities_operations_info as $entity_type => $entity_operations_info) {
-    $entity_info = entity_get_info($entity_type);
-
+  foreach (entity_get_info() as $entity_type => $entity_info) {
     // Only add operations to entities if their base table has Views data.
     $base_table = $entity_info['base table'];
     if (!isset($data[$base_table])) {
