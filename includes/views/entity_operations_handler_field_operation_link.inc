@@ -142,7 +142,7 @@ class entity_operations_handler_field_operation_link extends views_handler_field
     // This ensures, for instance, that the user doesn't get an empty (and
     // likely meaningless!) column in a table view.
     if (!$overall_access) {
-      unset($this->view->field[$this->field]);
+      unset($this->view->field[$this->options['id']]);
       // Just bail now, no point.
       return;
     }
