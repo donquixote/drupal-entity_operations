@@ -12,6 +12,8 @@ class entity_operations_handler_field_operation_link extends views_handler_field
    */
   function option_definition() {
     $options = parent::option_definition();
+
+    $options['operation_name'] = array('default' => NULL);
     $options['text'] = array('default' => '', 'translatable' => TRUE);
     $options['rewrite_link_text'] = array('default' => FALSE);
 
@@ -22,6 +24,27 @@ class entity_operations_handler_field_operation_link extends views_handler_field
    * Build the options form.
    */
   function options_form(&$form, &$form_state) {
+    $entity_operations_info = entity_operations_get_operation_info($this->entity_type);
+    $options = array();
+    foreach ($entity_operations_info as $operation_name => $operation_definition) {
+      if (!empty($operation_definition['provision']['views field'])) {
+        $handler_class = $operation_definition['handler'];
+        $operation_handler = new $handler_class($this->entity_type, $operation_name);
+        $operation_info = $operation_handler->operationInfo();
+
+        $options[$operation_name] = $operation_handler->getOperationAdminString('label');
+      }
+    }
+
+    $form['operation_name'] = array(
+      '#type' => 'radios',
+      '#title' => t('Operation'),
+      '#description' => t('The operation tab on the entity this field should link to.'),
+      '#options' => $options,
+      '#required' => TRUE,
+      '#default_value' => $this->options['operation_name'],
+    );
+
     $form['text'] = array(
       '#type' => 'textfield',
       '#title' => t('Text to display'),
@@ -56,13 +79,13 @@ class entity_operations_handler_field_operation_link extends views_handler_field
     parent::pre_render($values);
 
     // Get the handler for the operation.
-    $operation_name = $this->definition['operation path'];
-    $handler_class  = $this->definition['operation handler class'];
+    $operation_name = $this->options['operation_name'];
+
+    $entity_operations_info = entity_operations_get_operation_info($this->entity_type);
+    $operation_definition = $entity_operations_info[$operation_name];
+    $handler_class = $entity_operations_info[$operation_name]['handler'];
 
     $this->operation_handler = new $handler_class($this->entity_type, $operation_name);
-
-    $operation_info = entity_operations_get_operation_info($this->entity_type);
-    $operation_definition = $operation_info[$operation_name];
 
     // Spoofily get the menu item, in case the access callback has a $params
     // array. This is (currently) for the single case of a field that is itself
@@ -136,7 +159,7 @@ class entity_operations_handler_field_operation_link extends views_handler_field
   function render_link($entity, $values) {
     // Get the entity URI and append the operation path component.
     $uri = entity_uri($this->entity_type, $entity);
-    $uri['path'] .= '/' . $this->definition['operation path'];
+    $uri['path'] .= '/' . $this->options['operation_name'];
 
     $this->options['alter']['make_link'] = TRUE;
     $this->options['alter']['path'] = $uri['path'];
@@ -153,7 +176,7 @@ class entity_operations_handler_field_operation_link extends views_handler_field
       }
     }
     else {
-      $link_text = $this->definition['operation path'];
+      $link_text = $this->options['operation_name'];
     }
 
     return $link_text;

@@ -46,44 +46,23 @@ function entity_operations_views_data_alter(&$data) {
 
     // Only add operations to entities if their base table has Views data.
     $base_table = $entity_info['base table'];
-    if (isset($data[$base_table])) {
-      foreach ($entity_operations_info as $operation_name => $operation_definition) {
-        // Only act on operations that request a views field.
-        // We use empty() so that the definition can set this to FALSE to
-        // override handler info.
-        if (empty($operation_definition['provision']['views field'])) {
-          continue;
-        }
-
-        // Get the handler and the operation info.
-        $handler_class = $operation_definition['handler'];
-        $operation_handler = new $handler_class($entity_type, $operation_name);
-        $operation_info = $operation_handler->operationInfo();
-
-        if (empty($operation_info['provides views field'])) {
-          // Skip operations that don't declare that they provide a views field.
-          continue;
-        }
-
-        $data[$base_table]['entity_operation_' . $operation_name] = array(
-          'title' => t('Entity operation: !title', array(
-            // This is already translated and sanitized.
-            '!title' => $operation_handler->getOperationAdminString('label'),
-          )),
-          'help' => t('Displays a link to the Entity Operation on the @op subpath: "!op-desc"', array(
-            '@op' => $operation_name,
-            // This is already translated and sanitized.
-            '!op-desc' => $operation_handler->getOperationAdminString('description'),
-          )),
-          'field' => array(
-            'real field' => $entity_info['entity keys']['id'],
-            'handler' => 'entity_operations_handler_field_operation_link',
-            // Data for our handler to find.
-            'operation path' => $operation_name,
-            'operation handler class' => $handler_class,
-          ),
-        );
-      }
+    if (!isset($data[$base_table])) {
+      continue;
     }
+
+    // Only add an entity operations field if the entity operations UI is in
+    // use.
+    if (!isset($entity_info['operations ui'])) {
+      continue;
+    }
+
+    $data[$base_table]['entity_operation'] = array(
+      'title' => t('Entity operation link'),
+      'help' => t('Displays a link to an Entity Operation tab on the entity.'),
+      'field' => array(
+        'real field' => $entity_info['entity keys']['id'],
+        'handler' => 'entity_operations_handler_field_operation_link',
+      ),
+    );
   }
 }
