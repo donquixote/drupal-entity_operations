@@ -658,6 +658,9 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    *  A form ID that will be recognized by entity_operations_forms().
    */
   function getFormID($entity_type, $operation_path) {
+    // Convert '/' in operation path to '_' so that the form ID can form part of
+    // a valid function name for alter hooks.
+    $operation_path = str_replace('/', '_', $operation_path);
     return implode('_', array('entity_operations_operation_form', $entity_type, $operation_path));
   }
 
