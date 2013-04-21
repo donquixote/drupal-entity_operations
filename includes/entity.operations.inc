@@ -79,7 +79,7 @@ class EntityOperationsDefaultUIController {
 
       $menu_item += array(
         'title' => $title,
-        'type' => isset($operation_definition['provision']['menu']['default']) ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK,
+        'type' => MENU_LOCAL_TASK,
         'load arguments' => array($this->entityType),
         'weight' => $this->weight,
         // Very rarely, handlers may wish to set this (such as 'add'), so we
@@ -97,13 +97,44 @@ class EntityOperationsDefaultUIController {
       // Increase the weight for the next menu item.
       $this->weight++;
 
+      // Handle default tabs.
       // The default operation also gets to be the parent tab.
       if (!empty($operation_definition['provision']['menu']['default'])) {
+        // Copy the item to make the base item.
         $base_item = $menu_item;
-        $base_item['title'] = 'View'; // Won't get used.
+
+        // The item itself is made the default tab.
+        $items[$path]['type'] = MENU_DEFAULT_LOCAL_TASK;
+
+        $base_item['title'] = 'View'; // Won't get used. TODO
         $base_item['type'] = MENU_NORMAL_ITEM;
 
         $items[$this->base_path] = $base_item;
+      }
+
+      // Secondary parent tabs, which are themselves a primary tab.
+      if (!empty($operation_definition['provision']['menu']['default secondary'])) {
+        // Copy the item to make the base item.
+        $base_item = $menu_item;
+
+        // The item itself is made the default tab.
+        $items[$path]['type'] = MENU_DEFAULT_LOCAL_TASK;
+
+        list($root, ) = explode('/', $operation_path);
+        $expected_parent_path = $this->base_path . '/' . $root;
+
+        // The parent item takes the default tab's title, unless something else
+        // is specified in the operation definition.
+        if (!empty($operation_definition['provision']['menu']['parent tab title'])) {
+          $base_item['title'] = $operation_definition['provision']['menu']['parent tab title'];
+        }
+
+        // The base item can itself be a default tab in the primary tabs.
+        if (!empty($operation_definition['provision']['menu']['default'])) {
+          $base_item['type'] = MENU_DEFAULT_LOCAL_TASK;
+        }
+
+        $items[$expected_parent_path] = $base_item;
       }
     }
 

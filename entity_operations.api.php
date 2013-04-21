@@ -74,6 +74,18 @@ function entity_operations_hook_entity_info() {
  *          one operation may be the default. This causes it to respond to the
  *          base URI of the entity, ie 'base_path/%wildcard'. For nodes, the
  *          'view' operation would be the default.
+ *        - 'default secondary': (optional) If the operation name contains a
+ *          '/', the setting this to TRUE causes this operation to be the
+ *          default in the secondary tab set implicitly formed by the first
+ *          part of the name. For example, 'foo/bar' and 'foo/biz' form a
+ *          secondary tab set at the subpath 'foo', and one of the two should
+ *          be marked as default secondary, so that it is output at 'foo' (and
+ *          thus there should be no operation defined for 'foo').
+ *          Note that it is possible for one such secondary item to also be
+ *          marked as 'default', in which case the entity URI will output it.
+ *        - 'parent tab title': (optional) Can be set on a secondary-level
+ *          operation which has 'default' set to define the tab title for the
+ *          containing primary-level tab that is automatically created.
  *        - 'menu item': (optional) An array of properties suitable for
  *          hook_menu(), to use for this operation's menu item. These override
  *          those provided by the handler.
