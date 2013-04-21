@@ -1,0 +1,5 @@
+name = Entity Operations Example
+description = Provides an example entity type using Entity Operations.
+package = Example modules
+dependencies[] = entity_operations
+core = 7.x
