@@ -2101,7 +2101,8 @@ class EntityOperationsOperationOGGroup extends EntityOperationsOperationPage {
    */
   function userAccess($entity_type, $entity, $params = array(), $account = NULL) {
     // This is just a wrapper.
-    return og_ui_get_group_admin($entity_type, $entity->identifier());
+    $access = og_ui_user_access_group('manage members', $entity_type, $entity->identifier());
+    return $access;
   }
 
   /**
