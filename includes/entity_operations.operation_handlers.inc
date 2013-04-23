@@ -516,12 +516,11 @@ class EntityOperationsOperationPageViews extends EntityOperationsOperationPage {
     $view_display_name = $params['view_display_name'];
 
     if ($view = views_get_view($view_name)) {
+      // We don't check access to the display here: it's already been taken
+      // care of in userAccess().
       $view->set_display($view_display_name);
-      if ($view->access($view_display_name)) {
-        $view->current_entity = $entity;
-
-        $result = $view->execute_display($view_display_name);
-      }
+      $view->current_entity = $entity;
+      $result = $view->execute_display($view_display_name);
     }
 
     if (!empty($result)) {
