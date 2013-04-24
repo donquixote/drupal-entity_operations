@@ -71,11 +71,22 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
     return $access_arguments;
   }
 
+  /**
+   * Returns properties for this tab's menu item.
+   */
+  function menu_item() {
+    $weight = $this->get_option('menu_weight');
+    return array(
+      'weight' => empty($weight) ? 0 : $weight,
+    );
+  }
+
   function option_definition() {
     $options = parent::option_definition();
 
     $options['entity_type'] = array('default' => '');
     $options['path'] = array('default' => '');
+    $options['menu_weight'] = array('default' => 10);
     $options['argument_mode'] = array('default' => 'id');
     $options['default_argument'] = array('default' => '');
     $options['show_title'] = 0;
@@ -175,6 +186,13 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
           '#description' => t('The path below the entity where this tab should appear.'),
           '#default_value' => $this->get_option('path'),
         );
+        $form['menu_weight'] = array(
+          '#title' => t('Weight'),
+          '#type' => 'textfield',
+          '#size' => 4,
+          '#default_value' => $this->get_option('menu_weight'),
+          '#description' => t('The lower the weight the higher/further left it will appear.'),
+        );
 
         break;
 
@@ -257,6 +275,7 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
         break;
       case 'operation_name':
         $this->set_option('path', $form_state['values']['path']);
+        $this->set_option('menu_weight', $form_state['values']['menu_weight']);
         break;
       case 'arguments':
         $this->set_option('argument_mode', $form_state['values']['argument_mode']);

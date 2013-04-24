@@ -434,7 +434,9 @@ function views_entity_operation_info_alter(&$operation_info) {
       $operation_info[$entity_type][$operation_name] = array(
         'handler' => 'EntityOperationsOperationPageViews',
         'provision' => array(
-          'menu' => TRUE,
+          'menu' => array(
+            'menu item' => $view_info['menu item'],
+          ),
           // By default, we provide a Views field for this... view. Which just
           // means you can link to it from another view.
           'views field' => TRUE,
@@ -505,6 +507,7 @@ function entity_operations_get_views($type = NULL, $reset = FALSE) {
           'operation_name' => $operation_name,
           'title' => $view->display_handler->get_option('title'),
           'access' => $access,
+          'menu item' => $view->display_handler->menu_item(),
         );
         $view->destroy();
       }
