@@ -517,6 +517,9 @@ function entity_operations_get_views($type = NULL, $reset = FALSE) {
           // Data for the menu provision settings.
           'menu' => array(
             'menu item' => $view->display_handler->menu_item(),
+            'default' => $view->display_handler->get_option('menu_default'),
+            'default secondary' => $view->display_handler->get_option('menu_default_secondary'),
+            'parent tab title' => $view->display_handler->get_option('menu_parent_tab_title'),
           ),
         );
         $view->destroy();

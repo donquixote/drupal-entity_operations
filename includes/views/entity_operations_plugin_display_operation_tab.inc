@@ -87,6 +87,9 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
     $options['entity_type'] = array('default' => '');
     $options['path'] = array('default' => '');
     $options['menu_weight'] = array('default' => 10);
+    $options['menu_default'] = array('default' => FALSE);
+    $options['menu_default_secondary'] = array('default' => FALSE);
+    $options['menu_parent_tab_title'] = array('default' => '');
     $options['argument_mode'] = array('default' => 'id');
     $options['default_argument'] = array('default' => '');
     $options['show_title'] = 0;
@@ -193,7 +196,32 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
           '#default_value' => $this->get_option('menu_weight'),
           '#description' => t('The lower the weight the higher/further left it will appear.'),
         );
-
+        $form['menu_default'] = array(
+          '#title' => t('Menu default'),
+          '#type' => 'checkbox',
+          '#default_value' => $this->get_option('menu_default'),
+          '#description' => t('Makes this the default primary tab.'),
+        );
+        // This is meaningless if the path doesn't contain a '/', but having
+        // FAPI states work with regexps appears to be rather too fiddly to
+        // be worth it: see http://evolvingweb.ca/story/extending-form-api-states-regular-expressions
+        $form['menu_default_secondary'] = array(
+          '#title' => t('Menu default secondary'),
+          '#type' => 'checkbox',
+          '#default_value' => $this->get_option('menu_default_secondary'),
+          '#description' => t('Makes this the default secondary tab (only applies if the path contains a "/").'),
+        );
+        $form['menu_parent_tab_title'] = array(
+          '#title' => t('Parent tab title'),
+          '#type' => 'textfield',
+          '#default_value' => $this->get_option('menu_parent_tab_title'),
+          '#description' => t('Tab title for the parent primary tab when this is a default secondary.'),
+          '#states' => array(
+            'visible' => array(
+              'input:[name=menu_default_secondary]' => array('checked' => TRUE),
+            ),
+          ),
+        );
         break;
 
       case 'arguments':
@@ -276,6 +304,9 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
       case 'operation_name':
         $this->set_option('path', $form_state['values']['path']);
         $this->set_option('menu_weight', $form_state['values']['menu_weight']);
+        $this->set_option('menu_default', $form_state['values']['menu_default']);
+        $this->set_option('menu_default_secondary', $form_state['values']['menu_default_secondary']);
+        $this->set_option('menu_parent_tab_title', $form_state['values']['menu_parent_tab_title']);
         break;
       case 'arguments':
         $this->set_option('argument_mode', $form_state['values']['argument_mode']);
