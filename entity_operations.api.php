@@ -86,6 +86,9 @@ function entity_operations_hook_entity_info() {
  *        - 'parent tab title': (optional) Can be set on a secondary-level
  *          operation which has 'default' set to define the tab title for the
  *          containing primary-level tab that is automatically created.
+ *        - 'parent weight': (optional) Similarly to 'parent tab title', this
+ *          affects the primary-level tab which is automatically created for a
+ *          secondary default tab.
  *        - 'menu item': (optional) An array of properties suitable for
  *          hook_menu(), to use for this operation's menu item. These override
  *          those provided by the handler.

@@ -90,6 +90,7 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
     $options['menu_default'] = array('default' => FALSE);
     $options['menu_default_secondary'] = array('default' => FALSE);
     $options['menu_parent_tab_title'] = array('default' => '');
+    $options['menu_parent_weight'] = array('default' => 10);
     $options['argument_mode'] = array('default' => 'id');
     $options['default_argument'] = array('default' => '');
     $options['show_title'] = 0;
@@ -222,6 +223,18 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
             ),
           ),
         );
+        $form['menu_parent_weight'] = array(
+          '#title' => t('Parent weight'),
+          '#type' => 'textfield',
+          '#size' => 4,
+          '#default_value' => $this->get_option('menu_parent_weight'),
+          '#description' => t('Menu weight for the parent primary tab when this is a default secondary.'),
+          '#states' => array(
+            'visible' => array(
+              'input:[name=menu_default_secondary]' => array('checked' => TRUE),
+            ),
+          ),
+        );
         break;
 
       case 'arguments':
@@ -307,6 +320,7 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
         $this->set_option('menu_default', $form_state['values']['menu_default']);
         $this->set_option('menu_default_secondary', $form_state['values']['menu_default_secondary']);
         $this->set_option('menu_parent_tab_title', $form_state['values']['menu_parent_tab_title']);
+        $this->set_option('menu_parent_weight', $form_state['values']['menu_parent_weight']);
         break;
       case 'arguments':
         $this->set_option('argument_mode', $form_state['values']['argument_mode']);

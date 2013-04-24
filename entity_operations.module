@@ -520,6 +520,7 @@ function entity_operations_get_views($type = NULL, $reset = FALSE) {
             'default' => $view->display_handler->get_option('menu_default'),
             'default secondary' => $view->display_handler->get_option('menu_default_secondary'),
             'parent tab title' => $view->display_handler->get_option('menu_parent_tab_title'),
+            'parent weight' => $view->display_handler->get_option('menu_parent_weight'),
           ),
         );
         $view->destroy();

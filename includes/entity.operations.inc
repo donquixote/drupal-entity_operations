@@ -128,6 +128,9 @@ class EntityOperationsDefaultUIController {
         if (!empty($operation_definition['provision']['menu']['parent tab title'])) {
           $base_item['title'] = $operation_definition['provision']['menu']['parent tab title'];
         }
+        if (!empty($operation_definition['provision']['menu']['parent weight'])) {
+          $base_item['weight'] = $operation_definition['provision']['menu']['parent weight'];
+        }
 
         // The base item can itself be a default tab in the primary tabs.
         if (!empty($operation_definition['provision']['menu']['default'])) {
