@@ -93,7 +93,7 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
     parent::options_summary($categories, $options);
 
     $categories['entity_view'] = array(
-      'title' => t('Entity content settings'),
+      'title' => t('Entity tab settings'),
       'column' => 'second',
       'build' => array(
         '#weight' => -10,
