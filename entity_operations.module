@@ -434,15 +434,13 @@ function views_entity_operation_info_alter(&$operation_info) {
       $operation_info[$entity_type][$operation_name] = array(
         'handler' => 'EntityOperationsOperationPageViews',
         'provision' => array(
-          'menu' => array(
-            'menu item' => $view_info['menu item'],
-          ),
+          'menu' => $view_info['menu'],
           // By default, we provide a Views field for this... view. Which just
           // means you can link to it from another view.
           'views field' => TRUE,
         ),
         // Extend the array with info Views needs.
-        'views info' => $view_info,
+        'views info' => $view_info['views info'],
       );
     }
   }
@@ -465,7 +463,13 @@ function views_entity_operation_info_alter(&$operation_info) {
  *   Force a rebuild of the data.
  *
  * @return
- *   An array of view name/display name values, or an empty array().
+ *   An array of data about Views-provided entity operation tabs. This is keyed
+ *   first by entity type, then by operation name. Each value is then an array
+ *   containing:
+ *    - 'views info': An array about this View providing this tab, which is
+ *      needed by Views when the tab is rendered.
+ *    - 'menu': The array of settings to go in the 'provision' array in the
+ *      operation info.
  */
 function entity_operations_get_views($type = NULL, $reset = FALSE) {
   $used_views = &drupal_static(__FUNCTION__);
@@ -501,13 +505,19 @@ function entity_operations_get_views($type = NULL, $reset = FALSE) {
         $access = $view->display_handler->get_access_parameters();
 
         $used_views[$entity_type][$operation_name] = array(
-          'name' => $view->name,
-          'title' => $view->get_human_name() . ' - ' . $view->display[$display_id]->display_title,
-          'display' => $display_id,
-          'operation_name' => $operation_name,
-          'title' => $view->display_handler->get_option('title'),
-          'access' => $access,
-          'menu item' => $view->display_handler->menu_item(),
+          // Data for Views that we'll stash in the operation info.
+          'views info' => array(
+            'name' => $view->name,
+            'title' => $view->get_human_name() . ' - ' . $view->display[$display_id]->display_title,
+            'display' => $display_id,
+            'operation_name' => $operation_name,
+            'title' => $view->display_handler->get_option('title'),
+            'access' => $access,
+          ),
+          // Data for the menu provision settings.
+          'menu' => array(
+            'menu item' => $view->display_handler->menu_item(),
+          ),
         );
         $view->destroy();
       }
