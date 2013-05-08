@@ -58,8 +58,8 @@ function entity_operations_get_operation($entity_type, $entity, $operation_name)
  *  An operation handler object.
  */
 function entity_operations_get_entity_operation_handler($entity_type, $operation_name) {
-  $entity_info = entity_get_info($entity_type);
-  $handler_class = $entity_info['operations ui']['operations'][$operation_name]['handler'];
+  $entity_operation_info = entity_operations_get_operation_info($entity_type);
+  $handler_class = $entity_operation_info[$operation_name]['handler'];
   $operation_handler = new $handler_class($entity_type, $operation_name);
 
   return $operation_handler;
