@@ -118,10 +118,6 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
     if ($entity_type = $this->get_option('entity_type')) {
       $entity_info = entity_get_info($entity_type);
       $type_name = $entity_info['label'];
-      $bundle_names = array();
-      foreach ($this->get_option('bundles') as $bundle) {
-        $bundle_names[] = $entity_info['bundles'][$bundle]['label'];
-      }
     }
 
     $options['entity_type'] = array(
@@ -300,19 +296,6 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
         $old_entity = $this->get_option('entity_type');
 
         $this->set_option('entity_type', $new_entity);
-        if ($new_entity != $old_entity) {
-          // Each entity has its own list of bundles and view modes. If there's
-          // only one on the new type, we can select it automatically. Otherwise
-          // we need to wipe the options and start over.
-          $new_entity_info = entity_get_info($new_entity);
-
-          $new_bundle_keys = array_keys($new_entity_info['bundles']);
-          $new_bundles = array();
-          if (count($new_bundle_keys) == 1) {
-            $new_bundles[] = $new_bundle_keys[0];
-          }
-          $this->set_option('bundles', $new_bundles);
-        }
         break;
       case 'operation_name':
         $this->set_option('path', $form_state['values']['path']);
