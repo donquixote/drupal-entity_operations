@@ -41,7 +41,7 @@ function entity_operations_get_operation($entity_type, $entity, $operation_name)
       return drupal_get_form($form_id, $entity_type, $handler_class, $operation_name, $entity);
     }
     else {
-      return $operation_handler->page();
+      return $operation_handler->build();
     }
   }
 }
@@ -290,7 +290,7 @@ function entity_operations_entity_uri($entity) {
 /**
  * Generic page callback for an operation handler.
  *
- * This hands over to the handler's page() method for the output, and calls the
+ * This hands over to the handler's build() method for the output, and calls the
  * handler's setTitle() to allow setting of the page title.
  *
  * @param $entity_type
@@ -303,7 +303,7 @@ function entity_operations_entity_uri($entity) {
  *  The entity.
  * @param $params
  *  (optional) An array of further parameters which is passed to the operation
- *  handler's page() method.
+ *  handler's build() method.
  *
  * @return
  *  Either output text or a render array.
@@ -313,7 +313,7 @@ function entity_operations_operation_page_callback($entity_type, $handler_class,
 
   $operation_handler->setTitle($entity_type, $entity, $params);
 
-  return $operation_handler->page($entity_type, $entity, $params);
+  return $operation_handler->build($entity_type, $entity, $params);
 }
 
 /**
@@ -389,7 +389,7 @@ function entity_operations_operation_form_submit($form, &$form_state) {
  *  The entity.
  * @param $params
  *  (optional) An array of further parameters which is passed to the operation
- *  handler's page() method.
+ *  handler's build() method.
  *
  * @return
  *  A boolean indicating whether access should be granted.

@@ -331,6 +331,24 @@ abstract class EntityOperationsOperationBase {
   }
 
   /**
+   * Build the operation render array.
+   *
+   * @param $entity_type
+   *  The entity type.
+   * @param $entity
+   *  The entity. Pass NULL if there is no entity in context.
+   * @param $params
+   *  (optional) An array of additional parameters. It is up to subclasses that
+   *  require this to document what they expect.
+   *
+   * @return
+   *  Output suitable for a page callback.
+   */
+  function build($entity_type, $entity, $params = array()) {
+    return 'This is my operation content.';
+  }
+
+  /**
    * Execute the operation.
    */
   function execute($entity_type, $entity) {
@@ -353,7 +371,7 @@ class EntityOperationsOperationPage extends EntityOperationsOperationBase {
    */
   function menu_item($operation_path, $operation_definition, $loader_position) {
     $item = array(
-      // This takes care of calling our page() method, and is set here as a
+      // This takes care of calling our build() method, and is set here as a
       // convenience.
       // Subclasses however may specify any page callback they wish.
       'page callback' => 'entity_operations_operation_page_callback',
@@ -385,28 +403,10 @@ class EntityOperationsOperationPage extends EntityOperationsOperationBase {
    * This allows handlers to either override the title, or not have to bother
    * about it.
    *
-   * @see page() for the parameters.
+   * @see build() for the parameters.
    */
   function setTitle($entity_type, $entity, $params = array()) {
     drupal_set_title($entity->label());
-  }
-
-  /**
-   * Page callback.
-   *
-   * @param $entity_type
-   *  The entity type.
-   * @param $entity
-   *  The entity. Pass NULL if there is no entity in context.
-   * @param $params
-   *  (optional) An array of additional parameters. It is up to subclasses that
-   *  require this to document what they expect.
-   *
-   * @return
-   *  Output suitable for a page callback.
-   */
-  function page($entity_type, $entity, $params = array()) {
-    return 'This is my operation page.';
   }
 
 }
@@ -511,7 +511,7 @@ class EntityOperationsOperationPageViews extends EntityOperationsOperationPage {
    *  - 'view_name': The name of the view to output.
    *  - 'view_display_name': The name of the view display to use.
    */
-  function page($entity_type, $entity, $params = array()) {
+  function build($entity_type, $entity, $params = array()) {
     $view_name = $params['view_name'];
     $view_display_name = $params['view_display_name'];
 
@@ -661,6 +661,25 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
     // a valid function name for alter hooks.
     $operation_path = str_replace('/', '_', $operation_path);
     return implode('_', array('entity_operations_operation_form', $entity_type, $operation_path));
+  }
+
+  /**
+   * Build the operation render array.
+   *
+   * @param $entity_type
+   *  The entity type.
+   * @param $entity
+   *  The entity. Pass NULL if there is no entity in context.
+   * @param $params
+   *  (optional) An array of additional parameters. It is up to subclasses that
+   *  require this to document what they expect.
+   *
+   * @return
+   *  Output suitable for a page callback.
+   */
+  function build($entity_type, $entity, $params = array()) {
+    $form_id = $this->getFormID($entity_type, $this->path);
+    return drupal_get_form($form_id, $entity_type, get_class($this), $this->path, $entity);
   }
 
   /**
@@ -829,7 +848,7 @@ class EntityOperationsOperationEntityView extends EntityOperationsOperationPage 
     ) + parent::operationStrings();
   }
 
-  function page($entity_type, $entity, $params = array()) {
+  function build($entity_type, $entity, $params = array()) {
     //dsm($entity, 'handler page');
     // Pass in EntityAPI's defaults for the first two parameters so we can
     // set $page to TRUE.
@@ -859,8 +878,8 @@ class EntityOperationsOperationEntityViewOperations extends EntityOperationsOper
     ) + parent::operationInfo();
   }
 
-  function page($entity_type, $entity, $params = array()) {
-    $build = parent::page($entity_type, $entity);
+  function build($entity_type, $entity, $params = array()) {
+    $build = parent::build($entity_type, $entity);
 
     // Add the automatic entity view operations to the build array.
     $build['operations'] = entity_operations_get_entity_operations_fieldset($entity);
@@ -918,7 +937,7 @@ class EntityOperationsOperationDevel extends EntityOperationsOperationPage {
   /**
    * Page callback.
    */
-  function page($entity_type, $entity, $params = array()) {
+  function build($entity_type, $entity, $params = array()) {
     $output = kprint_r($entity, TRUE);
     return $output;
   }
@@ -972,7 +991,7 @@ class EntityOperationsOperationToken extends EntityOperationsOperationPage {
   /**
    * Page callback.
    */
-  function page($entity_type, $entity, $params = array()) {
+  function build($entity_type, $entity, $params = array()) {
     module_load_include('inc', 'token', 'token.pages');
     $build = token_devel_token_object($entity_type, $entity);
 
@@ -1012,7 +1031,7 @@ class EntityOperationsOperationMetadata extends EntityOperationsOperationDevel {
   /**
    * Page callback.
    */
-  function page($entity_type, $entity, $params = array()) {
+  function build($entity_type, $entity, $params = array()) {
     $entity_property_info = entity_get_property_info($this->entityType);
 
     $wrapper = entity_metadata_wrapper($entity_type, $entity);
@@ -1159,7 +1178,7 @@ class EntityOperationsOperationAddPrepopulate extends EntityOperationsOperationA
    * We have to override this as the parent implementation will try to get a
    * label out of a nonexistent entity.
    *
-   * @see page() for the parameters.
+   * @see build() for the parameters.
    */
   function setTitle($entity_type, $entity, $params = array()) {
     // entity_ui_get_form() takes care of setting the title.
@@ -1168,7 +1187,7 @@ class EntityOperationsOperationAddPrepopulate extends EntityOperationsOperationA
   /**
    * Determine access to the operation for the user.
    *
-   * We have to override this, because otherwise, as is called before page(), it
+   * We have to override this, because otherwise, as is called before build(), it
    * doesn't have the prepopulated entity to work on.
    */
   function userAccess($entity_type, $entity, $params = array(), $account = NULL) {
@@ -1187,7 +1206,7 @@ class EntityOperationsOperationAddPrepopulate extends EntityOperationsOperationA
    * This is a wrapper around entity_ui_get_form() which builds up a new entity
    * prepopulated with data from the query parameters.
    */
-  function page($entity_type, $entity, $params = array()) {
+  function build($entity_type, $entity, $params = array()) {
     // This is repeating the same work done by userAccess(). Would it be better
     // to remember the entity in this handler?
     $entity = $this->createEntity();
@@ -1196,7 +1215,7 @@ class EntityOperationsOperationAddPrepopulate extends EntityOperationsOperationA
   }
 
   /**
-   * Helper for userAccess() and page().
+   * Helper for userAccess() and build().
    *
    * Creates a new entity based on query parameters.
    *
@@ -2102,7 +2121,7 @@ class EntityOperationsOperationOGGroup extends EntityOperationsOperationPage {
     $item = array(
       'title' => 'Group',
       // These won't work: these expect IDs not loaded entities. Hence we have
-      // to define userAccess() and page() as wrappers.
+      // to define userAccess() and build() as wrappers.
       //'page callback' => 'og_ui_group_admin_overview',
       //'page arguments' => array($this->entityType, $loader_position),
       //'access callback' => 'og_ui_get_group_admin',
@@ -2132,7 +2151,7 @@ class EntityOperationsOperationOGGroup extends EntityOperationsOperationPage {
    * We need this as a wrapper around og_ui_group_admin_overview() because
    * its parameters aren't compatible with our menu loaders.
    */
-  function page($entity_type, $entity, $params = array()) {
+  function build($entity_type, $entity, $params = array()) {
     // This is just a wrapper.
     return og_ui_group_admin_overview($entity_type, $entity->identifier());
   }
