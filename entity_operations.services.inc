@@ -59,7 +59,7 @@ function entity_operations_services_resources() {
             'optional' => TRUE,
             'type' => 'string',
             'description' => 'The handler class for the operation.',
-            'default value' => get_class($operation_handler),
+            'default value' => $handler_class,
           ),
           array(
             'name' => 'operation_path',
