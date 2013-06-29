@@ -41,6 +41,11 @@ function entity_operations_views_data_alter(&$data) {
   }
 
   foreach (entity_get_info() as $entity_type => $entity_info) {
+    // Skip entity types that don't have a base table.
+    if (!isset($entity_info['base table'])) {
+      continue;
+    }
+
     // Only add operations to entities if their base table has Views data.
     $base_table = $entity_info['base table'];
     if (!isset($data[$base_table])) {
