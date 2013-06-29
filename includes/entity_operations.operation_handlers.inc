@@ -1049,6 +1049,8 @@ class EntityOperationsOperationMetadata extends EntityOperationsOperationDevel {
  *
  * @TODO: add a common abstract parent class with the Edit op, to avoid
  * repetition in menu_item().
+ *
+ * See EntityOperationsOperationEdit for requirements of this handler.
  */
 class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
 
@@ -1127,6 +1129,8 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
  * This class is a bit messy, as it's a descendant of the form class, but
  * provides a page. TODO: clean up: the only thing we inherit is the menu_item()
  * and that's not really worth this WTF.
+ *
+ * See EntityOperationsOperationEdit for requirements of this handler.
  */
 class EntityOperationsOperationAddPrepopulate extends EntityOperationsOperationAdd {
 
@@ -1221,6 +1225,13 @@ class EntityOperationsOperationAddPrepopulate extends EntityOperationsOperationA
 
 /**
  * Op handler for editing an entity: EntityAPI form.
+ *
+ * This handler requires the form for the entity to be defined elsewhere. This
+ * should be named 'ENTITY_TYPE_form' (though see entity_ui_get_form() for
+ * other options), along with a submit handler for saving the entity.
+ *
+ * The form builder may be located in an .inc file to be loaded: the properties
+ * in the entity type's 'admin ui' are taken into account.
  */
 class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
 
@@ -1273,19 +1284,26 @@ class EntityOperationsOperationEdit extends EntityOperationsOperationForm {
  * Op handler for editing an entity: generic form.
  *
  * This can be used as the 'edit' handler for entities that don't require any
- * form elements other than those provided by FieldAPI.
+ * form elements other than those provided by FieldAPI. Using this handler means
+ * that you don't need to provide a form builder for the edit/add form for your
+ * entities: the form is contained within this handler.
  *
- * One limitation of using this handler rather than
- * EntityOperationsOperationEdit is that the form produced here will not easily
- * be alterable with hook_form_alter(), as it will have the form build ID of our
- * generic operation form builder, 'entity_operations_operation_form'.
+ * This handler requires:
+ *  - The entity type's 'controller class' property to be EntityAPIController
+ *    or a subclass.
  *
- * Note that if this handler produces a form with no elements other than the
- * those from FieldAPI, and no hidden bundle element (as a result of the entity
- * having only one bundle), then a bug in drupal_write_record() will prevent
- * the entity being saved, because it would have an empty record. A simple
- * workaround for this is allowing the entity to use the 'label' element which
- * is automatically provided if the entity info defines the entity key for it.
+ * Using this handler (instead of having EntityOperationsOperationEdit and a
+ * form builder) has the following limitations:
+ *  - The form produced here will not easily be alterable with hook_form_alter()
+ *    as it will have the form build ID of our generic operation form builder,
+ *    'entity_operations_operation_form'.
+ *  - If this handler produces a form with no elements other than those from
+ *    FieldAPI, and no hidden bundle element (as a result of the entity
+ *    having only one bundle), then a bug in drupal_write_record() will prevent
+ *    the entity being saved, because it would have an empty record in the base
+ *    table. A simple workaround for this is allowing the entity to use the
+ *    'label' element which is automatically provided if the entity info defines
+ *    the entity key for it.
  *
  * @todo: use Entity Metadata API to automatically add field elements so that
  * properties such as entity title can be set.
@@ -1443,7 +1461,9 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
  * Op handler for adding an entity: generic form.
  *
  * This can be used as the 'add' handler for entities that don't require any
- * form elements other than those provided by FieldAPI.
+ * form elements other than those provided by FieldAPI. Using this means you
+ * don't need to provide a form builder for the edit/add form for your entities:
+ * it is contained within this handler.
  *
  * If the entity has multiple bundles, its entity access callback will receive
  * the bundle name that is being created in the place of the $entity parameter
@@ -1453,7 +1473,8 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
  * @endcode
  * (This is the same pattern as node_access().)
  *
- * See EntityOperationsOperationEditGeneric for limitations of this handler.
+ * See EntityOperationsOperationEditGeneric for requirements and limitations of
+ * this handler.
  */
 class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditGeneric {
 
