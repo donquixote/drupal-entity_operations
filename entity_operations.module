@@ -37,7 +37,7 @@ function entity_operations_get_operation($entity_type, $entity, $operation_name)
 
     $operation_info = $operation_handler->operationInfo();
     if ($operation_info['uses form']) {
-      $form_id = $this->getFormID($entity_type, $operation_name);
+      $form_id = $operation_handler->getFormID($entity_type, $operation_name);
       return drupal_get_form($form_id, $entity_type, $handler_class, $operation_name, $entity);
     }
     else {
