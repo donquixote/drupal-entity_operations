@@ -14,6 +14,7 @@ function entity_operations_services_resources() {
     return;
   }
 
+  $resources = array();
   $entities_operations_info = entity_operations_get_operation_info();
   foreach ($entities_operations_info as $entity_type => $entity_operations_info) {
     foreach ($entity_operations_info as $operation_name => $operation) {
