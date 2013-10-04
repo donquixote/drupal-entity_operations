@@ -39,7 +39,13 @@ function entity_operations_services_resource_callback($entity_type, $handler_cla
     $parameters[$parameter_name] = array_shift($extra_arguments);
   }
 
-  $result = $operation_handler->execute($entity_type, $entity, $parameters);
+  // Operations may throw an exception: catch it and return a services error.
+  try {
+    $result = $operation_handler->execute($entity_type, $entity, $parameters);
+  }
+  catch (Exception $e) {
+    return services_error($e->getMessage(), $e->getCode());
+  }
 
   return isset($result) ? $result : $entity;
 }

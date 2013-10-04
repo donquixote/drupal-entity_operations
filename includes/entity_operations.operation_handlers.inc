@@ -350,6 +350,11 @@ abstract class EntityOperationsOperationBase {
 
   /**
    * Execute the operation.
+   *
+   * Handlers may throw an exception in the case of a problem. It's up to
+   * consumers of the operation to react accordingly.
+   *
+   * @throws Exception
    */
   function execute($entity_type, $entity) {
   }
