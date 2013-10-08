@@ -137,14 +137,14 @@ function hook_entity_operation_info() {
         ),
       ),
       'edit' => array(
-        'handler' => 'EntityOperationsOperationEntityEdit',
+        'handler' => 'EntityOperationsOperationEdit',
         'provision' => array(
           'menu' => TRUE,
           'views field' => TRUE,
         ),
       ),
       'publish' => array(
-        'handler' => 'EntityOperationsOperationEntityPublish',
+        'handler' => 'EntityOperationsOperationPublish',
         'provision' => array(
           // Show the operation form as an entity tab.
           'menu' => TRUE,
