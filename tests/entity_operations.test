@@ -1,0 +1,57 @@
+<?php
+
+/**
+ * @file
+ * Contains tests for the Entity operations module.
+ */
+
+/**
+ * Test case for Entity Operations permissions helper.
+ */
+class EntityOperationsPermissionsTestCase extends DrupalWebTestCase {
+
+  /**
+   * Implements getInfo().
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Entity Operations permissions'),
+      'description' => t('Test generation of permissions based on entity operations.'),
+      'group' => t('Entity Operations'),
+    );
+  }
+
+  /**
+   * Implements setUp().
+   */
+  function setUp() {
+    // Call the parent with an array of modules to enable for the test.
+    parent::setUp(array('entity_operations', 'entity_operations_test'));
+  }
+
+  function testPermissions() {
+    $entity_operation_info = entity_operations_get_operation_info('entity_operations_test');
+
+    // Check basic permissions.
+    $permissions = entity_operations_get_entity_permissions('entity_operations_test');
+
+    // We should get the same number of permissions as of operations.
+    $this->assertEqual(count($permissions), 4, "The right number of permissions are generated.");
+    $this->assertTrue(isset($permissions['create entity_operations_tests']), "The 'create' permission is generated.");
+    $this->assertTrue(isset($permissions['edit entity_operations_tests']), "The 'edit' permission is generated.");
+    $this->assertTrue(isset($permissions['view entity_operations_tests']), "The 'view' permission is generated.");
+    $this->assertTrue(isset($permissions['delete entity_operations_tests']), "The 'delete' permission is generated.");
+
+    // Check 'own' permissions.
+    $permissions = entity_operations_get_entity_permissions('entity_operations_test', array('edit', 'delete'));
+
+    $this->assertEqual(count($permissions), 6, "The right number of permissions are generated.");
+    $this->assertTrue(isset($permissions['create entity_operations_tests']), "The 'create' permission is generated.");
+    $this->assertTrue(isset($permissions['edit entity_operations_tests']), "The 'edit' permission is generated.");
+    $this->assertTrue(isset($permissions['edit own entity_operations_tests']), "The 'edit own' permission is generated.");
+    $this->assertTrue(isset($permissions['view entity_operations_tests']), "The 'view' permission is generated.");
+    $this->assertTrue(isset($permissions['delete entity_operations_tests']), "The 'delete' permission is generated.");
+    $this->assertTrue(isset($permissions['delete own entity_operations_tests']), "The 'delete own' permission is generated.");
+  }
+
+}

@@ -1,0 +1,5 @@
+name = Entity Operations Test
+description = Test module for Entity Operations.
+core = 7.x
+files[] = tests/entity_operations_test.test
+hidden = TRUE
