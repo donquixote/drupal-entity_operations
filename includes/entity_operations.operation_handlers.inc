@@ -43,12 +43,10 @@ abstract class EntityOperationsOperationBase {
    */
   protected $path;
 
-  protected $entityType;
-
   /**
-   * The entity info.
+   * The type of the entity this operation is for.
    */
-  protected $entityInfo;
+  protected $entityType;
 
   /**
    * The operations controller. Only set when building hook_menu().
