@@ -80,12 +80,16 @@ function entity_operations_get_entity_operation_handler($entity_type, $operation
  *  operations array in the entity's hook_entity_info(). If ommitted, the
  *  operations used are those with 'entity view' set to TRUE in their
  *  hook_entity_operation_info() 'provision' settings.
+ * @param $form_states
+ *  (Optional) An array of form states to pass to drupal_build_form(). Each
+ *  should be keyed by the operation name, and any or all may be present. These
+ *  allow, among other things, the redirect to be set on each operation.
  *
  * @return
  *  A build array containing all the requested entities, or an empty array
  *  if no operations are available.
  */
-function entity_operations_get_entity_operations_fieldset($entity, $operations = array()) {
+function entity_operations_get_entity_operations_fieldset($entity, $operations = array(), $form_states = array()) {
   $entity_type = $entity->entityType();
   $entity_info = $entity->entityInfo();
   $operation_info = entity_operations_get_operation_info($entity->entityType());
@@ -115,7 +119,13 @@ function entity_operations_get_entity_operations_fieldset($entity, $operations =
     }
 
     // Dose up $form_state with our requested form elements.
-    $form_state = array();
+    if (isset($form_states[$operation_name])) {
+      $form_state = $form_states[$operation_name];
+    }
+    else {
+      $form_state = array();
+    }
+
     $form_state['build_info']['args'] = array(
       $entity_type, $handler_class, $operation_name, $entity,
     );
