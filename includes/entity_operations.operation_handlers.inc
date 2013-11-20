@@ -191,7 +191,7 @@ abstract class EntityOperationsOperationBase {
    * @param $operation_path
    *  The key for the operation.
    * @param $parameters
-   *  The parameters array from the form submission values. When this is not
+   *  (optional) The parameters array from the form submission values. When this is not
    *  available, for example when retrieving the button label, this will be an
    * empty array.
    *
@@ -206,7 +206,7 @@ abstract class EntityOperationsOperationBase {
    * because in some circumstances (such as buttons) the HTML included in the
    * placeholder is unsuitable.
    */
-  function getOperationStringSubstitutions($entity_type, $entity, $operation_path, $parameters) {
+  function getOperationStringSubstitutions($entity_type, $entity, $operation_path, $parameters = array()) {
     $entity_info = entity_get_info($entity_type);
 
     // We provide each of these twice so store them in a variable.
