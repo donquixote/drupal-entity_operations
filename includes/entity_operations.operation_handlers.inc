@@ -1877,6 +1877,58 @@ class EntityOperationsOperationDelete extends EntityOperationsOperationAction {
 }
 
 /**
+ * Op handler for deleting an entity, with a confirmation button.
+ *
+ * This is intended for use within an operations fieldset, where there may
+ * be several different submit buttons.
+ */
+class EntityOperationsOperationDeleteConfirm extends EntityOperationsOperationDelete {
+
+  public $access_verb = 'delete';
+
+  /**
+   * Returns basic information about the operation.
+   */
+  function operationInfo() {
+    return array(
+      'label' => 'Delete',
+      'description' => 'Produces a confirmation form to delete the entity.',
+    ) + parent::operationInfo();
+  }
+
+  /**
+   * Form builder for this operation.
+   *
+   * This should return the main part of the form, but without any of:
+   *  - a confirmation question (if one is required)
+   *  - a submit button
+   *  - a cancel link
+   * These are added as appropriate by getForm().
+   */
+  function form($form, &$form_state, $entity_type, $entity, $operation_path) {
+    $substitutions = $this->getOperationStringSubstitutions($entity_type, $entity, $operation_path);
+    $form['confirm'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Confirm deletion of this @entity-type.', $substitutions),
+    );
+
+    return $form;
+  }
+
+  /**
+   * Form validation handler for this operation.
+   *
+   * Receives the same parameters as the form builder as a convenience.
+   */
+  function formValidate($form, &$form_state, $entity_type, $entity, $operation_path) {
+    if (empty($form_state['values']['confirm'])) {
+      form_set_error('confirm', t("You must confirm that you want to delete this."));
+    }
+  }
+
+}
+
+/**
  * Op handler for publishing an entity.
  *
  * Requires the entity to have a 'status' property.
