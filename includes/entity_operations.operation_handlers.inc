@@ -1474,7 +1474,9 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
     }
 
     // Redirect to the entity.
-    $form_state['redirect'] = $this->getFormSubmitRedirect($this->entityType, $entity);
+    if (empty($form_state['redirect'])) {
+      $form_state['redirect'] = $this->getFormSubmitRedirect($this->entityType, $entity);
+    }
   }
 
 }
@@ -1785,7 +1787,9 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
       drupal_set_message($message);
     }
 
-    $form_state['redirect'] = $this->getFormSubmitRedirect($entity_type, $entity);
+    if (empty($form_state['redirect'])) {
+      $form_state['redirect'] = $this->getFormSubmitRedirect($this->entityType, $entity);
+    }
   }
 
   /**
