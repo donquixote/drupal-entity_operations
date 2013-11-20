@@ -1,24 +1,27 @@
 Entity Operations
 =================
 
-This module provides a framework for adding UI tabs to entities when they are viewed. Each tab is called an entity operation.
+This module provides a framework for defining operations for entities. An operation is at its most basic 'something you can do with an entity'. Operations can be:
+  - Page operations that return rendered output (such as 'view')
+  - Form operations that output a form (such as 'edit')
+  - Action operations, which may also have a form (such as 'publish')
 
-In fact, the whole of an entity's UI can be created using Entity Operations. For example, a basic entity type's UI might have these operations, which come as part of Entity Operations module:
-  - view: show the rendered entity at its basic URI.
-  - edit: show the entity edit form.
-
-More complex entities can implement further operations specific to its business logic. For example, a library book entity could have a tab that allows making reservations. The operations framework allows modules to output any kind of content or form in an entity tab.
+Operations can be exposed as UI tabs, which allows the whole of an entity's UI to be created using Entity Operations. For example, a basic entity type's UI might have these operations, which come as part of Entity Operations module:
+    - view: show the rendered entity at its basic URI.
+    - edit: show the entity edit form.
 
 Entity operations are also exposed in other ways:
   - Operations that are treated as actions are available to:
     - Views Bulk Operations as operations.
     - Services as targeted actions on entities (requires Services Entity
-      module, and a patch to Services at http://drupal.org/node/1931080).
+      module).
   - The link to an operation's tab is available as a Views field on the entity.
   - Operations that are forms can be output in a fieldset that can be shown on
     the entity (or indeed, anywhere).
   - If the Entity API admin UI is being used, the 'add', 'edit', and 'delete'
     operations can be shown there.
+
+More complex entities can implement further operations specific to its business logic. For example, a library book entity could have a tab that allows making reservations. The operations framework allows modules to output any kind of content or form in an entity tab.
 
 Access to an operation is defined by either the handler class, or the path component. entity_operations_get_entity_permissions() can be used to get all the permissions this invents for an entity type.
 

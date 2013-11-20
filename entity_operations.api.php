@@ -55,7 +55,7 @@ function entity_operations_hook_entity_info() {
  *  operations available for that entity type. This array of operations is
  *  keyed by the operation name which is an arbitrary machine string, and each
  *  item is an array with the following properties:
- *    - 'handler':
+ *    - 'handler': The name of the handler class for this operation.
  *    - 'provision': An array defining where this operation is made available.
  *      Each key is a provision type (listed further down) and each value may
  *      be one of:
