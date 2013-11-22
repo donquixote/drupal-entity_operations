@@ -1780,7 +1780,19 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
     // override this can get to it.
     $this->parameters = $this->formSubmitGetParameters($form, $form_state, $entity_type, $entity, $operation_path);
 
-    $this->execute($entity_type, $entity, $this->parameters);
+    // Operations may throw an exception: catch it and display the error.
+    try {
+      $this->execute($entity_type, $entity, $this->parameters);
+    }
+    catch (Exception $e) {
+      drupal_set_message($e->getMessage(), 'warning');
+
+      // You probably don't want to redirect anywhere if the operation has gone
+      // wrong.
+      $form_state['redirect'] = '';
+
+      return;
+    }
 
     $message = $this->getOperationString('submit message', $entity_type, $entity, $operation_path, $this->parameters);
     if (!empty($message)) {
