@@ -1785,7 +1785,7 @@ abstract class EntityOperationsOperationAction extends EntityOperationsOperation
       $this->execute($entity_type, $entity, $this->parameters);
     }
     catch (Exception $e) {
-      drupal_set_message($e->getMessage(), 'warning');
+      drupal_set_message($e->getMessage(), 'error');
 
       // You probably don't want to redirect anywhere if the operation has gone
       // wrong.
