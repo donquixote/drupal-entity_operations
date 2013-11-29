@@ -2116,7 +2116,7 @@ class EntityOperationsOperationSetOwner extends EntityOperationsOperationAction 
    *
    * We add the themed username for the submit message.
    */
-  function getOperationStringSubstitutions($entity_type, $entity, $operation_path, $parameters) {
+  function getOperationStringSubstitutions($entity_type, $entity, $operation_path, $parameters = array()) {
     $substitutions = parent::getOperationStringSubstitutions($entity_type, $entity, $operation_path, $parameters);
 
     if (isset($parameters['uid'])) {
