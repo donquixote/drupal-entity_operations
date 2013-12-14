@@ -756,7 +756,10 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
     if (isset($form['actions'])) {
       $form['actions'] += array(
         '#type' => 'actions',
-        '#weight' => 10,
+        // This weight needs to be sufficiently large to go below any fields on
+        // entity edit and add forms.
+        // TODO: node_form gets away with a weight of 10 here. How?!
+        '#weight' => 50,
       );
     }
 
