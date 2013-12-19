@@ -106,7 +106,9 @@ class EntityOperationsDefaultAdminUIController extends EntityDefaultUIController
       $row[$operation_column_numbers['edit']] = l('edit', $uri['path'] . '/edit');
     }
     if (isset($operations['delete'])) {
-      $row[$operation_column_numbers['delete']] = l('delete', $uri['path'] . '/delete');
+      $row[$operation_column_numbers['delete']] = l('delete', $uri['path'] . '/delete', array(
+        'query' => drupal_get_destination(),
+      ));
     }
 
     return $row;
