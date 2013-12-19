@@ -1239,8 +1239,15 @@ class EntityOperationsOperationAddPrepopulate extends EntityOperationsOperationA
 
     // Set properties from the query parameters on the new entity.
     $query = drupal_get_query_parameters();
+    $properties = $wrapper->getPropertyInfo();
+
     foreach ($query as $property => $value) {
-      $wrapper->$property->set($value);
+      // Only try to set a property that actually exists. Other things may be
+      // present on the query string. This happens in particular within
+      // Simpletests.
+      if (isset($properties[$property])) {
+        $wrapper->$property->set($value);
+      }
     }
 
     return $entity;
