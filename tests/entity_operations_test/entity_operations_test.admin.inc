@@ -44,7 +44,7 @@ function entity_operations_test_form_validate($form, &$form_state) {
 function entity_operations_test_form_submit($form, &$form_state) {
   $entity = entity_ui_form_submit_build_entity($form, $form_state);
 
-  $entity->uid = $GLOBAL['user']->uid;
+  $entity->uid = $GLOBALS['user']->uid;
 
   // Save the entity.
   $entity->save();
