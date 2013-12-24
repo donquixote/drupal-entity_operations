@@ -387,16 +387,19 @@ function entity_operations_operation_form_submit($form, &$form_state) {
 /**
  * Form callback for a multiple operation form.
  *
- TODO
+ * @param $entity_type
+ *  The entity type.
+ * @param $entity
+ *  The entity.
  * @param $operations
  *  (Optional) An array of operation names. These are the keys defined in the
  *  operations array in the entity's hook_entity_info(). If ommitted, the
  *  operations used are those with 'entity view' set to TRUE in their
  *  hook_entity_operation_info() 'provision' settings.
  */
-function entity_operations_multiple_operation_form($form, &$form_state, $entity_type, $entity, $operations) {
+function entity_operations_multiple_operation_form($form, &$form_state, $entity_type, $entity, $operations = array()) {
   $operation_info = entity_operations_get_operation_info($entity_type);
-  
+
   // Build up operations array if it's empty.
   if (empty($operations)) {
     foreach ($operation_info as $operation_name => $operation_definition) {
@@ -410,6 +413,9 @@ function entity_operations_multiple_operation_form($form, &$form_state, $entity_
     $handler_class = $operation_info[$operation_name]['handler'];
     $operation_handler = new $handler_class($entity_type, $operation_name);
 
+    // Store the handler class to save the validate and submit handlers legwork.
+    $form_state['entity_operation_handlers'][$operation_name] = $handler_class;
+
     // Check access for the operation.
     if ($operation_handler->access($entity_type, $entity) === FALSE) {
       continue;
@@ -417,7 +423,7 @@ function entity_operations_multiple_operation_form($form, &$form_state, $entity_
 
     $operation_form_state = array();
 
-    // Specify the elements we want.
+    // Specify the elements we want in each form.
     $operation_form_state['entity_operation_form_elements'] = array(
       'page title' => FALSE,
       'confirmation message' => FALSE,
@@ -428,14 +434,41 @@ function entity_operations_multiple_operation_form($form, &$form_state, $entity_
 
     $form[$operation_name] = array();
     $form[$operation_name] = $operation_handler->getForm($form[$operation_name], $operation_form_state, $entity_type, $entity, $operation_name);
-    dsm($form[$operation_name], "form for $operation_name");
   }
-  
+
   return $form;
 }
-// ARRRRGH
-function entity_operations_multiple_operation_form_submit($form, &$form_state) {
 
+/**
+ * Validate handler for multiple operation form.
+ */
+function entity_operations_multiple_operation_form_validate($form, &$form_state) {
+  list($entity_type, $entity, $operations) = $form_state['build_info']['args'];
+
+  // The submit button's #name is the name/path of the operation, set by
+  // EntityOperationsOperationForm::getForm().
+  $operation_path = $form_state['triggering_element']['#name'];
+  $handler_class = $form_state['entity_operation_handlers'][$operation_path];
+
+  $operation_handler = new $handler_class($entity_type, $operation_path);
+
+  $operation_handler->formValidate($form, $form_state, $entity_type, $entity, $operation_path);
+}
+
+/**
+ * Submit handler for multiple operation form.
+ */
+function entity_operations_multiple_operation_form_submit($form, &$form_state) {
+  list($entity_type, $entity, $operations) = $form_state['build_info']['args'];
+
+  // The submit button's #name is the name/path of the operation, set by
+  // EntityOperationsOperationForm::getForm().
+  $operation_path = $form_state['triggering_element']['#name'];
+  $handler_class = $form_state['entity_operation_handlers'][$operation_path];
+
+  $operation_handler = new $handler_class($entity_type, $operation_path);
+
+  $operation_handler->formSubmit($form, $form_state, $entity_type, $entity, $operation_path);
 }
 
 /**
