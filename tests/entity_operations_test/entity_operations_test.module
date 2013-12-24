@@ -86,6 +86,8 @@ function entity_operations_test_entity_info() {
       // TODO: check if actually needed!
       'admin ui' => array(
         'file' => 'entity_operations_test.admin.inc',
+        // We don't use this but it's needed for EntityOperationsOperationAdd.
+        'path' => 'admin/structure/entity_operations_test',
       ),
     ),
   );

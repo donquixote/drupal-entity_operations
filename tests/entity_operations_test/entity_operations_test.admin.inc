@@ -7,6 +7,10 @@
 
 /**
  * The test entity form.
+ *
+ * @param $entity
+ *  The entity. If this is a create operation, the entity must have the type
+ *  set on it.
  */
 function entity_operations_test_form($form, &$form_state, $entity) {
   $form['title'] = array(
@@ -15,6 +19,13 @@ function entity_operations_test_form($form, &$form_state, $entity) {
     '#description' => t('The title of this entity.'),
     '#default_value' => isset($entity->title) ? $entity->title : '',
     '#required' => TRUE,
+  );
+
+  // Set the bundle on the form so entity_form_field_validate() and
+  // entity_ui_form_submit_build_entity() have it to build the entity.
+  $form['type'] = array(
+    '#type' => 'value',
+    '#value' => $entity->type,
   );
 
   field_attach_form('entity_operations_test', $entity, $form, $form_state);
