@@ -1070,7 +1070,11 @@ class EntityOperationsOperationMetadata extends EntityOperationsOperationDevel {
  *
  * Add is a bit of a special case, as it doesn't use an entity loader.
  *
- * @TODO: support bundles. EEEP!
+ * This supports entity types with bundles, but to do so, the entity info must
+ * have ['admin ui']['path'] set. This is because
+ * entity_ui_get_bundle_add_form() tries to use per-bundle forms, and
+ * entity_forms() and entity_ui_controller() require this info property in order
+ * to return a controller.
  *
  * @TODO: add a common abstract parent class with the Edit op, to avoid
  * repetition in menu_item().
@@ -1099,18 +1103,29 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
    * Properties for the menu item specific to this handler.
    */
   function menu_item($operation_path, $operation_definition, $loader_position) {
+    // Determine which of Entity API's page callbacks to use, based on whether
+    // this entity type has bundles.
+    $entity_info = entity_get_info($this->entityType);
+    if (isset($entity_info['entity keys']['bundle'])) {
+      // Use the wrapper around entity_ui_get_form() which supports bundles.
+      $page_callback = 'entity_ui_get_bundle_add_form';
+      $page_arguments = array($this->entityType, $loader_position + 1);
+    }
+    else {
+      // Have to go to entity_ui_get_form() directly, as the wrapper doesn't
+      // support there not being bundles.
+      $page_callback = 'entity_ui_get_form';
+      $page_arguments = array($this->entityType, NULL, 'add');
+    }
+
     $item = array(
       'title' => 'Add',
       // Special path which doesn't have an entity loader.
       'path' => $this->controller->path . '/add',
       // We don't want a tab.
       'type' => MENU_CALLBACK,
-      'page callback' => 'entity_ui_get_form',
-      'page arguments' => array(
-        $this->entityType,
-        NULL,
-        'add',
-      ),
+      'page callback' => $page_callback,
+      'page arguments' => $page_arguments,
       'access callback' => 'entity_operations_operation_access_callback',
       'access arguments' => array(
         $this->entityType,
