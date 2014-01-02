@@ -737,8 +737,6 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
       $form['actions']['submit'] = array(
         '#type' => 'submit',
         '#value' => $this->getOperationString('button label', $entity_type, $entity, $operation_path),
-        // Give this a name so it can be identified in multiple-operation forms.
-        '#name' => $operation_path,
       );
     }
     if (!empty($form_state['entity_operation_form_elements']['cancel link'])) {
