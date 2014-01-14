@@ -1599,9 +1599,11 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
 
     // Multiple cases, depending on what circumstances we're here under and
     // whether the entity has multiple bundles.
-    // Case 1: we are on /add, and the entity type has either no bundles or
-    // only one bundle. We're about to show the add form.
-    if (!isset($entity_info['bundles']) || count($entity_info['bundles']) == 1) {
+    // Case 1: we are on /add, and the entity type has only one bundle (note
+    // that even if hook_entity_info() doesn't define any bundles,
+    // entity_get_info() defines one with the same name as the entity).
+    // We're about to show the add form.
+    if (count($entity_info['bundles']) == 1) {
       $values = array();
       if (!empty($bundle_key)) {
         $unique_bundle_name = array_pop(array_keys($entity_info['bundles']));
@@ -1670,22 +1672,23 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
 
     // Multiple cases, depending on what circumstances we're here under and
     // whether the entity has multiple bundles.
-    // Case 1: we are on /add, and the entity type has either no bundles or
-    // only one bundle. Just show the add form.
-    if (!isset($entity_info['bundles']) || count($entity_info['bundles']) == 1) {
+    // Case 1: we are on /add, and the entity type has only one bundle (note
+    // that even if hook_entity_info() doesn't define any bundles,
+    // entity_get_info() defines one with the same name as the entity).
+    // Just show the add form.
+    if (count($entity_info['bundles']) == 1) {
       // We won't have an entity here, so create one for our parent class's form.
      $values = array();
 
       // Set the bundle key, if we need it.
-      if (count($entity_info['bundles']) == 1) {
-        // Set a variable to avoid a strict warning with reset().
+      // Set a variable to avoid a strict warning with reset().
+      // Must use empty(), as entity_get_info() defaults this to ''.
+      if (!empty($entity_info['entity keys']['bundle'])) {
         $bundle_names = array_keys($entity_info['bundles']);
         $bundle_name = reset($bundle_names);
-        // Must use empty(), as entity_get_info() defaults this to ''.
-        if (!empty($entity_info['entity keys']['bundle'])) {
-          $bundle_key = $entity_info['entity keys']['bundle'];
-          $values[$bundle_key] = $bundle_name;
-        }
+
+        $bundle_key = $entity_info['entity keys']['bundle'];
+        $values[$bundle_key] = $bundle_name;
       }
 
       $entity = entity_create($entity_type, $values);
