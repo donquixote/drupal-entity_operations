@@ -1592,17 +1592,40 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
    * This is the same behaviour as _node_add_access().
    */
   function userAccess($entity_type, $entity, $params = array(), $account = NULL) {
-    // Figure out if we're in a situation where we show the bundle selection
-    // list.
-    // TODO: move this logic to the constructor or a helper, as it's repeated
-    // in form().
     $entity_info = entity_get_info($this->entityType);
-    if (isset($entity_info['bundles'])
-        && count($entity_info['bundles']) > 1
-        && empty($entity)) {
+    // entity_get_info() defaults this to at least a ''.
+    $bundle_key = $entity_info['entity keys']['bundle'];
+    $verb = $this->getAccessVerb();
+
+    // Multiple cases, depending on what circumstances we're here under and
+    // whether the entity has multiple bundles.
+    // Case 1: we are on /add, and the entity type has either no bundles or
+    // only one bundle. We're about to show the add form.
+    if (!isset($entity_info['bundles']) || count($entity_info['bundles']) == 1) {
+      $values = array();
+      if (!empty($bundle_key)) {
+        $unique_bundle_name = array_pop(array_keys($entity_info['bundles']));
+        $values[$bundle_key] = $unique_bundle_name;
+      }
+
+      $new_entity = entity_create($entity_type, $values);
+      $access = entity_access($verb, $entity_type, $new_entity, $account);
+      return $access;
+    }
+
+    // Case 2: we are on /add, and we don't know which bundle to use. We're
+    // about to show a list of links. Access is granted if the user has access
+    // to at least one of the links.
+    if (empty($entity)) {
       foreach (array_keys($entity_info['bundles']) as $bundle_name) {
-        $verb = $this->getAccessVerb();
-        $access = entity_access($verb, $entity_type, $bundle_name, $account);
+        // Create a minimal entity with just the bundle for entity_access():
+        // this always needs an entity, even for 'create' op.
+        $values = array(
+          $bundle_key => $bundle_name,
+        );
+        $new_entity = entity_create($entity_type, $values);
+
+        $access = entity_access($verb, $entity_type, $new_entity, $account);
         if ($access) {
           return TRUE;
         }
@@ -1611,8 +1634,15 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
       return FALSE;
     }
 
-    // Otherwise, just return what the parent says.
-    return parent::userAccess($entity_type, $entity, $account);
+    // Case 3: we are on /add/BUNDLE. We are about to show the add form for the
+    // requested bundle, which is in fact the $entity parameter.
+    $bundle_name = $entity;
+    $values = array(
+      $bundle_key => $bundle_name,
+    );
+    $new_entity = entity_create($entity_type, $values);
+    $access = entity_access($verb, $entity_type, $new_entity, $account);
+    return $access;
   }
 
   /**
@@ -1710,8 +1740,15 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
     $items = array();
     foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
       // Check access for each item.
+      // Create a minimal entity with just the bundle for entity_access():
+      // this always needs an entity, even for 'create' op.
+      $values = array(
+        $entity_info['entity keys']['bundle'] => $bundle_name,
+      );
+      $new_entity = entity_create($entity_type, $values);
+
       $verb = $this->getAccessVerb();
-      $access = entity_access($verb, $this->entityType, $bundle_name);
+      $access = entity_access($verb, $entity_type, $new_entity, $account);
       if ($access) {
         $items[] = l(t('Add @bundle', array('@bundle' => $bundle_info['label'])), "$base_path/$bundle_name");
       }
