@@ -12,7 +12,7 @@ function entity_operations_views_plugins() {
     'display' => array(
       'entity_operation' => array(
         'title' => t('Entity tab'),
-        'help' => t("Display the view astab on an entity."),
+        'help' => t("Display the view as a tab on an entity."),
         'handler' => 'entity_operations_plugin_display_operation_tab',
         'theme' => 'views_view',
         'provides entity operation' => TRUE,
