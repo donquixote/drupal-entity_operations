@@ -29,6 +29,29 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
   }
 
   /**
+   * Return the URL for the view.
+   *
+   * This is used (among other things?) to get the URL for the action on a
+   * view's exposed form. As such, we don't want the entity ID argument to get
+   * added to the end of the path.
+   */
+  function get_url() {
+    $args = $this->view->args;
+
+    $arg_mode = $this->view->display_handler->get_option('argument_mode');
+
+    if ($arg_mode == 'id') {
+      // pre_execute() set the first argument to be the entity ID.
+      // Remove it from the args we pass to $view->get_url().
+      array_shift($args);
+    }
+
+    $url = $this->view->get_url($args);
+
+    return $url;
+  }
+
+  /**
    * Get the arguments for views_access() for this display.
    *
    * Cribbed from parts of execute_hook_menu().
