@@ -66,7 +66,7 @@ function entity_operations_test_entity_info() {
         'bundle' => 'type',
         'label' => 'title',
       ),
-      'label callback' => 'callback_entity_info_label',
+      'label callback' => 'entity_operations_test_label',
       'uri callback' => 'entity_operations_entity_uri',
       'operations ui' => array(
         'path' => 'entity_operations_test',
@@ -105,7 +105,7 @@ function entity_operations_test_entity_info() {
 /**
  * Implements callback_entity_info_label().
  */
-function callback_entity_info_label($entity, $entity_type) {
+function entity_operations_test_label($entity, $entity_type) {
   return empty($entity->title) ? 'Untitled entity' : $entity->title;
 }
 
