@@ -309,6 +309,15 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
     }
   }
 
+  function options_validate(&$form, &$form_state) {
+    if ($form_state['section'] == 'operation_name') {
+      // Only allow word characters (including unicode) and hyphens.
+      if (preg_match('/[^\p{L}-_]/u', $form_state['values']['path'])) {
+        form_error($form['path'], t('The path may only contain letters, numbers, underscores, and hyphens.'));
+      }
+    }
+  }
+
   function options_submit(&$form, &$form_state) {
     // It is very important to call the parent function here:
     parent::options_submit($form, $form_state);
