@@ -200,6 +200,10 @@ abstract class EntityOperationsOperationBase {
    *  used in operationStrings(), and should include at least:
    *  - '%entity-type': The human-readable label for the entity type.
    *  - '@entity-type': The human-readable label for the entity type.
+   *  - '%entity-type-lower': The human-readable label for the entity type in
+   *    lower case.
+   *  - '@entity-type-lower': The human-readable label for the entity type in
+   *    lower case.
    *  - '%label': The label of the entity.
    *  - '@label': The label of the entity.
    * We provide both the escaped and placeholder versions (i.e., @ and %)
@@ -217,6 +221,8 @@ abstract class EntityOperationsOperationBase {
     $substitutions = array(
       '%entity-type' => $entity_info['label'],
       '@entity-type' => $entity_info['label'],
+      '%entity-type-lower' => drupal_strtolower($entity_info['label']),
+      '@entity-type-lower' => drupal_strtolower($entity_info['label']),
       '%label' => $entity_label,
       '@label' => $entity_label,
     );
@@ -1585,7 +1591,7 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
       'description' => 'Create a new entity, with a bundle selection page if required.',
       // Note: this is ignored when on the entity form for entities with more
       // than one bundle type.
-      'page title' => t('Add %entity-type'),
+      'page title' => t('Add %entity-type-lower'),
     ) + parent::operationStrings();
   }
 
@@ -1758,8 +1764,10 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
 
     // Kill the setting of the title: we need more complex handling.
     unset($form_state['entity_operation_form_elements']['page title']);
-    drupal_set_title(t('Add %bundle-type', array(
-      '%bundle-type' => $entity_info['bundles'][$bundle_name]['label'],
+    // Match the format of title that entity_ui_get_action_title() uses.
+    drupal_set_title(t('Add %bundle-type-lower %entity-type-lower', array(
+      '%entity-type-lower' => drupal_strtolower($entity_info['label']),
+      '%bundle-type-lower' => drupal_strtolower($entity_info['bundles'][$bundle_name]['label']),
     )), PASS_THROUGH);
 
     $entity = entity_create($entity_type, $values);
