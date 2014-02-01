@@ -44,7 +44,7 @@ function entity_operations_vbo_entity_operations_list($operation_id = NULL) {
         continue;
       }
 
-      $new_operation_id = 'entity_operation::' . $key;
+      $new_operation_id = implode('::', array('entity_operation', $entity_type, $key));
       // Start with what the operation info provides and fill in defaults.
       $vbo_operations[$new_operation_id] = $operation_info['vbo'] + array(
         'operation_type' => 'entity_operation',

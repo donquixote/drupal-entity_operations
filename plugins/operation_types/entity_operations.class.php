@@ -15,7 +15,7 @@ class EntityOperationsVBOOperations extends ViewsBulkOperationsBaseOperation {
   public function __construct($operationId, $entityType, array $operationInfo, array $adminOptions) {
     parent::__construct($operationId, $entityType, $operationInfo, $adminOptions);
 
-    list(, $this->entityOperationKey) = explode('::', $operationId);
+    list(, , $this->entityOperationKey) = explode('::', $operationId);
   }
 
   /**
