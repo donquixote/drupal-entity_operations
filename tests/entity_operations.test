@@ -6,38 +6,23 @@
  */
 
 /**
- * Test case for Entity Operations on an entity using entity form handlers.
+ * Abstract base class for tests involving entity CRUD forms.
  */
-class EntityOperationsEntityFormsTestCase extends DrupalWebTestCase {
-
-  /**
-   * Implements getInfo().
-   */
-  public static function getInfo() {
-    return array(
-      'name' => t('Entity Operations entity forms'),
-      'description' => t('Test built-in operations on entity type using the entity form handlers.'),
-      'group' => t('Entity Operations'),
-    );
-  }
-
-  /**
-   * Implements setUp().
-   */
-  function setUp() {
-    // Call the parent with an array of modules to enable for the test.
-    parent::setUp(array('entity_operations', 'entity_operations_test'));
-
-    $this->entity_base_path = 'entity_operations_test';
-    $this->entity_type = 'entity_operations_test';
-  }
+abstract class EntityOperationsEntityFormsBase extends DrupalWebTestCase {
 
   /**
    * Test basic CRUD operations for the test entity type.
+   *
+   * This test provides common testing of CRUD forms for an entity type. Child
+   * classes wishing to make use of it should set the following properties in
+   * their setUp():
+   *  - $this->entity_type
+   *  - $this->entity_base_path
    */
   function testCRUDOperations() {
     // Test add operation.
     $this->drupalGet($this->entity_base_path . '/add');
+
     $this->assertTitle('Add test entity | Drupal', 'The add operation page is displayed.');
     $this->assertText('Add Alpha', "The add operation page shows a link to add an entity of bundle 'alpha'.");
     $this->assertText('Add Beta', "The add operation page shows a link to add an entity of bundle 'beta'.");
@@ -109,6 +94,74 @@ class EntityOperationsEntityFormsTestCase extends DrupalWebTestCase {
     $entity = entity_load_single($this->entity_type, $entity_stub->eid);
 
     $this->assertFalse($entity, "The entity has been deleted.");
+  }
+
+}
+
+/**
+ * Test case for Entity Operations on an entity using entity form handlers.
+ */
+class EntityOperationsEntityFormsTestCase extends EntityOperationsEntityFormsBase {
+
+  /**
+   * Implements getInfo().
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Entity Operations entity forms'),
+      'description' => t('Test built-in operations on entity type using the entity form handlers.'),
+      'group' => t('Entity Operations'),
+    );
+  }
+
+  /**
+   * Implements setUp().
+   */
+  function setUp() {
+    // Call the parent with an array of modules to enable for the test.
+    parent::setUp(array('entity_operations', 'entity_operations_test'));
+
+    $this->entity_base_path = 'entity_operations_test';
+    $this->entity_type = 'entity_operations_test';
+  }
+  
+  function testCRUDOperations() {
+    // The test method is in the parent base class. This is here just for DX.
+    parent::testCRUDOperations();
+  }
+
+}
+
+/**
+ * Test case for Entity Operations on an entity using generic form handlers.
+ */
+class EntityOperationsGenericFormsTestCase extends EntityOperationsEntityFormsBase {
+
+  /**
+   * Implements getInfo().
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Entity Operations generic forms'),
+      'description' => t('Test built-in operations on entity type using the generic form handlers.'),
+      'group' => t('Entity Operations'),
+    );
+  }
+
+  /**
+   * Implements setUp().
+   */
+  function setUp() {
+    // Call the parent with an array of modules to enable for the test.
+    parent::setUp(array('entity_operations', 'entity_operations_generic_test'));
+
+    $this->entity_base_path = 'entity_operations_generic_test';
+    $this->entity_type = 'entity_operations_generic_test';
+  }
+
+  function testCRUDOperations() {
+    // The test method is in the parent base class. This is here just for DX.
+    parent::testCRUDOperations();
   }
 
 }
