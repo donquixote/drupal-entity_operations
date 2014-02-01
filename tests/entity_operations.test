@@ -216,3 +216,85 @@ class EntityOperationsPermissionsTestCase extends DrupalWebTestCase {
   }
 
 }
+
+
+/**
+ * Test case for Entity Operations VBO support.
+ */
+class EntityOperationsViewsBulkOperationsTestCase extends DrupalWebTestCase {
+
+  /**
+   * Implements getInfo().
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Entity Operations VBO'),
+      'description' => t('Test use of entity operations as operations supplied to Views Bulk Operations.'),
+      'group' => t('Entity Operations'),
+    );
+  }
+
+  /**
+   * Implements setUp().
+   */
+  function setUp() {
+    // Call the parent with an array of modules to enable for the test.
+    parent::setUp(array('entity_operations', 'entity_operations_test', 'views', 'views_bulk_operations'));
+  }
+
+  function testVBO() {
+    // Create some test entities.
+    $entities = array();
+    $values = array(
+      'title' => 'Foobar',
+      'type' => 'alpha',
+    );
+    $entity = entity_create('entity_operations_test', $values);
+    $entity->save();
+    $entities[$entity->eid] = $entity;
+
+    $values = array(
+      'title' => 'Bizbax',
+      'type' => 'alpha',
+    );
+    $entity = entity_create('entity_operations_test', $values);
+    $entity->save();
+    $entities[$entity->eid] = $entity;
+
+    $this->drupalGet('entity_operations_test_vbo');
+
+    $this->assertText("Foobar", "The first entity's title is shown.");
+    $this->assertText("Bizbax", "The second entity's title is shown.");
+
+    // Perform the 'blue' action on the first entity.
+    $edit = array(
+      'views_bulk_operations[0]' => TRUE,
+    );
+    $this->drupalPost(NULL, $edit, t('Make it blue'));
+
+    // Clear the cache so we can load fresh entities.
+    entity_get_controller('entity_operations_test')->resetCache();
+    $entities = entity_load('entity_operations_test', array_keys($entities));
+
+    $this->assertEqual($entities[1]->title, 'Blue', "The first entity's title was changed by the bulk operation.");
+
+    $this->assertText("Blue", "The first entity's title is shown.");
+    $this->assertText("Bizbax", "The second entity's title is shown.");
+
+    // Perform the 'red' action on the second entity.
+    $edit = array(
+      'views_bulk_operations[1]' => TRUE,
+    );
+    $this->drupalPost(NULL, $edit, t('Make it red'));
+
+    // Clear the cache so we can load fresh entities.
+    entity_get_controller('entity_operations_test')->resetCache();
+    $entities = entity_load('entity_operations_test', array_keys($entities));
+
+    $this->assertEqual($entities[2]->title, 'Red', "The second entity's title was changed by the bulk operation.");
+
+    $this->assertText("Blue", "The first entity's title is shown.");
+    $this->assertText("Red", "The second entity's title is shown.");
+  }
+
+}

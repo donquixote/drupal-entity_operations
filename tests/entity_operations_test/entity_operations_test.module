@@ -43,6 +43,24 @@ function entity_operations_test_entity_operation_info() {
           'views field' => TRUE,
         ),
       ),
+      'red' => array(
+        'handler' => 'EntityOperationsTestOperationTitleRed',
+        'provision' => array(
+          'menu' => TRUE,
+        ),
+      ),
+      'blue' => array(
+        'handler' => 'EntityOperationsTestOperationTitleBlue',
+        'provision' => array(
+          'menu' => TRUE,
+        ),
+      ),
+      'green' => array(
+        'handler' => 'EntityOperationsTestOperationTitleGreen',
+        'provision' => array(
+          'menu' => TRUE,
+        ),
+      ),
     ),
   );
   return $info;
@@ -115,4 +133,15 @@ function entity_operations_test_label($entity, $entity_type) {
 function entity_operations_test_access($op, $entity, $account, $entity_type) {
   // TODO!
   return TRUE;
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function entity_operations_test_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'entity_operations_test'),
+    'template path' => drupal_get_path('module', 'entity_operations_test'),
+  );
 }

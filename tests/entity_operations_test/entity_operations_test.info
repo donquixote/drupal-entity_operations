@@ -2,3 +2,4 @@ name = Entity Operations Test
 description = Test module for Entity Operations.
 core = 7.x
 hidden = TRUE
+files[] = entity_operations_test.operation_handlers.inc
