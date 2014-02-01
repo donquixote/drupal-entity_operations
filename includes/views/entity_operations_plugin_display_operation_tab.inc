@@ -356,6 +356,13 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
       ));
     }
 
+    $title = $this->get_option('title');
+    if (empty($title)) {
+      $errors[] = t('Display "@display" must have its title set, as this is used as the operation tab title.', array(
+        '@display' => $this->display->display_title,
+      ));
+    }
+
     return $errors;
   }
 
