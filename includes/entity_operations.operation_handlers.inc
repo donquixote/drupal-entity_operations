@@ -523,7 +523,7 @@ class EntityOperationsOperationPageViews extends EntityOperationsOperationPage {
       // care of in userAccess().
       $view->set_display($view_display_name);
       $view->current_entity = $entity;
-      $result = $view->execute_display($view_display_name);
+      $result = $view->preview($view_display_name);
     }
 
     if (!empty($result)) {
