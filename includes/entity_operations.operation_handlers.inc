@@ -1797,7 +1797,7 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
       $new_entity = entity_create($entity_type, $values);
 
       $verb = $this->getAccessVerb();
-      $access = entity_access($verb, $entity_type, $new_entity, $account);
+      $access = entity_access($verb, $entity_type, $new_entity);
       if ($access) {
         $items[] = l(t('Add @bundle', array('@bundle' => $bundle_info['label'])), "$base_path/$bundle_name");
       }
