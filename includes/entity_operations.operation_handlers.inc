@@ -1103,29 +1103,20 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
    * Properties for the menu item specific to this handler.
    */
   function menu_item($operation_path, $operation_definition, $loader_position) {
-    // Determine which of Entity API's page callbacks to use, based on whether
-    // this entity type has bundles.
-    $entity_info = entity_get_info($this->entityType);
-    if (isset($entity_info['entity keys']['bundle'])) {
-      // Use the wrapper around entity_ui_get_form() which supports bundles.
-      $page_callback = 'entity_ui_get_bundle_add_form';
-      $page_arguments = array($this->entityType, $loader_position + 1);
-    }
-    else {
-      // Have to go to entity_ui_get_form() directly, as the wrapper doesn't
-      // support there not being bundles.
-      $page_callback = 'entity_ui_get_form';
-      $page_arguments = array($this->entityType, NULL, 'add');
-    }
-
     $item = array(
       'title' => 'Add',
       // Special path which doesn't have an entity loader.
       'path' => $this->controller->path . '/add',
       // We don't want a tab.
       'type' => MENU_CALLBACK,
-      'page callback' => $page_callback,
-      'page arguments' => $page_arguments,
+      'page callback' => 'entity_operations_operation_page_callback',
+      'page arguments' => array(
+        $this->entityType,
+        get_class($this),
+        $operation_path,
+        // There is no entity, but there might be a bundle name after the path.
+        2,
+      ),
       'access callback' => 'entity_operations_operation_access_callback',
       'access arguments' => array(
         $this->entityType,
@@ -1159,6 +1150,61 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
     // Add in what the parent class has.
     $item += parent::menu_item($operation_path, $operation_definition, $loader_position);
     return $item;
+  }
+
+  /**
+   * Helper to set the page title.
+   *
+   * @see build() for the parameters.
+   */
+  function setTitle($entity_type, $entity, $params = array()) {
+    if (empty($entity)) {
+      module_load_include('inc', 'entity', 'includes/entity.ui');
+      drupal_set_title(entity_ui_get_action_title('add', $entity_type));
+    }
+    else {
+      // We're on /add/bundle.
+      // build() will call entity_ui_get_bundle_add_form() which takes care of
+      // setting the title.
+    }
+  }
+
+  /**
+   * Page callback.
+   */
+  function build($entity_type, $entity, $params = array()) {
+    if (empty($entity)) {
+      // We're on just /add.
+      $entity_info = entity_get_info($entity_type);
+
+      // Special case: single-bundled entity. Go straight to the form.
+      if (count($entity_info['bundles']) == 1) {
+        $entity = entity_create($entity_type, array());
+        return entity_ui_get_form($entity_type, $entity, 'add');
+      }
+
+      // We can't use entity_ui_bundle_add_page() because that outputs links to
+      // paths in the admin UI, so unfortunately we must repeat its work here.
+      $items = array();
+      foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
+        // Create an empty entity with just the bundle set to check for access.
+        $dummy_entity = entity_create($entity_type, array(
+          $entity_info['entity keys']['bundle'] => $bundle_name,
+        ));
+        // If modules use a uid, they can default to the current-user
+        // in their create() method on the storage controller.
+        if (entity_access('create', $entity_type, $dummy_entity, $account = NULL)) {
+          $add_path = $entity_info['operations ui']['path'] . '/add/' . $bundle_name;
+          $items[] = l(t('Add @label', array('@label' => $bundle_info['label'])), $add_path);
+        }
+      }
+      return theme('item_list', array('items' => $items));
+    }
+    else {
+      // We're on /add/bundle.
+      $bundle_name = $entity;
+      return entity_ui_get_bundle_add_form($entity_type, $bundle_name);
+    }
   }
 
 }

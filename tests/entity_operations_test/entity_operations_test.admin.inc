@@ -60,6 +60,13 @@ function entity_operations_test_form_submit($form, &$form_state) {
   // Save the entity.
   $entity->save();
 
+  $entity_info = entity_get_info($entity->entityType());
+  // Show a message so we're consistent with what normal entity forms would do.
+  drupal_set_message(t('The @entity-type %label has been saved.', array(
+    '@entity-type' => $entity_info['label'],
+    '%label' => $entity->label(),
+  )));
+
   // Redirect to the entity.
   $uri = $entity->uri();
 

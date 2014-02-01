@@ -6,6 +6,114 @@
  */
 
 /**
+ * Test case for Entity Operations on an entity using entity form handlers.
+ */
+class EntityOperationsEntityFormsTestCase extends DrupalWebTestCase {
+
+  /**
+   * Implements getInfo().
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Entity Operations entity forms'),
+      'description' => t('Test built-in operations on entity type using the entity form handlers.'),
+      'group' => t('Entity Operations'),
+    );
+  }
+
+  /**
+   * Implements setUp().
+   */
+  function setUp() {
+    // Call the parent with an array of modules to enable for the test.
+    parent::setUp(array('entity_operations', 'entity_operations_test'));
+
+    $this->entity_base_path = 'entity_operations_test';
+    $this->entity_type = 'entity_operations_test';
+  }
+
+  /**
+   * Test basic CRUD operations for the test entity type.
+   */
+  function testCRUDOperations() {
+    // Test add operation.
+    $this->drupalGet($this->entity_base_path . '/add');
+    $this->assertTitle('Add test entity | Drupal', 'The add operation page is displayed.');
+    $this->assertText('Add Alpha', "The add operation page shows a link to add an entity of bundle 'alpha'.");
+    $this->assertText('Add Beta', "The add operation page shows a link to add an entity of bundle 'beta'.");
+
+    $this->drupalGet($this->entity_base_path . '/add/alpha');
+    $this->assertTitle('Add alpha test entity | Drupal', "The add form title is shown for a specific entity bundle.");
+    $this->assertFieldByName('title', NULL, 'The title field is shown on the entity add form.');
+
+    // Don't use randomString(), it causes wacky issues with funny characters.
+    $entity_title = $this->randomName();
+    $edit = array(
+      'title' => $entity_title,
+    );
+    $this->drupalPost(NULL, $edit, t('Save'));
+
+    $this->assertTitle("$entity_title | Drupal", "The user was redirected to the entity after saving the add form.");
+    $this->assertText("The Test Entity $entity_title has been saved.", "The user is shown a status message.");
+
+    // Load the newly created entity by its title.
+    $query = new EntityFieldQuery();
+    $query
+      ->entityCondition('entity_type', $this->entity_type)
+      ->propertyCondition('title', $entity_title);
+    $result = $query->execute();
+    $this->assertTrue(isset($result[$this->entity_type]), t('The entity was saved.'));
+
+    $entity_stub = array_pop($result[$this->entity_type]);
+    $entity = entity_load_single($this->entity_type, $entity_stub->eid);
+
+    // Test view operation.
+    $this->drupalGet($this->entity_base_path . '/' . $entity->eid);
+    $this->assertTitle("$entity_title | Drupal", "The entity title is shown.");
+
+    // Test edit operation.
+    $this->drupalGet($this->entity_base_path . '/' . $entity->eid . '/edit');
+
+    $this->assertTitle("Edit $entity_title | Drupal", "The edit form title is shown.");
+    $this->assertFieldByName('title', $entity_title, 'The title field is shown on the entity edit form and shows the entity title.');
+
+    $entity_title_changed = $this->randomName();
+    $edit = array(
+      'title' => $entity_title_changed,
+    );
+    $this->drupalPost(NULL, $edit, t('Save'));
+
+    $this->assertTitle("$entity_title_changed | Drupal", "The user was redirected to the entity after saving the edit form.");
+    $this->assertText("The Test Entity $entity_title_changed has been saved.", "The status message is shown.");
+
+    // Clear the cache so we can load fresh entities.
+    entity_get_controller($this->entity_type)->resetCache();
+    $entity = entity_load_single($this->entity_type, $entity_stub->eid);
+
+    $this->assertEqual($entity->title, $entity_title_changed, "The entity title was changed.");
+
+    // Test delete operation.
+    $this->drupalGet($this->entity_base_path . '/' . $entity->eid . '/delete');
+    $this->assertTitle("Delete $entity_title_changed? | Drupal", "The delete form title is shown.");
+    $this->assertText("Are you sure you want to delete the Test Entity $entity_title_changed?",
+      "The confirmation message is shown.");
+    $this->assertText("Cancel", "The cancel link is shown.");
+
+    $this->drupalPost(NULL, array(), t('Delete Test Entity'));
+
+    // Check status message
+    $this->assertText("The Test Entity $entity_title_changed has been deleted.", "The status message is shown.");
+
+    // Clear the cache so we can load fresh entities.
+    entity_get_controller($this->entity_type)->resetCache();
+    $entity = entity_load_single($this->entity_type, $entity_stub->eid);
+
+    $this->assertFalse($entity, "The entity has been deleted.");
+  }
+
+}
+
+/**
  * Test case for Entity Operations permissions helper.
  */
 class EntityOperationsPermissionsTestCase extends DrupalWebTestCase {
