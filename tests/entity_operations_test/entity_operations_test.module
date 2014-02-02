@@ -110,6 +110,7 @@ function entity_operations_test_entity_info() {
       // Admin UI for our 'add' and 'edit' operations.
       // TODO: check if actually needed!
       'admin ui' => array(
+        'controller class' => 'EntityOperationsDefaultAdminUIController',
         'file' => 'entity_operations_test.admin.inc',
         // We don't use this but it's needed for EntityOperationsOperationAdd.
         'path' => 'admin/structure/entity_operations_test',
