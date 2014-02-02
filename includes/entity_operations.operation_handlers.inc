@@ -1603,9 +1603,7 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
       'tab title' => 'Add',
       'label' => 'Add',
       'description' => 'Create a new entity, with a bundle selection page if required.',
-      // Note: this is ignored when on the entity form for entities with more
-      // than one bundle type.
-      'page title' => t('Add %entity-type-lower'),
+      // Note page title is set by setTitle().
     ) + parent::operationStrings();
   }
 
@@ -1622,9 +1620,11 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
       'path' => $entity_info['operations ui']['path'] . '/add',
       // We don't want a tab.
       'type' => MENU_CALLBACK,
+      // Although we have EntityOperationsOperationForm in our ancestry, we use
+      // the page callback as our output is not always a form.
+      'page callback' => 'entity_operations_operation_page_callback',
       // Change the callback arguments to pass NULL for the entity parameter.
       'page arguments' => array(
-        $form_id,
         $this->entityType,
         get_class($this),
         $operation_path,
@@ -1718,42 +1718,37 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
   }
 
   /**
-   * Form builder for this operation.
-   *
-   * To get different parameters, override menu_item().
+   * Build the operation render array.
    *
    * @param $entity_type
    *  The entity type.
    * @param $entity
-   *  The bundle name to add. May be NULL if the entity has no bundles or only
-   *  one bundle.
-   * @param $operation_path
-   *  The operation path of the current operation. This is the key of the
-   *  definition array in hook_entity_info().
+   *  The entity. Pass NULL if there is no entity in context.
+   * @param $params
+   *  (optional) An array of additional parameters. It is up to subclasses that
+   *  require this to document what they expect.
+   *
+   * @return
+   *  Output suitable for a page callback.
    */
-  function form($form, &$form_state, $entity_type, $entity, $operation_path) {
-    // TODO: consider instead of abusing $entity, look in form state
-    // build info for an extra bundle parameter?
-
-    // Kill the cancel button.
-    unset($form_state['entity_operation_form_elements']['cancel link']);
-
+  function build($entity_type, $entity, $params = array()) {
+    // There are several different cases for two different results.
     $entity_info = entity_get_info($this->entityType);
 
-    // Multiple cases, depending on what circumstances we're here under and
-    // whether the entity has multiple bundles.
-    // Case 1: we are on /add, and the entity type has only one bundle (note
-    // that even if hook_entity_info() doesn't define any bundles,
-    // entity_get_info() defines one with the same name as the entity).
-    // Just show the add form.
-    if (count($entity_info['bundles']) == 1) {
-      // We won't have an entity here, so create one for our parent class's form.
-     $values = array();
+    // The $entity parameter is in fact the bundle name.
+    $bundle_name = $entity;
 
-      // Set the bundle key, if we need it.
-      // Set a variable to avoid a strict warning with reset().
+    if (count($entity_info['bundles']) == 1) {
+      // Case 1: we are on /add, and the entity type has only one bundle (note
+      // that even if hook_entity_info() doesn't define any bundles,
+      // entity_get_info() defines one with the same name as the entity).
+      // Just show the add form.
+      $output = 'form';
+
+      // Create a new entity, setting the bundle key, if we need it.
       // Must use empty(), as entity_get_info() defaults this to ''.
       if (!empty($entity_info['entity keys']['bundle'])) {
+        // Set a variable to avoid a strict warning with reset().
         $bundle_names = array_keys($entity_info['bundles']);
         $bundle_name = reset($bundle_names);
 
@@ -1762,55 +1757,92 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
       }
 
       $entity = entity_create($entity_type, $values);
+    }
+    elseif (empty($bundle_name)) {
+      // Case 2: we are on /add, and we don't know which bundle to use. Show a
+      // list of links.
+      $output = 'links';
+    }
+    else {
+      // Case 3: we are on /add/BUNDLE. Show the add form.
+      $output = 'form';
 
-      return $this->entityForm($form, $form_state, $entity_type, $entity, $operation_path);
+      // Create an entity of the right bundle.
+      $values = array();
+      $bundle_key = $entity_info['entity keys']['bundle'];
+      $values[$bundle_key] = $bundle_name;
+
+      $entity = entity_create($entity_type, $values);
     }
 
-    // Case 2: we are on /add, and we don't know which bundle to use. Show a
-    // list of links.
-    if (empty($entity)) {
-      return $this->bundleSelectionForm($form, $form_state, $entity_type, $entity, $operation_path);
+    // Now return the output, depending on what's required.
+    switch ($output) {
+      case 'links':
+        return $this->bundleSelectionList($entity_type);
+      case 'form':
+        // Return the form.
+        // This will:
+        // - look up the form ID with our hook_forms().
+        // - use the base form builder entity_operations_operation_form().
+        // - go back into this handler's form().
+        // - call entityForm(), which calls the parent method
+        //   EntityOperationsOperationEditGeneric::entityForm().
+        $form_id = $this->getFormID($entity_type, $this->path);
+        return drupal_get_form($form_id, $entity_type, get_class($this), $this->path, $entity);
     }
+  }
 
-    // Case 3: we are on /add/BUNDLE. Show the add form.
-    $bundle_name = $entity;
-
-    // We won't have an entity here, so create one for our parent class's form.
-    $values = array();
-    $bundle_key = $entity_info['entity keys']['bundle'];
-    $values[$bundle_key] = $bundle_name;
-
-    // Kill the setting of the title: we need more complex handling.
+  /**
+   * Form builder for this operation.
+   */
+  function form($form, &$form_state, $entity_type, $entity, $operation_path) {
+    // Kill the page title.
     unset($form_state['entity_operation_form_elements']['page title']);
-    // Match the format of title that entity_ui_get_action_title() uses.
-    drupal_set_title(t('Add %bundle-type-lower %entity-type-lower', array(
-      '%entity-type-lower' => drupal_strtolower($entity_info['label']),
-      '%bundle-type-lower' => drupal_strtolower($entity_info['bundles'][$bundle_name]['label']),
-    )), PASS_THROUGH);
 
-    $entity = entity_create($entity_type, $values);
+    // Kill the cancel link.
+    unset($form_state['entity_operation_form_elements']['cancel link']);
 
     return $this->entityForm($form, $form_state, $entity_type, $entity, $operation_path);
   }
 
   /**
-   * Helper for form() that returns a list of bundle creation links.
+   * Helper to set the page title.
    *
-   * This is not really a form, just a collection of add links. But we can't
-   * handle this as a page type handler because that would require returning
-   * multiple menu items from a single operation handler; so we fake it.
+   * We need this because we don't have it in our parent classes, and it's
+   * expected by entity_operations_operation_page_callback().
+   *
+   * @see build() for the parameters.
    */
-  function bundleSelectionForm($form, &$form_state, $entity_type, $entity, $operation_path) {
-    $entity_info = entity_get_info($this->entityType);
+  function setTitle($entity_type, $entity, $params = array()) {
+    // The $entity parameter is in fact the bundle name.
+    $bundle_name = $entity;
 
-    // Kill the action button.
-    unset($form_state['entity_operation_form_elements']['action button']);
+    $entity_info = entity_get_info($entity_type);
+
+    if (!empty($bundle_name)) {
+      drupal_set_title(t('Add %bundle-type-lower %entity-type-lower', array(
+        '%entity-type-lower' => drupal_strtolower($entity_info['label']),
+        '%bundle-type-lower' => drupal_strtolower($entity_info['bundles'][$bundle_name]['label']),
+      )), PASS_THROUGH);
+    }
+    else {
+      drupal_set_title(t('Add %entity-type-lower', array(
+        '%entity-type-lower' => drupal_strtolower($entity_info['label']),
+      )), PASS_THROUGH);
+    }
+  }
+
+  /**
+   * Helper for build() that returns a list of bundle creation links.
+   */
+  function bundleSelectionList($entity_type) {
+    $entity_info = entity_get_info($this->entityType);
 
     // Get the base path. We will probably be on ENTITYBASE/add, though of
     // course the declaration for this operation could have set a different
     // operation path. We create links with the bundle name appended to that,
     // which will also be handled by this operation.
-    $base_path = $entity_info['operations ui']['path'] . '/' . $operation_path;
+    $base_path = $entity_info['operations ui']['path'] . '/' . $this->path;
 
     $items = array();
     foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
@@ -1828,12 +1860,13 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
         $items[] = l(t('Add @bundle', array('@bundle' => $bundle_info['label'])), "$base_path/$bundle_name");
       }
     }
-    $form['links'][$bundle_name] = array(
+
+    $build['links'][$bundle_name] = array(
       '#theme' => 'item_list',
       '#items' => $items,
     );
 
-    return $form;
+    return $build;
   }
 
 }
