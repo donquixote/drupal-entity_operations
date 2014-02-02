@@ -1594,6 +1594,8 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
    * Properties for the menu item specific to this handler.
    */
   function menu_item($operation_path, $operation_definition, $loader_position) {
+    $form_id = $this->getFormID($this->entityType, $operation_path);
+
     $item = array(
       // Special path which doesn't have an entity loader.
       'path' => $this->controller->path . '/add',
@@ -1601,7 +1603,7 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
       'type' => MENU_CALLBACK,
       // Change the callback arguments to pass NULL for the entity parameter.
       'page arguments' => array(
-        'entity_operations_operation_form',
+        $form_id,
         $this->entityType,
         get_class($this),
         $operation_path,
