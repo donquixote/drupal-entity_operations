@@ -406,8 +406,39 @@ function entity_operations_operation_form_submit($form, &$form_state) {
  * @see EntityOperationsOperationBase::access()
  */
 function entity_operations_operation_access_callback($entity_type, $handler_class, $operation_path, $entity, $params = array()) {
+  // Use a static cache here, as menu access is often required repeatedly for
+  // the same menu items, for things such as tab parentage and breadcrumbs.
+  // This is better than caching the handler object itself, as a) we might not
+  // in fact need this for some operations and b) if we do need the handler
+  // several times, it'll be for access; only one use of the handler is for its
+  // actual content. This way we are only caching booleans, which is very light.
+  // Access to handlers will not normally change in the lifetime of a request.
+  // A handler that needs to consider access after it has made some sort of
+  // change (for example, when figuring out where to redirect the user to after
+  // the operation has been executed) should clear this static cache.
+  $cache = &drupal_static(__FUNCTION__);
+
+  // Make a key for the access cache.
+  // This is not available for those operations that cheat and use the $entity
+  // parameter for something else: these are the 'add' operations.
+  if (is_object($entity)) {
+    list($id) = entity_extract_ids($entity_type, $entity);
+    $cache_key = $entity_type . '::' . $operation_path . '::' . $id;
+  }
+
+  if (isset($cache_key) && isset($cache[$cache_key])) {
+    return $cache[$cache_key];
+  }
+
   $operation_handler = new $handler_class($entity_type, $operation_path);
-  return $operation_handler->access($entity_type, $entity, $params);
+
+  $operation_access = $operation_handler->access($entity_type, $entity, $params);
+
+  if (isset($cache_key)) {
+    $cache[$cache_key] = $operation_access;
+  }
+
+  return $operation_access;
 }
 
 // ========================================== Other contrib integration.
