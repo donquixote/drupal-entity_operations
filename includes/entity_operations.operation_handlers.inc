@@ -1442,6 +1442,24 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
   }
 
   /**
+   * Get the form ID for the operation form.
+   *
+   * @param $entity_type
+   *  The entity type.
+   * @param $operation_path
+   *  The path component for the operation.
+   *
+   * @return
+   *  A form ID that will be recognized by entity_operations_forms().
+   */
+  function getFormID($entity_type, $operation_path) {
+    // Force the form ID, so that child classes get the same one. This means
+    // both the add and edit generic operation forms get the same form ID, and
+    // thus makes form alteration easier.
+    return implode('_', array('entity_operations_operation_form', $entity_type, 'edit'));
+  }
+
+  /**
    * Form builder for this operation.
    */
   function form($form, &$form_state, $entity_type, $entity, $operation_path) {
