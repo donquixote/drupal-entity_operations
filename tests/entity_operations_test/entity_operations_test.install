@@ -31,6 +31,14 @@ function entity_operations_test_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      // Note this has no effect in the UI, it's just for testing handlers!
+      'status' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'default' => NULL,
+        'description' => "Boolean indicating whether the entity is published or unpublished.",
+      ),
       'uid' => array(
         'type' => 'int',
         'unsigned' => TRUE,

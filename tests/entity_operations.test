@@ -124,7 +124,7 @@ class EntityOperationsEntityFormsTestCase extends EntityOperationsEntityFormsBas
     $this->entity_base_path = 'entity_operations_test';
     $this->entity_type = 'entity_operations_test';
   }
-  
+
   function testCRUDOperations() {
     // The test method is in the parent base class. This is here just for DX.
     parent::testCRUDOperations();
@@ -217,6 +217,77 @@ class EntityOperationsPermissionsTestCase extends DrupalWebTestCase {
 
 }
 
+/**
+ * Test case for operation access using Publish/Unpublish handlers.
+ */
+class EntityOperationsPublishTestCase extends DrupalWebTestCase {
+
+
+  /**
+   * Implements getInfo().
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Entity Operations operation access'),
+      'description' => t('Test access of operations using the publish and unpublish handlers.'),
+      'group' => t('Entity Operations'),
+    );
+  }
+
+  /**
+   * Implements setUp().
+   */
+  function setUp() {
+    // Call the parent with an array of modules to enable for the test.
+    parent::setUp(array('entity_operations', 'entity_operations_test'));
+  }
+
+  function testPublish() {
+    // Create a test entity, initially published.
+    $values = array(
+      'title' => 'Foobar',
+      'type' => 'alpha',
+      'status' => TRUE,
+    );
+    $entity = entity_create('entity_operations_test', $values);
+    $entity->save();
+
+    // View the entity.
+    $this->drupalGet('entity_operations_test/' . $entity->eid);
+
+    $this->assertText('Unpublish', "The unpublish tab is shown when the entity is viewed.");
+
+    // Go to the unpublish tab and unpublish it.
+    $this->drupalGet("entity_operations_test/$entity->eid/unpublish");
+
+    $this->assertText("Are you sure you want to unpublish this Test Entity?", "The unpublish tab shows a confirmation question.");
+
+    $this->drupalPost(NULL, array(), 'Unpublish');
+
+    // Clear the cache and reload the entity.
+    entity_get_controller('entity_operations_test')->resetCache();
+    $entity = entity_load_single('entity_operations_test', $entity->eid);
+
+    $this->assertEqual($entity->status, FALSE, "The entity was unpublished.");
+
+    // TODO: assert we got redirected?
+
+    $this->assertText('Publish', "The publish tab is shown when the entity is viewed.");
+
+    $this->drupalGet("entity_operations_test/$entity->eid/publish");
+
+    $this->assertText("Are you sure you want to publish this Test Entity?", "The publish tab shows a confirmation question.");
+
+    $this->drupalPost(NULL, array(), 'Publish');
+
+    // Clear the cache and reload the entity.
+    entity_get_controller('entity_operations_test')->resetCache();
+    $entity = entity_load_single('entity_operations_test', $entity->eid);
+
+    $this->assertEqual($entity->status, TRUE, "The entity was published.");
+  }
+
+}
 
 /**
  * Test case for Entity Operations VBO support.

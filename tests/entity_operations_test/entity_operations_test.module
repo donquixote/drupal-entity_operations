@@ -43,6 +43,7 @@ function entity_operations_test_entity_operation_info() {
           'views field' => TRUE,
         ),
       ),
+      // Test handlers for changing the title of the entity.
       'red' => array(
         'handler' => 'EntityOperationsTestOperationTitleRed',
         'provision' => array(
@@ -57,6 +58,19 @@ function entity_operations_test_entity_operation_info() {
       ),
       'green' => array(
         'handler' => 'EntityOperationsTestOperationTitleGreen',
+        'provision' => array(
+          'menu' => TRUE,
+        ),
+      ),
+      // Test handlers for changing the status of the entity.
+      'publish' => array(
+        'handler' => 'EntityOperationsOperationPublish',
+        'provision' => array(
+          'menu' => TRUE,
+        ),
+      ),
+      'unpublish' => array(
+        'handler' => 'EntityOperationsOperationUnPublish',
         'provision' => array(
           'menu' => TRUE,
         ),
