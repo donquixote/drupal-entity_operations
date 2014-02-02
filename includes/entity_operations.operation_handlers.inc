@@ -1566,14 +1566,6 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
  * don't need to provide a form builder for the edit/add form for your entities:
  * it is contained within this handler.
  *
- * If the entity has multiple bundles, its entity access callback will receive
- * the bundle name that is being created in the place of the $entity parameter
- * for the 'add' op. In other words, you will get:
- * @code
- * your_entity_access('add', BUNDLE_NAME, $account, $entity_type);
- * @endcode
- * (This is the same pattern as node_access().)
- *
  * See EntityOperationsOperationEditGeneric for requirements and limitations of
  * this handler.
  */
