@@ -699,10 +699,13 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    * the following array keys to TRUE in an array in
    * $form_state['entity_operation_form_elements']:
    *  - 'page title': Set the page title.
-   *  - 'confirmation message': The confirmation question.
-   *  - 'form elements': The body of the form as returned by form().
+   *  - 'confirmation message': The confirmation question. This is shown at the
+   *    top of the form, and is a string defined by the operation, e.g. 'Are you
+   *    sure you want to do X?'.
+   *  - 'form elements': The body of the form as returned by the form() method.
    *  - 'action button': The submit button.
-   *  - 'cancel link': A link to return to the entity.
+   *  - 'cancel link': A 'cancel' link to return the user to the entity itself,
+   *    whose path is given by entity_uri().
    */
   function getForm($form, &$form_state, $entity_type, $entity, $operation_path) {
     // Case 1: tab: always show everything.
