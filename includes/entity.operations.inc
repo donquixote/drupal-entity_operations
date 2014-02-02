@@ -14,8 +14,7 @@ class EntityOperationsDefaultUIController {
 
   protected $entityType;
   protected $entityInfo;
-  // Argh, public because of the op handlers.
-  public $path;
+  protected $path;
 
   public function __construct($entity_type) {
     $this->entityType = $entity_type;
@@ -56,9 +55,6 @@ class EntityOperationsDefaultUIController {
 
       $handler_class = $operation_definition['handler'];
       $operation_handler = new $handler_class($this->entityType, $operation_path);
-      // Some handlers need to get some of our properties.
-      // TODO: this is a bit ugly.
-      $operation_handler->controller = $this;
 
       $operation_handler_info = $operation_handler->operationInfo();
 

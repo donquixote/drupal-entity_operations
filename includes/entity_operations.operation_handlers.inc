@@ -1112,10 +1112,12 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
    * Properties for the menu item specific to this handler.
    */
   function menu_item($operation_path, $operation_definition, $loader_position) {
+    $entity_info = entity_get_info($this->entityType);
+
     $item = array(
       'title' => 'Add',
       // Special path which doesn't have an entity loader.
-      'path' => $this->controller->path . '/add',
+      'path' => $entity_info['operations ui']['path'] . '/add',
       // We don't want a tab.
       'type' => MENU_CALLBACK,
       'page callback' => 'entity_operations_operation_page_callback',
@@ -1137,7 +1139,6 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
 
     // Use the file setting from entity info 'admin ui', as we expect that to be
     // used for the entity form callback.
-    $entity_info = entity_get_info($this->entityType);
     if (isset($entity_info['admin ui']['file'])) {
       $item['file'] = $entity_info['admin ui']['file'];
     }
@@ -1612,11 +1613,13 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
    * Properties for the menu item specific to this handler.
    */
   function menu_item($operation_path, $operation_definition, $loader_position) {
+    $entity_info = entity_get_info($this->entityType);
+
     $form_id = $this->getFormID($this->entityType, $operation_path);
 
     $item = array(
       // Special path which doesn't have an entity loader.
-      'path' => $this->controller->path . '/add',
+      'path' => $entity_info['operations ui']['path'] . '/add',
       // We don't want a tab.
       'type' => MENU_CALLBACK,
       // Change the callback arguments to pass NULL for the entity parameter.
