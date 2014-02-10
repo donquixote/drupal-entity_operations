@@ -1745,6 +1745,8 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
       // Just show the add form.
       $output = 'form';
 
+      $values = array();
+
       // Create a new entity, setting the bundle key, if we need it.
       // Must use empty(), as entity_get_info() defaults this to ''.
       if (!empty($entity_info['entity keys']['bundle'])) {
