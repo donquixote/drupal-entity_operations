@@ -369,3 +369,62 @@ class EntityOperationsViewsBulkOperationsTestCase extends DrupalWebTestCase {
   }
 
 }
+
+
+/**
+ * Test case for Entity Operations multiple operations form.
+ */
+class EntityOperationsMultipleFormTestCase extends DrupalWebTestCase {
+
+  /**
+   * Implements getInfo().
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Entity Operations multiple operations form'),
+      'description' => t('Test form showing multiple operations.'),
+      'group' => t('Entity Operations'),
+    );
+  }
+
+  /**
+   * Implements setUp().
+   */
+  function setUp() {
+    // Call the parent with an array of modules to enable for the test.
+    parent::setUp(array('entity_operations', 'entity_operations_test'));
+
+    // TODO: user with permissions.
+  }
+
+  function testMultipleOperationsForm() {
+    $values =  array(
+      'type' => 'alpha',
+      'title' => $this->randomName(),
+    );
+    $entity = entity_create('entity_operations_test', $values);
+    $entity->save();
+
+    $this->drupalGet('entity_operations_test-multiple/' . $entity->eid);
+
+    // Click the button for the 'red' operation.
+    $this->drupalPost(NULL, array(), t('Make it red'));
+
+    entity_get_controller('entity_operations_test')->resetCache();
+    $entity = entity_load_single('entity_operations_test', $entity->eid);
+
+    $this->assertEqual($entity->title, 'Red', "The entity title is changed to 'Red'.");
+
+    // The operations will redirect to the entity, so return to our test form.
+    $this->drupalGet('entity_operations_test-multiple/' . $entity->eid);
+
+    // Click the button for the 'blue' operation.
+    $this->drupalPost(NULL, array(), t('Make it blue'));
+
+    entity_get_controller('entity_operations_test')->resetCache();
+    $entity = entity_load_single('entity_operations_test', $entity->eid);
+
+    $this->assertEqual($entity->title, 'Blue', "The entity title is changed to 'Blue'.");
+  }
+
+}

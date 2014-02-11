@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains dummy handler classes for testing.
+ * Contains handler classes for test operations.
  */
 
 /**
@@ -132,7 +132,7 @@ class EntityOperationsTestOperationTitleGreen extends EntityOperationsOperationA
       'page title' => "Set title to 'Green'",
       'button label' => t('Make it green'),
       'confirm question' => t('Are you sure you want to set the @entity-type %label to Green?'),
-      'submit message' => t('The @entity-type %label has been made Green.'),
+      'submit message' => t('The @entity-type %label has been made green.'),
     );
   }
 

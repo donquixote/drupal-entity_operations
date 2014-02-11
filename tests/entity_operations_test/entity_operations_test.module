@@ -160,3 +160,31 @@ function entity_operations_test_views_api() {
     'template path' => drupal_get_path('module', 'entity_operations_test'),
   );
 }
+
+/**
+ * Implements hook_menu().
+ */
+function entity_operations_test_menu() {
+  $items['entity_operations_test-multiple'] = array(
+    'title' => 'Multiple operations page',
+    'page callback' => 'entity_operations_test_multiple',
+    'access arguments' => array('access content'),
+  );
+
+  return $items;
+}
+
+/**
+ * Page callback for showing multiple operation form.
+ *
+ * @param $entity_id
+ *  An entity ID to show.
+ */
+function entity_operations_test_multiple($entity_id) {
+  $entity = entity_load_single('entity_operations_test', $entity_id);
+  $operation_names = array('red', 'green', 'blue');
+
+  $build = drupal_get_form('entity_operations_multiple_operation_form', 'entity_operations_test', $entity, $operation_names);
+
+  return $build;
+}
