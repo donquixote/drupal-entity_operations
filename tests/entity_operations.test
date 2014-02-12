@@ -108,7 +108,7 @@ class EntityOperationsEntityFormsTestCase extends EntityOperationsEntityFormsBas
    */
   public static function getInfo() {
     return array(
-      'name' => t('Entity Operations entity forms'),
+      'name' => t('Entity forms'),
       'description' => t('Test built-in operations on entity type using the entity form handlers.'),
       'group' => t('Entity Operations'),
     );
@@ -142,7 +142,7 @@ class EntityOperationsGenericFormsTestCase extends EntityOperationsEntityFormsBa
    */
   public static function getInfo() {
     return array(
-      'name' => t('Entity Operations generic forms'),
+      'name' => t('Entity generic forms'),
       'description' => t('Test built-in operations on entity type using the generic form handlers.'),
       'group' => t('Entity Operations'),
     );
@@ -176,7 +176,7 @@ class EntityOperationsPermissionsTestCase extends DrupalWebTestCase {
    */
   public static function getInfo() {
     return array(
-      'name' => t('Entity Operations permissions'),
+      'name' => t('Operation permissions'),
       'description' => t('Test generation of permissions based on entity operations.'),
       'group' => t('Entity Operations'),
     );
@@ -228,7 +228,7 @@ class EntityOperationsPublishTestCase extends DrupalWebTestCase {
    */
   public static function getInfo() {
     return array(
-      'name' => t('Entity Operations operation access'),
+      'name' => t('Operation access'),
       'description' => t('Test access of operations using the publish and unpublish handlers.'),
       'group' => t('Entity Operations'),
     );
@@ -299,7 +299,7 @@ class EntityOperationsViewsBulkOperationsTestCase extends DrupalWebTestCase {
    */
   public static function getInfo() {
     return array(
-      'name' => t('Entity Operations VBO'),
+      'name' => t('Operations in VBO'),
       'description' => t('Test use of entity operations as operations supplied to Views Bulk Operations.'),
       'group' => t('Entity Operations'),
     );
@@ -381,7 +381,7 @@ class EntityOperationsMultipleFormTestCase extends DrupalWebTestCase {
    */
   public static function getInfo() {
     return array(
-      'name' => t('Entity Operations multiple operations form'),
+      'name' => t('Multiple operations form'),
       'description' => t('Test form showing multiple operations.'),
       'group' => t('Entity Operations'),
     );
