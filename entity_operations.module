@@ -438,9 +438,10 @@ function entity_operations_multiple_operation_form_validate($form, &$form_state)
   $entity_type = $form_state['entity_operations_multiple_operation_form']['entity_type'];
   $entity = $form_state['entity_operations_multiple_operation_form']['entity'];
 
-  // The submit button's #entity_operation is the name/path of the operation,
-  // set by EntityOperationsOperationForm::getForm().
-  $operation_path = $form_state['triggering_element']['#entity_operation'];
+  // The triggering element's top ancestor in the form array is the name/path of
+  // the operation.
+  $triggering_element_array_parents = $form_state['triggering_element']['#array_parents'];
+  $operation_path = array_shift($triggering_element_array_parents);
   $handler_class = $form_state['entity_operation_handlers'][$operation_path];
 
   $operation_handler = new $handler_class($entity_type, $operation_path);
@@ -461,9 +462,10 @@ function entity_operations_multiple_operation_form_submit($form, &$form_state) {
   $entity_type = $form_state['entity_operations_multiple_operation_form']['entity_type'];
   $entity = $form_state['entity_operations_multiple_operation_form']['entity'];
 
-  // The submit button's #entity_operation is the name/path of the operation,
-  // set by EntityOperationsOperationForm::getForm().
-  $operation_path = $form_state['triggering_element']['#entity_operation'];
+  // The triggering element's top ancestor in the form array is the name/path of
+  // the operation.
+  $triggering_element_array_parents = $form_state['triggering_element']['#array_parents'];
+  $operation_path = array_shift($triggering_element_array_parents);
   $handler_class = $form_state['entity_operation_handlers'][$operation_path];
 
   $operation_handler = new $handler_class($entity_type, $operation_path);

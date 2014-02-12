@@ -706,10 +706,6 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
    *  - 'action button': The submit button.
    *  - 'cancel link': A 'cancel' link to return the user to the entity itself,
    *    whose path is given by entity_uri().
-   *
-   * This sets '#entity_operation' on the submit button, thus allowing forms
-   * containing multiple operations to figure out which button is for which
-   * operation. Subclasses overriding this should take care to do the same.
    */
   function getForm($form, &$form_state, $entity_type, $entity, $operation_path) {
     // Case 1: tab: always show everything.
@@ -750,8 +746,6 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
       $form['actions']['submit'] = array(
         '#type' => 'submit',
         '#value' => $this->getOperationString('button label', $entity_type, $entity, $operation_path),
-        // Mark the button so it can be identified in multiple-operation forms.
-        '#entity_operation' => $operation_path,
       );
     }
     if (!empty($form_state['entity_operation_form_elements']['cancel link'])) {
