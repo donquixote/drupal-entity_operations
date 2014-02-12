@@ -359,6 +359,21 @@ function entity_operations_operation_form($form, &$form_state, $entity_type, $ha
 }
 
 /**
+ * Implements callback_form_after_build().
+ *
+ * This sets the form parent data for an operation form in the form state, thus
+ * allowing validate and submit code to find the original form if it's being
+ * embedded within a compound form.
+ *
+ * This is the same pattern as field_form_element_after_build().
+ */
+function entity_operations_operation_form_after_build($element, &$form_state) {
+  $operation_name = $element['#entity_operation_name'];
+  $form_state['entity_operations_form'][$operation_name]['#array_parents'] = $element['#array_parents'];
+  return $element;
+}
+
+/**
  * Operation form validate callback. Hands over to the handler's formValidate().
  */
 function entity_operations_operation_form_validate($form, &$form_state) {

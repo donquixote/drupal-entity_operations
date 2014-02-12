@@ -772,6 +772,13 @@ class EntityOperationsOperationForm extends EntityOperationsOperationBase {
       );
     }
 
+    // Set the form array parents so that validate and submit handlers can use
+    // the form even if it's embedded within a larger compound form.
+    // It is important that subclasses that override this method take care of
+    // doing this too.
+    $form['#entity_operation_name'] = $operation_path;
+    $form['#after_build'][] = 'entity_operations_operation_form_after_build';
+
     return $form;
   }
 
