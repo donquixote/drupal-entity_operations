@@ -49,11 +49,6 @@ abstract class EntityOperationsOperationBase {
   protected $entityType;
 
   /**
-   * The operations controller. Only set when building hook_menu().
-   */
-  public $controller;
-
-  /**
    * Returns basic information about the operation.
    *
    * @return
