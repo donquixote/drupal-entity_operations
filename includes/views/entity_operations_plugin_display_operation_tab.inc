@@ -312,8 +312,8 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
   function options_validate(&$form, &$form_state) {
     if ($form_state['section'] == 'operation_name') {
       // Only allow word characters (including unicode) and hyphens.
-      if (preg_match('/[^\p{L}-_]/u', $form_state['values']['path'])) {
-        form_error($form['path'], t('The path may only contain letters, numbers, underscores, and hyphens.'));
+      if (preg_match('@[^\p{L}-_/]@u', $form_state['values']['path'])) {
+        form_error($form['path'], t('The path may only contain letters, numbers, underscores, hyphens, and slashes to form a secondary tab.'));
       }
     }
   }
