@@ -129,6 +129,9 @@ function entity_operations_test_entity_info() {
         // We don't use this but it's needed for EntityOperationsOperationAdd.
         'path' => 'admin/structure/entity_operations_test',
       ),
+      // This allows quick generation of entities with Devel Contrib module,
+      // which is useful when developing tests.
+      'devel contrib generator class' => 'DevelContribGeneratorDefault',
     ),
   );
 

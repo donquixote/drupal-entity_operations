@@ -89,6 +89,9 @@ function entity_operations_generic_test_entity_info() {
         ),
       ),
       'module' => 'entity_operations_generic_test',
+      // This allows quick generation of entities with Devel Contrib module,
+      // which is useful when developing tests.
+      'devel contrib generator class' => 'DevelContribGeneratorDefault',
     ),
   );
 
