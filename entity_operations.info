@@ -11,3 +11,4 @@ files[] = tests/entity_operations.test
 
 test_dependencies[] = views
 test_dependencies[] = views_bulk_operations
+test_dependencies[] = entityreference

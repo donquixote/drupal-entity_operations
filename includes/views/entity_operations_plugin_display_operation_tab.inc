@@ -13,6 +13,10 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
 
   /**
    * The tab display has a path.
+   *
+   * Note that in some cases this has undesirable results: returning TRUE here
+   * causes a 'View DISPLAY' item in the dropdown menu for the display in Views
+   * admin UI, which we can neither remove nor fix to be a correct link.
    */
   function has_path() { return TRUE; }
 
@@ -23,9 +27,21 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
    * with the path. Like us! ;)
    */
   function get_path() {
-    // @todo We probably should be doing things to return the actual path here,
-    // but I'm not sure of the situations this gets called yet!
-    return $this->get_option('path');
+    // In Views UI preview, there is no current entity.
+    if (isset($this->view->current_entity)) {
+      // Get the entity this display is displayed on, and then its path.
+      $entity = $this->view->current_entity;
+      $uri = $entity->uri();
+      $entity_path = $uri['path'];
+
+      // Append the display's path option, to construct the full path to it.
+      return $entity_path . '/' . $this->get_option('path');
+    }
+    else {
+      // This will be meaningless in a number of situations but there isn't much
+      // else we can do here.
+      return $this->get_option('path');
+    }
   }
 
   /**
@@ -33,22 +49,19 @@ class entity_operations_plugin_display_operation_tab extends views_plugin_displa
    *
    * This is used (among other things?) to get the URL for the action on a
    * view's exposed form. As such, we don't want the entity ID argument to get
-   * added to the end of the path.
+   * added to the end of the path; we just want the path to the hosting entity
+   * with the operation name appended.
+   *
+   * @todo: should anyone want to use further arguments with this display plugin
+   * they won't get used here -- please submit a patch ;)
    */
   function get_url() {
-    $args = $this->view->args;
-
-    $arg_mode = $this->view->display_handler->get_option('argument_mode');
-
-    if ($arg_mode == 'id') {
-      // pre_execute() set the first argument to be the entity ID.
-      // Remove it from the args we pass to $view->get_url().
-      array_shift($args);
-    }
-
-    $url = $this->view->get_url($args);
-
-    return $url;
+    // The pair of methods get_path() and get_url() are a bit convoluted even in
+    // Views itself.
+    // Both the view and the display plugin objects have them, but:
+    // - get_path() on the view is mostly a wrapper for the plugin's verion
+    // - get_url() on the plugin is a wrapper for the views' version.
+    return $this->get_path();
   }
 
   /**

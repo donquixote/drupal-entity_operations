@@ -1,0 +1,6 @@
+name = Entity Operations Views Test
+description = Provides components to test Views-related functionality of the Entity Operations module.
+dependencies[] = entity_operations
+dependencies[] = entity_operations_test
+core = 7.x
+;hidden = TRUE

@@ -290,6 +290,128 @@ class EntityOperationsPublishTestCase extends DrupalWebTestCase {
 }
 
 /**
+ * Test case for Entity Operations Views display plugin.
+ */
+class EntityOperationsViewsDisplayPluginTestCase extends DrupalWebTestCase {
+
+  /**
+   * Implements getInfo().
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Views display plugin'),
+      'description' => t('Test use of the Views display plugin that provides an operation.'),
+      'group' => t('Entity Operations'),
+    );
+  }
+
+  /**
+   * Implements setUp().
+   */
+  function setUp() {
+    // Call the parent with an array of modules to enable for the test.
+    parent::setUp(array('entity_operations', 'entity_operations_test', 'views', 'entityreference', 'entity_operations_test_views'));
+
+    $this->user = $this->drupalCreateUser(array(
+      'administer nodes',
+    ));
+    $this->drupalLogin($this->user);
+  }
+
+  function testViewsDisplayPlugin() {
+    // Create two test entities.
+    // One will have nodes pointing to it, the other will not.
+    $entities = array();
+    $values = array(
+      'title' => 'Foobar',
+      'type' => 'alpha',
+    );
+    $entity = entity_create('entity_operations_test', $values);
+    $entity->save();
+    $entities['has_nodes'] = $entity;
+
+    $values = array(
+      'title' => 'Bizbax',
+      'type' => 'alpha',
+    );
+    $entity = entity_create('entity_operations_test', $values);
+    $entity->save();
+    $entities['has_no_nodes'] = $entity;
+
+    // Create three test nodes.
+    // Points to the test entity and is promoted.
+    $node = (object) array(
+      'type' => 'entity_operations_node_test',
+      // Use meaningful rather than random titles to help with debugging.
+      // We're not testing node title functionality, so a random string doesn't
+      // help with anything.
+      'title' => 'is promoted',
+      'uid' => $this->user->uid,
+      'created' => strtotime('2014-09-07 12:00'),
+      'promote' => 1,
+    );
+    $node->field_test_test_entities['und'][]['target_id'] = $entities['has_nodes']->eid;
+
+    node_save($node);
+    $nodes['promote'] = $node;
+
+    // Points to the test entity and is not promoted.
+    $node = (object) array(
+      'type' => 'entity_operations_node_test',
+      'title' => 'not promoted',
+      'uid' => $this->user->uid,
+      'created' => strtotime('2014-09-07 12:00'),
+      'promote' => 0,
+    );
+    $node->field_test_test_entities['und'][]['target_id'] = $entities['has_nodes']->eid;
+
+    node_save($node);
+    $nodes['normal'] = $node;
+
+    // Does not point to the test entity.
+    $node = (object) array(
+      'type' => 'entity_operations_node_test',
+      'title' => 'unrelated',
+      'uid' => $this->user->uid,
+      'created' => strtotime('2014-09-07 12:00'),
+    );
+
+    node_save($node);
+    $nodes['unrelated'] = $node;
+
+    debug($nodes);
+
+    // Check the output on each of the test entities.
+    $this->drupalGet('entity_operations_test/' . $entities['has_no_nodes']->eid . '/test-view-nodes');
+    $this->assertText("No results were found.", "No nodes were found on the entity's views-provided operation.");
+
+    $this->drupalGet('entity_operations_test/' . $entities['has_nodes']->eid . '/test-view-nodes');
+    $this->assertText($nodes['promote']->title, "The related promoted node is listed on the entity's views-provided operation.");
+    $this->assertText($nodes['normal']->title, "The related normal node is listed on the entity's views-provided operation.");
+    $this->assertNoText($nodes['unrelated']->title, "The unrelated node is not listed on the entity's views-provided operation.");
+
+    // Views uses GET not POST forms. This means we can't simulate clicking the
+    // button with drupalPost. Instead we have to check the raw HTML for the
+    // form action directly, and then build the paths to pass to drupalGet().
+    $form_url = url('entity_operations_test/' . $entities['has_nodes']->eid . '/test-view-nodes');
+    $this->assertRaw('<form action="' . $form_url . '"', "View form action has the correct URL.");
+
+    // Get the view with the exposed filter.
+    // Views uses GET rather than POST for exposed forms.
+    $this->drupalGet('entity_operations_test/' . $entities['has_nodes']->eid . '/test-view-nodes', array(
+      'query' => array(
+        'promote' => 1,
+      ),
+    ));
+
+    $this->assertText($nodes['promote']->title, "The related promoted node is listed on the entity's views-provided operation.");
+    $this->assertNoText($nodes['normal']->title, "The related normal node is not listed on the entity's views-provided operation.");
+    $this->assertNoText($nodes['unrelated']->title, "The unrelated node is not listed on the entity's views-provided operation.");
+  }
+
+}
+
+/**
  * Test case for Entity Operations VBO support.
  */
 class EntityOperationsViewsBulkOperationsTestCase extends DrupalWebTestCase {
