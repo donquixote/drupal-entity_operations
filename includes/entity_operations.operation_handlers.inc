@@ -1469,7 +1469,7 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
     // Kill the cancel link.
     unset($form_state['entity_operation_form_elements']['cancel link']);
 
-    return $this->entityForm($form, $form_state, $entity_type, $entity, $operation_path);
+    return $this->entityForm($form, $form_state, $entity_type, $entity, $operation_path, 'edit');
   }
 
   /**
@@ -1482,8 +1482,13 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
    * also used by the EntityOperationsOperationAddGeneric handler. If you want
    * to customize the form for your entity, you may want to consider using
    * the EntityOperationsOperationEdit handler instead.
+   *
+   * @param ...
+   *  The same parameters as form().
+   * @param $form_op
+   *  The 'op' value to set on the entity form state. Either 'edit' or 'add'.
    */
-  function entityForm($form, &$form_state, $entity_type, $entity, $operation_path) {
+  function entityForm($form, &$form_state, $entity_type, $entity, $operation_path, $form_op) {
     $entity_info = entity_get_info($this->entityType);
 
     // Ripped from entity_ui_form_defaults().
@@ -1493,8 +1498,8 @@ class EntityOperationsOperationEditGeneric extends EntityOperationsOperationForm
     if (isset($entity)) {
       $defaults[$this->entityType] = $entity;
     }
-    if (isset($op)) {
-      $defaults['op'] = $op;
+    if (isset($form_op)) {
+      $defaults['op'] = $form_op;
     }
     $form_state += $defaults;
 
@@ -1792,7 +1797,7 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
         // - call entityForm(), which calls the parent method
         //   EntityOperationsOperationEditGeneric::entityForm().
         $form_id = $this->getFormID($entity_type, $this->path);
-        return drupal_get_form($form_id, $entity_type, get_class($this), $this->path, $entity);
+        return drupal_get_form($form_id, $entity_type, get_class($this), $this->path, $entity, 'add');
     }
   }
 
