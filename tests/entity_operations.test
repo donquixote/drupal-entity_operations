@@ -350,7 +350,7 @@ class EntityOperationsViewsDisplayPluginTestCase extends DrupalWebTestCase {
       'created' => strtotime('2014-09-07 12:00'),
       'promote' => 1,
     );
-    $node->field_test_test_entities['und'][]['target_id'] = $entities['has_nodes']->eid;
+    $node->field_test_test_entities[LANGUAGE_NONE][]['target_id'] = $entities['has_nodes']->eid;
 
     node_save($node);
     $nodes['promote'] = $node;
@@ -363,7 +363,7 @@ class EntityOperationsViewsDisplayPluginTestCase extends DrupalWebTestCase {
       'created' => strtotime('2014-09-07 12:00'),
       'promote' => 0,
     );
-    $node->field_test_test_entities['und'][]['target_id'] = $entities['has_nodes']->eid;
+    $node->field_test_test_entities[LANGUAGE_NONE][]['target_id'] = $entities['has_nodes']->eid;
 
     node_save($node);
     $nodes['normal'] = $node;
