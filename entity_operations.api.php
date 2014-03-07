@@ -166,7 +166,7 @@ function hook_entity_operation_info_alter(&$operation_info) {
   $operation_info['myentity']['edit']['handler'] = 'MyEntityCustomHandlerClass';
 }
 
-/*
+/**
  * Alter entity operations prior to building hook_menu() items.
  *
  * This allows the addition of operations when menu items are being created. In

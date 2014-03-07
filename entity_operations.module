@@ -77,7 +77,7 @@ function entity_operations_get_entity_operation_handler($entity_type, $operation
  *  The entity to get operations for. This must be a subclass of Entity.
  * @param $operations
  *  (Optional) An array of operation names. These are the keys defined in the
- *  operations array in the entity's hook_entity_info(). If ommitted, the
+ *  operations array in the entity's hook_entity_info(). If omitted, the
  *  operations used are those with 'entity view' set to TRUE in their
  *  hook_entity_operation_info() 'provision' settings.
  * @param $form_states
@@ -635,7 +635,8 @@ function entity_operations_get_views($type = NULL, $reset = FALSE) {
 
     // If it's still empty rebuild it.
     if (!isset($used_views)) {
-      // Trigger a rebuild of the views object cache, which may not be fully loaded.
+      // Trigger a rebuild of the views object cache, which may not be fully
+      // loaded.
       ctools_include('export');
       ctools_export_load_object_reset('views_view');
 

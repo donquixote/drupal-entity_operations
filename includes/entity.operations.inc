@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Contains the default entity UI controller class.
+ */
+
+/**
  * Controller class for the entity operations UI.
  *
  * Registers paths with hook_menu(), based on entity info properties.
