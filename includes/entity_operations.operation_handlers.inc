@@ -1205,7 +1205,7 @@ class EntityOperationsOperationAdd extends EntityOperationsOperationBase {
         ));
         // If modules use a uid, they can default to the current-user
         // in their create() method on the storage controller.
-        if (entity_access('create', $entity_type, $dummy_entity, $account = NULL)) {
+        if (entity_access('create', $entity_type, $dummy_entity)) {
           $add_path = $entity_info['operations ui']['path'] . '/add/' . $bundle_name;
           $items[] = l(t('Add @label', array('@label' => $bundle_info['label'])), $add_path);
         }
