@@ -1683,7 +1683,9 @@ class EntityOperationsOperationAddGeneric extends EntityOperationsOperationEditG
     if (count($entity_info['bundles']) == 1) {
       $values = array();
       if (!empty($bundle_key)) {
-        $unique_bundle_name = array_pop(array_keys($entity_info['bundles']));
+        // Get the last array key. See http://stackoverflow.com/a/1028677/246724
+        end($entity_info['bundles']);
+        $unique_bundle_name = key($entity_info['bundles']);
         $values[$bundle_key] = $unique_bundle_name;
       }
 
